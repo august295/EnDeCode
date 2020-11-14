@@ -1,28 +1,26 @@
 #include "../src/md5.h"
 
-int main(int argc, char** argv) {
-    char*   msg;
-    size_t  len;
-    int     i;
-    uint8_t result[16];
+int main(int argc, char* argv[]) {
+    char*    msg;
+    uint64_t len;
+    uint8_t  result[16];
 
     if (argc < 2) {
-        printf("usage: %s 'string'\n", argv[0]);
-        return 1;
+        printf("请输入加密字符串：");
+        scanf("%s", msg);
+    } else if (argc == 2) {
+        msg = argv[1];
+    } else {
+        printf("please input 'md5.exe' or 'md5.exe '123''");
     }
-    msg = argv[1];
 
     len = strlen(msg);
-
-    // benchmark
-    for (i = 0; i < 1000000; i++) {
-        md5((uint8_t*)msg, len, result);
-    }
-
-    // display result
-    for (i = 0; i < 16; i++)
-        printf("%2.2x", result[i]);
-    puts("");
+    md5((uint8_t*)msg, len, result);
+    // md5，32个字符
+    uint8_t* str = (uint8_t*)malloc(sizeof(uint8_t) * 32);
+    // 16进制，16组，32个字符
+    HexToAscii(result, str, 16);
+    printf("%s", str);
 
     return 0;
 }

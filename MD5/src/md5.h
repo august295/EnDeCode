@@ -5,7 +5,19 @@
 #include <stdlib.h>
 #include <string.h>
 
-// Constants are the integer part of the sines of integers (in radians) * 2^32.
+// leftrotate function definition
+#define LEFTROTATE(x, c) (((x) << (c)) | ((x) >> (32 - (c))))
+
+// 四个固定变量
+#define A 0x67452301
+#define B 0xefcdab89
+#define C 0x98badcfe
+#define D 0x10325476
+
+/**
+ * 常量ti
+ * 公式 unsigned int(abs(sin(i+1))*(2pow32))
+ */
 const uint32_t k[64] = {
     0xd76aa478, 0xe8c7b756, 0x242070db, 0xc1bdceee, 0xf57c0faf, 0x4787c62a, 0xa8304613, 0xfd469501,
     0x698098d8, 0x8b44f7af, 0xffff5bb1, 0x895cd7be, 0x6b901122, 0xfd987193, 0xa679438e, 0x49b40821,
@@ -16,8 +28,8 @@ const uint32_t k[64] = {
     0xf4292244, 0x432aff97, 0xab9423a7, 0xfc93a039, 0x655b59c3, 0x8f0ccc92, 0xffeff47d, 0x85845dd1,
     0x6fa87e4f, 0xfe2ce6e0, 0xa3014314, 0x4e0811a1, 0xf7537e82, 0xbd3af235, 0x2ad7d2bb, 0xeb86d391};
 
-// r specifies the per-round shift amounts
-const uint32_t r[] = {
+// 每次左移位数
+const uint32_t r[64] = {
     7, 12, 17, 22, 7, 12, 17, 22,
     7, 12, 17, 22, 7, 12, 17, 22,
     5, 9, 14, 20, 5, 9, 14, 20,
@@ -27,11 +39,16 @@ const uint32_t r[] = {
     6, 10, 15, 21, 6, 10, 15, 21,
     6, 10, 15, 21, 6, 10, 15, 21};
 
-// leftrotate function definition
-#define LEFTROTATE(x, c) (((x) << (c)) | ((x) >> (32 - (c))))
-
-void     to_bytes(uint32_t val, uint8_t* bytes);
-uint32_t to_int32(const uint8_t* bytes);
-void     md5(const uint8_t* initial_msg, size_t initial_len, uint8_t* digest);
+/**
+ * 函数
+ *  1. 32bit  转换为 4*8bit
+ *  2. 4*8bit 转换为 32bit
+ *  3. md5 计算
+ *  4. 16进制转字符串
+ */
+void to_bytes(uint32_t val, uint8_t* bytes);
+void to_int32(uint8_t* bytes, uint32_t* val);
+void md5(const uint8_t* initial_msg, uint64_t initial_len, uint8_t* digest);
+void HexToAscii(uint8_t* pHex, uint8_t* pAscii, int nLen);
 
 #endif

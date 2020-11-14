@@ -1,7 +1,7 @@
 SRC_DIR = ./src
 TEST_DIR = ./test
 OBJ = md5.o test.o
-EXE = md5_test
+EXE = md5
 CC = g++
 
 
@@ -15,4 +15,4 @@ test.o:
 	$(CC) -c $(TEST_DIR)/test.c
 
 clean:
-	rm -f *.o
+	rm -f *.o md5
