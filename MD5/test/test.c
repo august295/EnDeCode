@@ -16,11 +16,21 @@ int main(int argc, char* argv[]) {
 
     len = strlen(msg);
     md5((uint8_t*)msg, len, result);
+
+    /**
+     * type1. 直接打印
+     * type2. 转换成字符串打印 
+     */
+    // for (int i = 0; i < 16; i++) {
+    //     printf("%.2x", result[i]);
+    // }
+    // printf("\n");
+
     // md5，32个字符
     uint8_t* str = (uint8_t*)malloc(sizeof(uint8_t) * 32);
     // 16进制，16组，32个字符
     HexToAscii(result, str, 16);
-    printf("%s", str);
+    printf("%s\n", str);
 
     return 0;
 }
