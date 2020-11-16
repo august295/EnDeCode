@@ -44,7 +44,7 @@ $$
 
 $\oplus, \wedge, \vee, \neg$ 是 ''XOR'', ''AND'', ''OR'' , ''NOT'' 的符号。
 
-![](../picture/MD5.png)
+![](picture/MD5.png)
 
 **Figure**
 
@@ -69,4 +69,4 @@ $\oplus, \wedge, \vee, \neg$ 是 ''XOR'', ''AND'', ''OR'' , ''NOT'' 的符号。
 
 **（2）结果**
 
-![](../picture/MD5_result.png)
+![](picture/MD5_result.png)
