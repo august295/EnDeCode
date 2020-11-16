@@ -110,9 +110,10 @@ void HexToAscii(uint8_t* pHex, uint8_t* pAscii, int nLen) {
             if (Nibble[j] < 10) {
                 Nibble[j] += 0x30;
             } else {
-                if (Nibble[j] < 16)
-                    // Nibble[j] = Nibble[j] - 10 + 'a';
-                    Nibble[j] = Nibble[j] - 10 + 'A';
+                if (Nibble[j] < 16) {
+                    // Nibble[j] = Nibble[j] - 10 + 'A';
+                    Nibble[j] = Nibble[j] - 10 + 'a';
+                }
             }
             *pAscii++ = Nibble[j];
         }

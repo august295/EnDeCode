@@ -7,11 +7,12 @@ int main(int argc, char* argv[]) {
 
     if (argc < 2) {
         printf("请输入加密字符串：");
-        scanf("%s", msg);
+        scanf("%[^\n]", msg);
     } else if (argc == 2) {
         msg = argv[1];
     } else {
-        printf("please input 'md5.exe' or 'md5.exe 123'");
+        printf("please input ('md5.exe' and next 'str') or (md5.exe 'str')");
+        exit(0);
     }
 
     len = strlen(msg);
