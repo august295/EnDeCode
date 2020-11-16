@@ -1,5 +1,5 @@
-#ifndef _MD5_H_
-#define _MD5_H_
+#ifndef __MD5_H__
+#define __MD5_H__
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -18,7 +18,7 @@
  * 常量ti
  * 公式 unsigned int(abs(sin(i+1))*(2pow32))
  */
-const uint32_t k[64] = {
+const static uint32_t k[64] = {
     0xd76aa478, 0xe8c7b756, 0x242070db, 0xc1bdceee, 0xf57c0faf, 0x4787c62a, 0xa8304613, 0xfd469501,
     0x698098d8, 0x8b44f7af, 0xffff5bb1, 0x895cd7be, 0x6b901122, 0xfd987193, 0xa679438e, 0x49b40821,
     0xf61e2562, 0xc040b340, 0x265e5a51, 0xe9b6c7aa, 0xd62f105d, 0x02441453, 0xd8a1e681, 0xe7d3fbc8,
@@ -29,7 +29,7 @@ const uint32_t k[64] = {
     0x6fa87e4f, 0xfe2ce6e0, 0xa3014314, 0x4e0811a1, 0xf7537e82, 0xbd3af235, 0x2ad7d2bb, 0xeb86d391};
 
 // 每次左移位数
-const uint32_t r[64] = {
+const static uint32_t r[64] = {
     7, 12, 17, 22, 7, 12, 17, 22,
     7, 12, 17, 22, 7, 12, 17, 22,
     5, 9, 14, 20, 5, 9, 14, 20,

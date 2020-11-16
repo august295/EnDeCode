@@ -11,18 +11,18 @@ int main(int argc, char* argv[]) {
     } else if (argc == 2) {
         msg = argv[1];
     } else {
-        printf("please input 'md5.exe' or 'md5.exe '123''");
+        printf("please input 'md5.exe' or 'md5.exe 123'");
     }
 
     len = strlen(msg);
     md5((uint8_t*)msg, len, result);
 
     /**
-     * type1. 直接打印
-     * type2. 转换成字符串打印 
+     * type1: 直接打印
+     * type2: 转换成字符串打印 
      */
     // for (int i = 0; i < 16; i++) {
-    //     printf("%.2x", result[i]);
+    //     printf("%.2X", result[i]);
     // }
     // printf("\n");
 

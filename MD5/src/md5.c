@@ -111,9 +111,11 @@ void HexToAscii(uint8_t* pHex, uint8_t* pAscii, int nLen) {
                 Nibble[j] += 0x30;
             } else {
                 if (Nibble[j] < 16)
-                    Nibble[j] = Nibble[j] - 10 + 'a';
+                    // Nibble[j] = Nibble[j] - 10 + 'a';
+                    Nibble[j] = Nibble[j] - 10 + 'A';
             }
             *pAscii++ = Nibble[j];
         }
     }
+    *pAscii++ = '\0';
 }
