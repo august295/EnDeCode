@@ -1,6 +1,6 @@
 SRC_DIR = ./src
 TEST_DIR = ./test
-OBJ = file_operat.o des.o test.o
+OBJ =  des.o test.o
 EXE = des_test
 CC = gcc
 
@@ -14,9 +14,6 @@ test.o:
 
 des.o:
 	$(CC) -c $(SRC_DIR)/des.c
-
-file_operat.o:
-	$(CC) -c $(SRC_DIR)/file_operat.c
 
 clean:
 	rm -f $(OBJ) $(EXE)
