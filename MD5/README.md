@@ -56,17 +56,20 @@ $\oplus, \wedge, \vee, \neg$ 是 ''XOR'', ''AND'', ''OR'' , ''NOT'' 的符号。
 
 3. Mi 表示一个 32-bits 的输入数据，Ki 表示一个 32-bits 常数，用来完成每次不同的计算。
 
-## 5. 结果
+## 5. 代码
 
-**（1）命令**
+**（1）代码**
+
+[MD5](https://github.com/2950833136/EnDeCode/tree/master/MD5): https://github.com/2950833136/EnDeCode/tree/master/MD5
+
+**（2）结果**
+
+命令
 
 > make
 >
 > .\md5_test.exe
 >
 > .\md5_test.exe "my name is li"  
-
-
-**（2）结果**
 
 ![](picture/MD5_result.png)
