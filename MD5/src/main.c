@@ -1,7 +1,7 @@
-#include "../src/md5.h"
+#include "md5.h"
 
-int main(int argc, char* argv[]) {
-    char*    msg;
+int main(int argc, char *argv[]) {
+    char *   msg;
     uint64_t len;
     uint8_t  result[16];
 
@@ -16,7 +16,7 @@ int main(int argc, char* argv[]) {
     }
 
     len = strlen(msg);
-    md5((uint8_t*)msg, len, result);
+    md5((uint8_t *)msg, len, result);
 
     /**
      * type1: 直接打印
@@ -28,7 +28,7 @@ int main(int argc, char* argv[]) {
     // printf("\n");
 
     // md5，32个字符
-    uint8_t* str = (uint8_t*)malloc(sizeof(uint8_t) * 32);
+    uint8_t *str = (uint8_t *)malloc(sizeof(uint8_t) * 32);
     // 16进制，16组，32个字符
     HexToAscii(result, str, 16);
     printf("%s\n", str);

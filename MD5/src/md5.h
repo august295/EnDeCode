@@ -46,9 +46,9 @@ const static uint32_t r[64] = {
  *  3. md5 计算
  *  4. 16进制转字符串
  */
-void to_bytes(uint32_t val, uint8_t* bytes);
-void to_int32(uint8_t* bytes, uint32_t* val);
-void md5(const uint8_t* initial_msg, uint64_t initial_len, uint8_t* digest);
-void HexToAscii(uint8_t* pHex, uint8_t* pAscii, int nLen);
+void to_bytes(uint32_t val, uint8_t *bytes);
+void to_int32(uint8_t *bytes, uint32_t *val);
+void md5(const uint8_t *initial_msg, uint64_t initial_len, uint8_t *digest);
+void HexToAscii(uint8_t *pHex, uint8_t *pAscii, int nLen);
 
 #endif

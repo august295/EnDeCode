@@ -1,19 +1,17 @@
-SRC_DIR = ./src
-TEST_DIR = ./test
-OBJ = md5.o test.o
-EXE = md5_test
 CC = gcc
+CFLAGS = -c
+TARGET = main
+INC = $(wildcard ./src/*.h)
+SRC = $(wildcard ./src/*.c)
+OBJ += $(patsubst %.c,%.o,$(SRC))
 
-$(EXE): $(OBJ)
-	$(CC) $(OBJ) -o $(EXE)
+all: $(TARGET) 
 
-$(OBJ): $(SRC_DIR)/md5.h
+$(TARGET): $(OBJ) $(INC)
+	$(CC) $^ -o $@
 
-md5.o:
-	$(CC) -c $(SRC_DIR)/md5.c
-
-test.o:
-	$(CC) -c $(TEST_DIR)/test.c
+%.o: %.c
+	$(CC) -c $< -o $@
 
 clean:
-	rm -f $(OBJ) $(EXE)
+	rm -f $(OBJ) $(TARGET)

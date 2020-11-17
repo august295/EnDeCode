@@ -1,17 +1,17 @@
-#include "../src/md5.h"
+#include "md5.h"
 
-void to_bytes(uint32_t val, uint8_t* bytes) {
+void to_bytes(uint32_t val, uint8_t *bytes) {
     bytes[0] = (uint8_t)val;
     bytes[1] = (uint8_t)(val >> 8);
     bytes[2] = (uint8_t)(val >> 16);
     bytes[3] = (uint8_t)(val >> 24);
 }
 
-void to_int32(uint8_t* bytes, uint32_t* val) {
+void to_int32(uint8_t *bytes, uint32_t *val) {
     *val = (uint32_t)bytes[0] | ((uint32_t)bytes[1] << 8) | ((uint32_t)bytes[2] << 16) | ((uint32_t)bytes[3] << 24);
 }
 
-void md5(const uint8_t* initial_msg, uint64_t initial_len, uint8_t* digest) {
+void md5(const uint8_t *initial_msg, uint64_t initial_len, uint8_t *digest) {
     // 初始化
     uint32_t h0 = A;
     uint32_t h1 = B;
@@ -19,7 +19,7 @@ void md5(const uint8_t* initial_msg, uint64_t initial_len, uint8_t* digest) {
     uint32_t h3 = D;
 
     // Message (to prepare)
-    uint8_t* msg = NULL;
+    uint8_t *msg = NULL;
 
     uint64_t new_len, offset;
     uint32_t w[16];
@@ -36,7 +36,7 @@ void md5(const uint8_t* initial_msg, uint64_t initial_len, uint8_t* digest) {
         new_len++;
     }
 
-    msg = (uint8_t*)malloc(new_len + 8);
+    msg = (uint8_t *)malloc(new_len + 8);
     memcpy(msg, initial_msg, initial_len);
     // 首部填充 "1"
     msg[initial_len] = 0x80;
@@ -101,7 +101,7 @@ void md5(const uint8_t* initial_msg, uint64_t initial_len, uint8_t* digest) {
     to_bytes(h3, digest + 12);
 }
 
-void HexToAscii(uint8_t* pHex, uint8_t* pAscii, int nLen) {
+void HexToAscii(uint8_t *pHex, uint8_t *pAscii, int nLen) {
     uint8_t Nibble[2];
     for (int i = 0; i < nLen; i++) {
         Nibble[0] = (pHex[i] & 0xF0) >> 4;
