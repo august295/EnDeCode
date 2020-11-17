@@ -1,24 +1,50 @@
-#ifndef __DES_H__
-#define __DES_H__
+//
+// Implementation of DES coded by:
+//     - David Wong, moi@davidwong.fr
+//     - Jacques Monin, jacques.monin@u-bordeaux.fr
+//     - Hugo Bonnin, hugo.bonnin@u-bordeaux.fr
+//
+
+#ifndef DES_H
+#define DES_H
+
+//////////////////////////////////////////////////////
+//               USEFUL DEFINES                    //
+////////////////////////////////////////////////////
+
+#define FIRSTBIT 0x8000000000000000 // 1000000000...
+
+//////////////////////////////////////////////////////
+//                 PROTOTYPES                      //
+////////////////////////////////////////////////////
 
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-void BitsCopy(bool *DatOut, bool *DataIn, int Len);                                 // 数组复制
-void ByteToBit(bool *DatOut, unsigned char *DataIn, int Num);                       // 字节到位
-void BitToByte(unsigned char *DatOut, bool *DataIn, int Num);                       // 位到字节
-void BitToHex(unsigned char *DatOut, bool *DataIn, int Num);                        // 二进制到十六进制
-void HexToBit(bool *DatOut, unsigned char *DataIn, int Num);                        // 十六进制到二进制
-void TablePermute(bool *DatOut, bool *DataIn, const unsigned char *Table, int Num); // 位表置换函数
-void F_Change(bool DataIn[32], bool DatKi[48]);                                     // F函数
-void S_Change(bool DatOut[32], bool DataIn[48]);                                    // S盒置换
-void E_change(bool DataOut[48], bool DataIn[32]);                                   // E置换
-void P_change(bool DataOut[32], bool DataIn[32]);                                   // P置换
-void Xor(bool *DatA, bool *DatB, int Num);                                          // 异或函数
-void LoopMove(bool *DataIn, int Len, int Num);                                      // 循环左移 Len长度 Num移动位数
-void SetKey(unsigned char KeyIn[8]);                                                // 设置密钥
-void Des(unsigned char MesOut[8], unsigned char MesIn[8]);                          // 执行DES加密
-void deDes(unsigned char MesOut[8], unsigned char MesIn[8]);                        // 执行DES解密
+// Addbit helper
+// Takes the bit number "position_from" from "from"
+// adds it to "block" in position "position_to"
+void addbit(uint64_t *block, uint64_t from, int position_from, int position_to);
+
+// Initial and Final Permutations
+void Permutation(uint64_t *data, bool initial);
+
+// Verify if the parity bits are okay
+bool key_parity_verify(uint64_t key);
+
+// Key Schedule ( http://en.wikipedia.org/wiki/File:DES-key-schedule.png )
+// input :
+//   * encrypt : false if decryption
+//   * next_key : uint64_t next_key 0
+//   * round : [[0, 15]]
+// changes :
+//   * [key] is good to be used in the XOR in the rounds
+//   * [next_key] is the combined leftkey+rightkey to be used
+//     in the key_schedule for next round
+void key_schedule(uint64_t *key, uint64_t *next_key, int round);
+
+void rounds(uint64_t *data, uint64_t key);
 
 #endif

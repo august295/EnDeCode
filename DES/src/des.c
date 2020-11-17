@@ -1,164 +1,288 @@
 #include "des.h"
-#include "table.h"
 
-/*****************************************位操作**************************************************/
-// 把 DataIn 开始的长度位 Len 位的二进制复制到 DatOut
-void BitsCopy(bool *DatOut, bool *DataIn, int Len) {
-    for (int i = 0; i < Len; i++) {
-        DatOut[i] = DataIn[i];
-    }
+//////////////////////////////////////////////////////
+//                 GLOBAL VARIABLES                //
+////////////////////////////////////////////////////
+
+// Tables bellow can be verified on wikipedia:
+// http://en.wikipedia.org/wiki/DES_supplementary_material#Initial_permutation_.28IP.29
+
+// Key schedule tables
+
+const int PC1[56] = {
+    57, 49, 41, 33, 25, 17, 9,
+    1, 58, 50, 42, 34, 26, 18,
+    10, 2, 59, 51, 43, 35, 27,
+    19, 11, 3, 60, 52, 44, 36,
+    63, 55, 47, 39, 31, 23, 15,
+    7, 62, 54, 46, 38, 30, 22,
+    14, 6, 61, 53, 45, 37, 29,
+    21, 13, 5, 28, 20, 12, 4};
+
+const int Rotations[16] = {1, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1};
+
+const int PC2[48] = {
+    14, 17, 11, 24, 1, 5,
+    3, 28, 15, 6, 21, 10,
+    23, 19, 12, 4, 26, 8,
+    16, 7, 27, 20, 13, 2,
+    41, 52, 31, 37, 47, 55,
+    30, 40, 51, 45, 33, 48,
+    44, 49, 39, 56, 34, 53,
+    46, 42, 50, 36, 29, 32};
+
+// Permutation tables
+
+const int InitialPermutation[64] = {
+    58, 50, 42, 34, 26, 18, 10, 2,
+    60, 52, 44, 36, 28, 20, 12, 4,
+    62, 54, 46, 38, 30, 22, 14, 6,
+    64, 56, 48, 40, 32, 24, 16, 8,
+    57, 49, 41, 33, 25, 17, 9, 1,
+    59, 51, 43, 35, 27, 19, 11, 3,
+    61, 53, 45, 37, 29, 21, 13, 5,
+    63, 55, 47, 39, 31, 23, 15, 7};
+const int FinalPermutation[64] = {
+    40, 8, 48, 16, 56, 24, 64, 32,
+    39, 7, 47, 15, 55, 23, 63, 31,
+    38, 6, 46, 14, 54, 22, 62, 30,
+    37, 5, 45, 13, 53, 21, 61, 29,
+    36, 4, 44, 12, 52, 20, 60, 28,
+    35, 3, 43, 11, 51, 19, 59, 27,
+    34, 2, 42, 10, 50, 18, 58, 26,
+    33, 1, 41, 9, 49, 17, 57, 25};
+
+// Rounds tables
+
+const int DesExpansion[48] = {
+    32, 1, 2, 3, 4, 5, 4, 5,
+    6, 7, 8, 9, 8, 9, 10, 11,
+    12, 13, 12, 13, 14, 15, 16, 17,
+    16, 17, 18, 19, 20, 21, 20, 21,
+    22, 23, 24, 25, 24, 25, 26, 27,
+    28, 29, 28, 29, 30, 31, 32, 1};
+
+const int DesSbox[8][4][16] = {
+    {
+        {14, 4, 13, 1, 2, 15, 11, 8, 3, 10, 6, 12, 5, 9, 0, 7},
+        {0, 15, 7, 4, 14, 2, 13, 1, 10, 6, 12, 11, 9, 5, 3, 8},
+        {4, 1, 14, 8, 13, 6, 2, 11, 15, 12, 9, 7, 3, 10, 5, 0},
+        {15, 12, 8, 2, 4, 9, 1, 7, 5, 11, 3, 14, 10, 0, 6, 13},
+    },
+
+    {
+        {15, 1, 8, 14, 6, 11, 3, 4, 9, 7, 2, 13, 12, 0, 5, 10},
+        {3, 13, 4, 7, 15, 2, 8, 14, 12, 0, 1, 10, 6, 9, 11, 5},
+        {0, 14, 7, 11, 10, 4, 13, 1, 5, 8, 12, 6, 9, 3, 2, 15},
+        {13, 8, 10, 1, 3, 15, 4, 2, 11, 6, 7, 12, 0, 5, 14, 9},
+    },
+
+    {
+        {10, 0, 9, 14, 6, 3, 15, 5, 1, 13, 12, 7, 11, 4, 2, 8},
+        {13, 7, 0, 9, 3, 4, 6, 10, 2, 8, 5, 14, 12, 11, 15, 1},
+        {13, 6, 4, 9, 8, 15, 3, 0, 11, 1, 2, 12, 5, 10, 14, 7},
+        {1, 10, 13, 0, 6, 9, 8, 7, 4, 15, 14, 3, 11, 5, 2, 12},
+    },
+
+    {
+        {7, 13, 14, 3, 0, 6, 9, 10, 1, 2, 8, 5, 11, 12, 4, 15},
+        {13, 8, 11, 5, 6, 15, 0, 3, 4, 7, 2, 12, 1, 10, 14, 9},
+        {10, 6, 9, 0, 12, 11, 7, 13, 15, 1, 3, 14, 5, 2, 8, 4},
+        {3, 15, 0, 6, 10, 1, 13, 8, 9, 4, 5, 11, 12, 7, 2, 14},
+    },
+
+    {
+        {2, 12, 4, 1, 7, 10, 11, 6, 8, 5, 3, 15, 13, 0, 14, 9},
+        {14, 11, 2, 12, 4, 7, 13, 1, 5, 0, 15, 10, 3, 9, 8, 6},
+        {4, 2, 1, 11, 10, 13, 7, 8, 15, 9, 12, 5, 6, 3, 0, 14},
+        {11, 8, 12, 7, 1, 14, 2, 13, 6, 15, 0, 9, 10, 4, 5, 3},
+    },
+
+    {
+        {12, 1, 10, 15, 9, 2, 6, 8, 0, 13, 3, 4, 14, 7, 5, 11},
+        {10, 15, 4, 2, 7, 12, 9, 5, 6, 1, 13, 14, 0, 11, 3, 8},
+        {9, 14, 15, 5, 2, 8, 12, 3, 7, 0, 4, 10, 1, 13, 11, 6},
+        {4, 3, 2, 12, 9, 5, 15, 10, 11, 14, 1, 7, 6, 0, 8, 13},
+    },
+
+    {
+        {4, 11, 2, 14, 15, 0, 8, 13, 3, 12, 9, 7, 5, 10, 6, 1},
+        {13, 0, 11, 7, 4, 9, 1, 10, 14, 3, 5, 12, 2, 15, 8, 6},
+        {1, 4, 11, 13, 12, 3, 7, 14, 10, 15, 6, 8, 0, 5, 9, 2},
+        {6, 11, 13, 8, 1, 4, 10, 7, 9, 5, 0, 15, 14, 2, 3, 12},
+    },
+
+    {
+        {13, 2, 8, 4, 6, 15, 11, 1, 10, 9, 3, 14, 5, 0, 12, 7},
+        {1, 15, 13, 8, 10, 3, 7, 4, 12, 5, 6, 11, 0, 14, 9, 2},
+        {7, 11, 4, 1, 9, 12, 14, 2, 0, 6, 10, 13, 15, 3, 5, 8},
+        {2, 1, 14, 7, 4, 10, 8, 13, 15, 12, 9, 0, 3, 5, 6, 11},
+    },
+};
+
+const int Pbox[32] = {
+    16, 7, 20, 21, 29, 12, 28, 17,
+    1, 15, 23, 26, 5, 18, 31, 10,
+    2, 8, 24, 14, 32, 27, 3, 9,
+    19, 13, 30, 6, 22, 11, 4, 25};
+
+//////////////////////////////////////////////////////
+//                  FUNCTIONS                      //
+////////////////////////////////////////////////////
+
+void addbit(uint64_t *block, uint64_t from, int position_from, int position_to) {
+    if (((from << (position_from)) & FIRSTBIT) != 0)
+        *block += (FIRSTBIT >> position_to);
 }
-// 字节转换成位函数: 8byte 转成 64bit
-void ByteToBit(bool *DatOut, unsigned char *DataIn, int Num) {
-    for (int i = 0; i < Num; i++) {
-        DatOut[i] = (DataIn[i / 8] >> (i % 8)) & 0x01;
+
+void Permutation(uint64_t *data, bool initial) {
+    uint64_t data_temp = 0;
+    for (int ii = 0; ii < 64; ii++) {
+        if (initial)
+            addbit(&data_temp, *data, InitialPermutation[ii] - 1, ii);
+        else
+            addbit(&data_temp, *data, FinalPermutation[ii] - 1, ii);
     }
+    *data = data_temp;
 }
-// 位转换成字节函数: 64bit 转成 8byte
-void BitToByte(unsigned char *DatOut, bool *DataIn, int Num) {
-    for (int i = 0; i < (Num / 8); i++) {
-        DatOut[i] = 0;
-    }
-    for (int i = 0; i < Num; i++) {
-        DatOut[i / 8] |= DataIn[i] << (8 - (i % 8));
-    }
-}
-// 二进制密文转换为十六进制密文
-void BitToHex(unsigned char *DatOut, bool *DataIn, int Num) {
-    for (int i = 0; i < Num / 4; i++) {
-        DatOut[i] = 0;
-    }
-    for (int i = 0; i < Num / 4; i++) {
-        DatOut[i] = (DataIn[i * 4] << 3) + (DataIn[i * 4 + 1] << 2) + (DataIn[i * 4 + 2] << 1) + (DataIn[i * 4 + 3]); //二进制转十六进制
-        if ((DatOut[i] % 16) > 9) {
-            DatOut[i] = DatOut[i] % 16 + '7'; //  余数大于9 10-15转换为A-F ascii表中9与A中间相差7个字符
-        } else {
-            DatOut[i] = DatOut[i] % 16 + '0'; //  余数小于9，直接输出字符
+
+bool key_parity_verify(uint64_t key) {
+    int parity_bit = 0; // Parity helper
+
+    for (int ii = 0; ii < 64; ii++) {
+        // Test the parity bit (8-th bit)
+        if (ii % 8 == 7) {
+            if (parity_bit == 0) {
+                // Test if 8-th bit != 0
+                if (((key << ii) & FIRSTBIT) != (uint64_t)0) {
+                    printf("parity error at bit #%i\n", ii + 1);
+                    return false;
+                }
+            } else {
+                // Test if 8-th bit != 1
+                if (((key << ii) & FIRSTBIT) != FIRSTBIT) {
+                    printf("parity error at bit #%i\n", ii + 1);
+                    return false;
+                }
+            }
+            parity_bit = 0; // Re-init parity_bit for next byte block
+        }
+        // Count numbers of 1 in the 7bit block
+        else {
+            if (((key << ii) & FIRSTBIT) == FIRSTBIT)
+                parity_bit = parity_bit == 0 ? 1 : 0;
         }
     }
+
+    return true;
 }
-// 十六进制字符转二进制
-void HexToBit(bool *DatOut, unsigned char *DataIn, int Num) {
-    // 16进制字符输入
-    for (int i = 0; i < Num; i++) {
-        //  大于9
-        if ((DataIn[i / 4]) > '9') {
-            DatOut[i] = ((DataIn[i / 4] - '7') >> (i % 4)) & 0x01;
-        } else {
-            DatOut[i] = ((DataIn[i / 4] - '0') >> (i % 4)) & 0x01;
+
+void key_schedule(uint64_t *key, uint64_t *next_key, int round) {
+    // Init
+    uint64_t key_left  = 0;
+    uint64_t key_right = 0;
+
+    uint64_t key_left_temp  = 0;
+    uint64_t key_right_temp = 0;
+
+    *next_key = 0; // Important !
+
+    // 1. First round => PC-1 : Permuted Choice 1
+    if (round == 0) {
+        for (int ii = 0; ii < 56; ii++) {
+            if (ii < 28)
+                addbit(&key_left, *key, PC1[ii] - 1, ii);
+            else
+                addbit(&key_right, *key, PC1[ii] - 1, ii % 28);
         }
     }
-}
-/*****************************************位操作**************************************************/
-
-/***********************************设置密钥 获取子密钥 Ki*****************************************/
-void SetKey(unsigned char KeyIn[8]) {
-    static bool  KeyBit[64] = {0};         // 密钥二进制存储空间
-    static bool *KiL        = &KeyBit[0];  // 前28
-    static bool *KiR        = &KeyBit[28]; // 后28共56，这只是获取空间地址大小，省略再额外分配空间
-
-    // PC1: 把密钥转为二进制存入KeyBit, PC1_Table表置换 56 次
-    ByteToBit(KeyBit, KeyIn, 64);
-    TablePermute(KeyBit, KeyBit, PC1_Table, 56);
-    // PC2
-    for (int i = 0; i < 16; i++) {
-        // 循环左移
-        LoopMove(KiL, 28, Move_Table[i]);
-        LoopMove(KiR, 28, Move_Table[i]);
-        TablePermute(SubKey[i], KeyBit, PC2_Table, 48);
+    // 1'. Other rounds? => Seperate key into two key halves.
+    else {
+        for (int ii = 0; ii < 56; ii++) {
+            if (ii < 28)
+                addbit(&key_left, *key, ii, ii);
+            else
+                addbit(&key_right, *key, ii, ii % 28);
+        }
     }
-}
-void LoopMove(bool *DataIn, int Len, int Num) {
-    static bool Temp[64] = {0};                // 缓存备份
-    BitsCopy(Temp, DataIn, Num);               // 将数据最左边的Num位(被移出去的)存入Temp
-    BitsCopy(DataIn, DataIn + Num, Len - Num); // 将数据左边开始的第Num移入原来的空间
-    BitsCopy(DataIn + Len - Num, Temp, Num);   // 将缓存中移出去的数据加到最右边
-}
-/***********************************设置密钥 获取子密钥 Ki*****************************************/
 
-/*******************************************F 函数************************************************/
-void F_Change(bool DataIn[32], bool DatKi[48]) {
-    static bool MiR[48] = {0}; // 输入 32 位通过E选位变为48位
-    E_change(MiR, DataIn);     // E 扩展置换
-    Xor(MiR, DatKi, 48);       // 和子密钥异或
-    S_Change(DataIn, MiR);     // S 盒置换
-    P_change(DataIn, DataIn);  // P 盒置换
-}
-void E_change(bool DataOut[48], bool DataIn[32]) {
-    TablePermute(DataOut, DataIn, E_Table, 48);
-}
-void S_Change(bool DatOut[32], bool DataIn[48]) {
-    int X = 0;
-    int Y = 0;
-    // i为8个S盒, 每执行一次,输入数据偏移6位, 每执行一次,输出数据偏移4位
-    for (int i = 0, X = 0, Y = 0; i < 8; i++, DataIn += 6, DatOut += 4) {
-        X = (DataIn[0] << 1) + DataIn[5];                                       // 05   代表第几行
-        Y = (DataIn[1] << 3) + (DataIn[2] << 2) + (DataIn[3] << 1) + DataIn[4]; // 1234 代表第几列
-        ByteToBit(DatOut, &S_Box[i][X][Y], 4);                                  // 把找到的点数据换为二进制
+    // 2. Rotations
+    key_left_temp  = Rotations[round] == 1 ? FIRSTBIT : 0xC000000000000000;
+    key_right_temp = Rotations[round] == 1 ? FIRSTBIT : 0xC000000000000000;
+    key_left_temp  = (key_left & key_left_temp) >> (28 - Rotations[round]);
+    key_right_temp = (key_right & key_right_temp) >> (28 - Rotations[round]);
+
+    key_left_temp += (key_left << Rotations[round]);
+    key_right_temp += (key_right << Rotations[round]);
+
+    // Combine the 2 keys into 1 (next_key)
+    // Next_key will be used for following rounds
+    for (int ii = 0; ii < 56; ii++) {
+        if (ii < 28)
+            addbit(next_key, key_left_temp, ii, ii);
+        else
+            addbit(next_key, key_right_temp, (ii % 28), ii);
     }
-}
-void P_change(bool DataOut[32], bool DataIn[32]) {
-    TablePermute(DataIn, DataIn, P_Table, 32);
-}
-/*******************************************F 函数************************************************/
 
-// 表置换函数
-void TablePermute(bool *DatOut, bool *DataIn, const unsigned char *Table, int Num) {
-    // Num为置换的长度
-    for (int i = 0; i < Num; i++) {
-        DatOut[i] = DataIn[Table[i] - 1]; // 将数据按对应的表上的位置排列
+    // 3. PC-2 : Permuted Choice 2
+    *key = 0;
+
+    for (int ii = 0; ii < 48; ii++)
+        addbit(key, *next_key, PC2[ii] - 1, ii);
+
+    // All Good!
+    // Use key in the DES rounds.
+    // Use next_key in this function again as the new key to change
+}
+
+void rounds(uint64_t *data, uint64_t key) {
+    uint64_t right_block      = 0;
+    uint64_t right_block_temp = 0;
+
+    // 1. Block expansion
+    for (int ii = 0; ii < 48; ii++)
+        addbit(&right_block, *data, (DesExpansion[ii] + 31), ii);
+
+    // 2. Xor with the key
+    right_block = right_block ^ key;
+
+    // 3. Substitution
+    int      coordx, coordy;
+    uint64_t substitued;
+
+    for (int ii = 0; ii < 8; ii++) {
+        coordx = ((right_block << 6 * ii) & FIRSTBIT) == FIRSTBIT ? 2 : 0;
+        if (((right_block << (6 * ii + 5)) & FIRSTBIT) == FIRSTBIT)
+            coordx++;
+
+        coordy = 0;
+        for (int jj = 1; jj < 5; jj++) {
+            if (((right_block << (6 * ii + jj)) & FIRSTBIT) == FIRSTBIT) {
+                coordy += 2 ^ (4 - jj);
+            }
+        }
+
+        substitued = DesSbox[ii][coordx][coordy];
+        substitued = substitued << (60 - (4 * ii));
+        right_block_temp += substitued;
     }
-}
-// 按位异或
-void Xor(bool *DataA, bool *DataB, int Num) {
-    for (int i = 0; i < Num; i++) {
-        DataA[i] = DataA[i] ^ DataB[i]; // 异或
-    }
+
+    // Right_block done
+    right_block = right_block_temp;
+
+    // 4. Permutation
+    right_block_temp = 0;
+
+    for (int ii = 0; ii < 32; ii++)
+        addbit(&right_block_temp, right_block, Pbox[ii] - 1, ii);
+
+    right_block = right_block_temp;
+
+    // 5. Xor with the left block
+    right_block = right_block ^ *data;
+
+    // Combine the new block and the right block
+    *data = (*data << 32) + (right_block >> 32);
 }
 
-// IP置换
-void IP_change(bool DataOut[64], bool DataIn[64]) {
-    TablePermute(DataOut, DataIn, IP_Table, 64);
-}
-// 反IP置换
-void IIP_change(bool DataOut[64], bool DataIn[64]) {
-    TablePermute(DataOut, DataIn, IIP_Table, 64);
-}
-// 执行DES加密, unsigned char 输入, bit 输出
-void Des(unsigned char MesOut[8], unsigned char MesIn[8]) {
-    static bool  MesBit[64] = {0};         // 明文二进制存储空间 64位
-    static bool  Temp[32]   = {0};         // 临时存储
-    static bool *MiL        = &MesBit[0];  // 前32位
-    static bool *MiR        = &MesBit[32]; //  后32位
-
-    ByteToBit(MesBit, MesIn, 64); // 把明文换成二进制存入MesBit
-    IP_change(MesBit, MesBit);    // IP置换
-    for (int i = 0; i < 16; i++) {
-        BitsCopy(Temp, MiR, 32);  // 临时存储
-        F_Change(MiR, SubKey[i]); // F函数变换
-        Xor(MiR, MiL, 32);        // 得到Ri
-        BitsCopy(MiL, Temp, 32);  // 得到Li
-    }
-    IIP_change(MesBit, MesBit); // IP反置换
-    BitToByte(MesOut, MesBit, 64);
-}
-
-// 执行DES解密, unsigned char 输入, unsigned char 输出
-void deDes(unsigned char MesOut[8], unsigned char MesIn[8]) {
-    static bool  MesBit[64] = {0};
-    static bool  Temp[32]   = {0};
-    static bool *MiL        = &MesBit[0];
-    static bool *MiR        = &MesBit[32];
-
-    ByteToBit(MesBit, MesIn, 64);
-    IP_change(MesBit, MesBit);
-    TablePermute(MesBit, MesBit, IP_Table, 64);
-    for (int i = 15; i >= 0; i--) {
-        BitsCopy(Temp, MiL, 32);
-        F_Change(MiL, SubKey[i]);
-        Xor(MiL, MiR, 32);
-        BitsCopy(MiR, Temp, 32);
-    }
-    IIP_change(MesBit, MesBit);
-    BitToByte(MesOut, MesBit, 64);
-}
+// End of file

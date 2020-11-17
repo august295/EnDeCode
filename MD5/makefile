@@ -1,9 +1,9 @@
 CC = gcc
 CFLAGS = -c
-TARGET = main
+TARGET = md5
 INC = $(wildcard ./src/*.h)
 SRC = $(wildcard ./src/*.c)
-OBJ += $(patsubst %.c,%.o,$(SRC))
+OBJ = $(patsubst %.c,%.o,$(SRC))
 
 all: $(TARGET) 
 
