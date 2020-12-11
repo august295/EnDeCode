@@ -7,46 +7,13 @@
 DES现在已经不是一种安全的加密方法，主要因为它使用的56位密钥过短。DES标准和3DES标准已逐渐被 **高级加密标准（AES）**所取代
 
 
-
-##  2. 使用
-
-```shell
- -d, --decrypt     decrypt DES from input file
- -e, --encrypt     encrypt DES from input file
- -o, --output=FILE write result to FILE
- -h, --help        display this help
-```
-
-**例如**
-
-```shell
-生成密钥程序 
-make genkey
-
-生成密钥
-genkey
-(.\genkey.exe)
-
-生成主程序
-make
-
-加密
-des -k "0101110011111111000101110101100111000101111001110100110100001001" -e a.txt -o b.txt
-(.\des.exe)
-解密
-des -k "0101110011111111000101110101100111000101111001110100110100001001" -d b.txt -o c.txt
-(.\des.exe)
-```
-
-
-
-## 3. 原理
+## 2. 原理
 
 DES是一种典型的块密码，一种将固定长度的明文通过一系列复杂的操作变成同样长度的密文的算法。对DES而言，块长度为64位。同时，DES使用密钥来自定义变换过程，因此算法认为只有持有加密所用的密钥的用户才能解密密文。密钥表面上是64位的，然而只有其中的56位被实际用于算法，其余8位可以被用于奇偶校验（第8、16、24、32、40、48、56、64位是校验位，使得每个密钥都有奇数个1），并在算法中被丢弃。因此，DES的有效密钥长度仅为56位。
 
 
 
-### 3.1 模块图片
+### 2.1 模块图片
 
 DES算法的主要流程如下图所示，按照流程依次介绍每个模块。
 
@@ -83,7 +50,7 @@ S盒，P置换和E扩张各自满足了克劳德·香农在1940年代提出的�
 
 
 
-### 3.2 步骤
+### 2.2 步骤
 
 密钥可以先生成，然后开始主模块运算。
 
@@ -273,13 +240,42 @@ IP-1（亦被称为FP）是IP的逆过程。
 
 ![](picture/1920px-DES-ip-1.svg.png)
 
-## 4. 代码
+## 3. 代码
 
-### 4.1 全部代码
+### 3.1 全部代码
 
 [DES](https://github.com/2950833136/EnDeCode/tree/master/DES): https://github.com/2950833136/EnDeCode/tree/master/DES
 
+### 3.2 使用
 
-### 4.2 展示
+```shell
+ -d, --decrypt     decrypt DES from input file
+ -e, --encrypt     encrypt DES from input file
+ -o, --output=FILE write result to FILE
+ -h, --help        display this help
+```
+
+**例如**
+
+```shell
+生成密钥程序 
+make genkey
+
+生成密钥
+genkey
+(.\genkey.exe)
+
+生成主程序
+make
+
+加密
+des -k "0101110011111111000101110101100111000101111001110100110100001001" -e a.txt -o b.txt
+(.\des.exe)
+解密
+des -k "0101110011111111000101110101100111000101111001110100110100001001" -d b.txt -o c.txt
+(.\des.exe)
+```
+
+### 3.3 展示
 
 ![](picture/DES_result.png)
