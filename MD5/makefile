@@ -1,9 +1,14 @@
+# Usual compilation flags
 CC = gcc
 CFLAGS = -c
-TARGET = md5
+
+# Resources
 INC = $(wildcard ./src/*.h)
 SRC = $(wildcard ./src/*.c)
 OBJ = $(patsubst %.c,%.o,$(SRC))
+
+# target
+TARGET = md5
 
 all: $(TARGET) 
 

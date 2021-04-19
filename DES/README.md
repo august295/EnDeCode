@@ -1,10 +1,13 @@
 # DES
 
+
+
 ## 1. 简介
 
 **数据加密标准**（英语：Data Encryption Standard，缩写为 DES）是一种 **对称密钥加密** 算法
 
 DES现在已经不是一种安全的加密方法，主要因为它使用的56位密钥过短。DES标准和3DES标准已逐渐被 **高级加密标准（AES）**所取代
+
 
 
 ## 2. 原理
@@ -25,7 +28,7 @@ DES算法的主要流程如下图所示，按照流程依次介绍每个模块�
 
 图中的 **⊕** 符号代表 **异或（XOR）**操作。“F函数”将数据半块与某个子密钥进行处理。然后，一个F函数的输出与另一个半块异或之后，再与原本的半块组合并交换顺序，进入下一个回次的处理。在最后一个回次完成时，两个半块需要交换顺序，这是费斯妥结构的一个特点，以保证加解密的过程相似。
 
-![](picture/DES_ALL.png)
+![](./image/DES_ALL.png)
 
 #### （2）密钥调度模块
 
@@ -33,7 +36,7 @@ DES算法的主要流程如下图所示，按照流程依次介绍每个模块�
 
 解密过程中，除了子密钥输出的顺序相反外，密钥调度的过程与加密完全相同。
 
-![](picture/DES-key-schedule.png)
+![](./image/DES-key-schedule.png)
 
 #### （3）费斯妥函数（F函数）
 
@@ -46,7 +49,7 @@ DES算法的主要流程如下图所示，按照流程依次介绍每个模块�
 
 S盒，P置换和E扩张各自满足了克劳德·香农在1940年代提出的实用密码所需的必要条件，“混淆与扩散”。
 
-![](picture/DES-f-function.png)
+![](./image/DES-f-function.png)
 
 
 
@@ -72,7 +75,7 @@ S盒，P置换和E扩张各自满足了克劳德·香农在1940年代提出的�
 | 14  | 6   | 61  | 53  | 45  | 37  | 29  |
 | 21  | 13  | 5   | 28  | 20  | 12  | 4   |
 
-![](picture/1920px-DES-pc1.svg.png)
+![](./image/1920px-DES-pc1.svg.png)
 
 **2、密钥调度过程中的循环移位（loopShift）**
 
@@ -97,7 +100,7 @@ S盒，P置换和E扩张各自满足了克劳德·香农在1940年代提出的�
 | 44  | 49  | 39  | 56  | 34  | 53  |
 | 46  | 42  | 50  | 36  | 29  | 32  |
 
-![](picture/1920px-DES-pc2.svg.png)
+![](./image/1920px-DES-pc2.svg.png)
 
 
 
@@ -115,7 +118,7 @@ S盒，P置换和E扩张各自满足了克劳德·香农在1940年代提出的�
 | 61  | 53  | 45  | 37  | 29  | 21  | 13  | 5   |
 | 63  | 55  | 47  | 39  | 31  | 23  | 15  | 7   |
 
-![](picture/1920px-DES-ip.svg.png)
+![](./image/1920px-DES-ip.svg.png)
 
 #### （3）F 模块函数
 
@@ -133,7 +136,7 @@ S盒，P置换和E扩张各自满足了克劳德·香农在1940年代提出的�
 | 24  | 25  | 26  | 27  | 28  | 29  |
 | 28  | 29  | 30  | 31  | 32  | 1   |
 
-![](picture/1920px-DES-ee.svg.png)
+![](./image/1920px-DES-ee.svg.png)
 
 
 **2、置换盒 (S盒)**
@@ -222,7 +225,7 @@ P置换将32位的半块数据重新排列。
 | 19  | 13  | 30  | 6   |
 | 22  | 11  | 4   | 25  |
 
-![](picture/1280px-DES-pp.svg.png)
+![](./image/1280px-DES-pp.svg.png)
 
 #### （5）最终置换 (IP-1)
 
@@ -238,13 +241,15 @@ IP-1（亦被称为FP）是IP的逆过程。
 | 34  | 2   | 42  | 10  | 50  | 18  | 58  | 26  |
 | 33  | 1   | 41  | 9   | 49  | 17  | 57  | 25  |
 
-![](picture/1920px-DES-ip-1.svg.png)
+![](./image/1920px-DES-ip-1.svg.png)
+
+
 
 ## 3. 代码
 
 ### 3.1 全部代码
 
-[DES](https://github.com/2950833136/EnDeCode/tree/master/DES): https://github.com/2950833136/EnDeCode/tree/master/DES
+[DES](https://github.com/augusteight8/EnDeCode/tree/master/DES): https://github.com/augusteight8/EnDeCode/tree/master/DES
 
 ### 3.2 使用
 
@@ -278,4 +283,4 @@ des -k "0101110011111111000101110101100111000101111001110100110100001001" -d b.t
 
 ### 3.3 展示
 
-![](picture/DES_result.png)
+![](./image/DES_result.png)

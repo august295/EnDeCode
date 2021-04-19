@@ -44,7 +44,7 @@ $$
 
 $\oplus, \wedge, \vee, \neg$ 是 ''XOR'', ''AND'', ''OR'' , ''NOT'' 的符号。
 
-![](picture/MD5.png)
+![](./image/MD5.png)
 
 **Figure**
 
@@ -60,11 +60,13 @@ $\oplus, \wedge, \vee, \neg$ 是 ''XOR'', ''AND'', ''OR'' , ''NOT'' 的符号。
 
 **（1）代码**
 
-[MD5](https://github.com/2950833136/EnDeCode/tree/master/MD5): https://github.com/2950833136/EnDeCode/tree/master/MD5
+[MD5](https://github.com/augusteight8/EnDeCode/blob/master/MD5): https://github.com/augusteight8/EnDeCode/blob/master/MD5
 
-**（2）结果**
 
-命令
+
+**（2）使用**
+
+使用
 
 > make
 >
@@ -72,4 +74,4 @@ $\oplus, \wedge, \vee, \neg$ 是 ''XOR'', ''AND'', ''OR'' , ''NOT'' 的符号。
 >
 > .\md5_test.exe "my name is li"  
 
-![](picture/MD5_result.png)
+![](./image/MD5_result.png)

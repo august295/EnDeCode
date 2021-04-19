@@ -1,10 +1,10 @@
 #Variables
-APP=des
+APP = des
 
 #Usual compilation flags
-CFLAGS=-std=c99 -Wall -Wextra -g -O2
-CPPFLAGS=-I -DDEBUG
-LDFLAGS=-lm
+CFLAGS = -std=c99 -Wall -Wextra -g -O2
+CPPFLAGS = -I -DDEBUG
+LDFLAGS = -lm
 SRC = ./src
 
 #Special rules and targets
