@@ -1,36 +1,19 @@
 {
-    // See https://go.microsoft.com/fwlink/?LinkId=733558 
-    // for the documentation about the tasks.json format
-    "version": "2.0.0",
     "tasks": [
         {
             "type": "shell",
-            "label": "g++",
-            "command": "D:\\cygwin64\\bin\\g++.exe",
+            "label": "g++ build active file",
+            "command": "/usr/bin/g++",
             "args": [
                 "-g",
                 "${file}",
                 "-o",
-                "${fileDirname}\\${fileBasenameNoExtension}.exe"
+                "${fileDirname}/${fileBasenameNoExtension}"
             ],
             "options": {
-                "cwd": "D:\\cygwin64\\bin"
-            },
-            "problemMatcher": [
-                "$gcc"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
+                "cwd": "/usr/bin"
             }
         }
     ],
-    "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": false,
-        "panel": "shared", // 这里 shared 表示共享，改成 new 之后每个进程创建新的端口
-        "showReuseMessage": true,
-        "clear": false
-    }
+    "version": "2.0.0"
 }

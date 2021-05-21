@@ -13,7 +13,8 @@ static const char base64en[] = {
     'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
     'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
     'w', 'x', 'y', 'z', '0', '1', '2', '3',
-    '4', '5', '6', '7', '8', '9', '+', '/'};
+    '4', '5', '6', '7', '8', '9', '+', '/'
+};
 
 /* ASCII order for BASE 64 decode, 255 in unused character */
 static const unsigned char base64de[] = {
@@ -48,7 +49,8 @@ static const unsigned char base64de[] = {
     /*'p', 'q', 'r',  's',  't',  'u',  'v',  'w', */
     0x29, 0x2A, 0x2B, 0x2C, 0x2D, 0x2E, 0x2F, 0x30,
     /*'x', 'y', 'z',  '{',  '|',  '}',  '~',  del, */
-    0x31, 0x32, 0x33, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+    0x31, 0x32, 0x33, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+};
 
 unsigned int base64_encode(const unsigned char *in, unsigned int inlen, char *out) {
     int           s;

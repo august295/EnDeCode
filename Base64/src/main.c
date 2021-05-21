@@ -6,7 +6,7 @@
 #include "base64.h"
 
 int main(int argc, char *argv[]) {
-    char           str[256] = {0};
+    char           str[256] = { 0 };
     char           encrypt  = 1;
     char *         encode_out;
     unsigned char *decode_out;
