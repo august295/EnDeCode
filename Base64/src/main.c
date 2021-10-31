@@ -1,14 +1,14 @@
+#include <getopt.h> // #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
 #include "base64.h"
 
 int main(int argc, char *argv[]) {
     char           str[256] = { 0 };
     char           encrypt  = 1;
-    char *         encode_out;
+    char          *encode_out;
     unsigned char *decode_out;
     int            out_len;
 
