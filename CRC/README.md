@@ -17,7 +17,7 @@ D：D数据拥有 d 比特
 G：发送方和接收方需要协商一个 r+1 比特模式，称为生成多项式（G），**G 的最高有效位比特（最高位）和 最低有效位比特（最低位）必须为 1**
 R：发送方选择 r 个附加比特，称为 R（CRC校验码）
 
-![在这里插入图片描述](image/README/20191209234903780.png)
+![在这里插入图片描述](image/20191209234903780.png)
 
 （1）**计算**：R 是数据 D 通过**模 2 除法**除 G 运算得到的（姑且这么说）余数，**这个 R 就是 FCS（检测帧序列）**，发送时把 R 附加到数据 D 后面。
 
@@ -26,14 +26,14 @@ R：发送方选择 r 个附加比特，称为 R（CRC校验码）
 
 #### 1.3、CRC原理解释
 所有 CRC 计算采用模 2 算术，即在加法中不进位，在减法中不借位，意味加法和减法是相同的，**等价于操作数的按位异或（XOR）运算**，而不是需要借位运算。
-![在这里插入图片描述](image/README/20191212001309381.png)
+![在这里插入图片描述](image/20191212001309381.png)
 例如：
 D = 10110011，d = 8
 G = 11001，r = 4
 通过计算得到 R = 0100
 在这种情况下传输 12 个比特是 101100110100
 
-![在这里插入图片描述](image/README/20191211230228739.png)
+![在这里插入图片描述](image/20191211230228739.png)
 
 
 #### 1.4、例子（一步一步分析）
@@ -51,10 +51,10 @@ CRC-8 标准的 h(x) = x^8^ + x^7^ + x^6^ + x^4^ + x^2^ + 1，既 g 是9位的�
 直到剩余数据长度与标准相等。
 
 经过运算后，最终得到的r是10001100，这就是 CRC 校验码。
-![在这里插入图片描述](image/README/20191212001512605.png)
+![在这里插入图片描述](image/20191212001512605.png)
 
 #### 1.5、生成多项式
-![在这里插入图片描述](image/README/20191212010448161.png)
+![在这里插入图片描述](image/20191212010448161.png)
 
 **注意：**
 + **位宽**：文献中提到的生成多项式经常会说到多项式的位宽（Width，简记为W），这个位宽不是多项式对应的二进制数的位数，而是位数减1。比如CRC8中用到的位宽为8的生成多项式，其实对应得二进制数有九位：100110001。**计算出的CRC校验值长度是位宽。**
@@ -336,15 +336,15 @@ int main() {
 
 #### 2.4、结果及CRC32生成表
 **2.4.1、结果**
-![在这里插入图片描述](image/README/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MjEwOTAxMg==,size_16,color_FFFFFF,t_70.png)![在这里插入图片描述](image/README/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MjEwOTAxMg==,size_16,color_FFFFFF,t_70-16460646397091.png)
+![在这里插入图片描述](image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MjEwOTAxMg==,size_16,color_FFFFFF,t_70.png)![在这里插入图片描述](image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MjEwOTAxMg==,size_16,color_FFFFFF,t_70-16460646397091.png)
 
 
 **2.4.2、正向 CRC32 生成表**
-![在这里插入图片描述](image/README/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MjEwOTAxMg==,size_16,color_FFFFFF,t_70-16460646397102.png)
+![在这里插入图片描述](image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MjEwOTAxMg==,size_16,color_FFFFFF,t_70-16460646397102.png)
 
 
 **2.4.3、反向 CRC32 生成表**
-![在这里插入图片描述](image/README/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MjEwOTAxMg==,size_16,color_FFFFFF,t_70-16460646397103.png)
+![在这里插入图片描述](image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MjEwOTAxMg==,size_16,color_FFFFFF,t_70-16460646397103.png)
 
 
 
