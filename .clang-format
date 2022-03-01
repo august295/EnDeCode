@@ -2,10 +2,15 @@
 # 语言: None, Cpp, Java, JavaScript, ObjC, Proto, TableGen, TextProto
 Language:        Cpp
 # BasedOnStyle:  LLVM
+# 访问说明符(public、private等)的偏移
 AccessModifierOffset: -4
+# 开括号(开圆括号、开尖括号、开方括号)后的对齐: Align, DontAlign, AlwaysBreak(总是在开括号后换行)
 AlignAfterOpenBracket: Align
+# 对齐连续宏
 AlignConsecutiveMacros: true
+# 连续赋值时，对齐所有等号
 AlignConsecutiveAssignments: true
+# 连续声明时，对齐所有声明的变量名
 AlignConsecutiveDeclarations: true
 AlignEscapedNewlines: Right
 AlignOperands:   true
@@ -14,15 +19,21 @@ AlignTrailingComments: true
 AllowAllArgumentsOnNextLine: true
 AllowAllConstructorInitializersOnNextLine: true
 AllowAllParametersOfDeclarationOnNextLine: true
-AllowShortBlocksOnASingleLine: Never
-AllowShortCaseLabelsOnASingleLine: false
+# 允许短的块放在同一行
+AllowShortBlocksOnASingleLine: true
+# 允许短的case标签放在同一行
+AllowShortCaseLabelsOnASingleLine: true
 # 允许短的函数放在同一行: None, InlineOnly(定义在类中), Empty(空函数), Inline(定义在类中，空函数), All
-AllowShortFunctionsOnASingleLine: InlineOnly
-AllowShortLambdasOnASingleLine: All
-AllowShortIfStatementsOnASingleLine: Never
-AllowShortLoopsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: All
+# 允许短的lambda语句保持在同一行
+AllowShortLambdasOnASingleLine: true
+# 允许短的if语句保持在同一行
+AllowShortIfStatementsOnASingleLine: true
+# 允许短的循环保持在同一行
+AllowShortLoopsOnASingleLine: true
 AlwaysBreakAfterDefinitionReturnType: None
 AlwaysBreakAfterReturnType: None
+# 总是在多行string字面量前换行
 AlwaysBreakBeforeMultilineStrings: false
 AlwaysBreakTemplateDeclarations: MultiLine
 BinPackArguments: true
@@ -57,7 +68,7 @@ BreakBeforeBinaryOperators: None
 #   WebKit(在函数前换行), 
 #   Custom
 #   注：这里认为语句块也属于函数
-BreakBeforeBraces: Custom
+BreakBeforeBraces: Allman
 # 在三元运算符前换行
 BreakBeforeInheritanceComma: false
 BreakInheritanceList: BeforeColon
@@ -76,6 +87,7 @@ ContinuationIndentWidth: 4
 # 去除 C++11 的列表初始化的大括号 { 后和 } 前的空格
 Cpp11BracedListStyle: false
 DeriveLineEnding: true
+# 继承最常用的指针和引用的对齐方式
 DerivePointerAlignment: false
 DisableFormat:   false
 ExperimentalAutoDetectBinPacking: false
@@ -121,7 +133,8 @@ PenaltyBreakString: 1000
 PenaltyBreakTemplateDeclaration: 10
 PenaltyExcessCharacter: 1000000
 PenaltyReturnTypeOnItsOwnLine: 60
-PointerAlignment: Right
+# 指针和引用的对齐: Left, Right, Middle
+PointerAlignment: Left
 ReflowComments:  true
 SortIncludes:    true
 SortUsingDeclarations: true

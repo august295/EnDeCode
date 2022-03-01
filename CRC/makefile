@@ -1,13 +1,20 @@
-CC = gcc
+TARGET := crc
 
-main: main.o crc.o
-	$(CC) main.o crc.o -o main
+OBJDIRS := obj
+SRCDIRS := src
+SOURCES := $(wildcard $(SRCDIRS)/*.c)
+OBJECTS := $(patsubst $(SRCDIRS)/%.c, $(OBJDIRS)/%.o, $(SOURCES))
 
-main.o: main.cpp crc.h
-	$(CC) -c main.cpp -o main.o
+CC       := gcc
+CPPFLAGS := -I./$(SRCDIRS)
 
-crc.o: crc.cpp crc.h type.h
-	$(CC) -c crc.cpp -o crc.o
+$(TARGET): $(OBJECTS)
+	$(CC) -o $@ $^ $(CPPFLAGS)
 
+$(OBJDIRS)/%.o: ./src/%.c
+	@test -d $(OBJDIRS) || mkdir $(OBJDIRS)
+	$(CC) -o $@ -c $<
+
+.PHONY: clean
 clean:
-	rm main *.o
+	rm -rf $(TARGET) $(OBJDIRS)

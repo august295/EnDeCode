@@ -2,5 +2,8 @@
     // Visual Studio  LLVM  Google  Chromium  Mozilla  WebKit
     // "C_Cpp.clang_format_style": "{BasedOnStyle: LLVM}"
     "C_Cpp.clang_format_style": "file",
-    "editor.formatOnSave": false
+    "editor.formatOnSave": false,
+    "files.associations": {
+        "stdio.h": "c"
+    }
 }
