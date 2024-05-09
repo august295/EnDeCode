@@ -67,7 +67,7 @@ DES_API void genkey(uint64_t* key);
  * @param key          密钥
  * @param output       密文
  */
-DES_API int des_ecb_zero(char* input, int input_len, bool encrypt, uint64_t key, char** output);
+DES_API int des_ecb_zero(char* input, int input_len, bool encrypt, uint64_t key, char* output);
 
 #ifdef __cplusplus
 }

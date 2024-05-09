@@ -14,10 +14,10 @@ TEST(test_des, str_ascii)
     genkey(&key);
 
     char* ciphertext     = (char*)calloc(plaintext_len + 1, sizeof(char));
-    int   ciphertext_len = des_ecb_zero(plaintext, plaintext_len, true, key, &ciphertext);
+    int   ciphertext_len = des_ecb_zero(plaintext, plaintext_len, true, key, ciphertext);
 
     char* result     = (char*)calloc(plaintext_len + 1, sizeof(char));
-    int   result_len = des_ecb_zero(ciphertext, ciphertext_len, false, key, &result);
+    int   result_len = des_ecb_zero(ciphertext, ciphertext_len, false, key, result);
 
     EXPECT_EQ(std::string(plaintext, plaintext_len), std::string(result, result_len));
 }
@@ -31,10 +31,10 @@ TEST(test_des, str_gbk)
     genkey(&key);
 
     char* ciphertext     = (char*)calloc(plaintext_len + 1, sizeof(char));
-    int   ciphertext_len = des_ecb_zero(plaintext, plaintext_len, true, key, &ciphertext);
+    int   ciphertext_len = des_ecb_zero(plaintext, plaintext_len, true, key, ciphertext);
 
     char* result     = (char*)calloc(plaintext_len + 1, sizeof(char));
-    int   result_len = des_ecb_zero(ciphertext, ciphertext_len, false, key, &result);
+    int   result_len = des_ecb_zero(ciphertext, ciphertext_len, false, key, result);
 
     EXPECT_EQ(std::string(plaintext, plaintext_len), std::string(result, result_len));
 }

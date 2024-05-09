@@ -364,7 +364,7 @@ void genkey(uint64_t* key)
     }
 }
 
-int des_ecb_zero(char* input, int input_len, bool encrypt, uint64_t key, char** output)
+int des_ecb_zero(char* input, int input_len, bool encrypt, uint64_t key, char* output)
 {
     // 1. Verify parity bits of the key
     if (!key_parity_verify(key))
@@ -426,7 +426,7 @@ int des_ecb_zero(char* input, int input_len, bool encrypt, uint64_t key, char** 
             data = data >> (8 * (8 - amount));
 
         // Write output
-        memcpy(*output + output_len, (char*)&data, 8);
+        memcpy(output + output_len, (char*)&data, 8);
         output_len += amount;
         data = 0;
     }

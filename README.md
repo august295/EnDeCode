@@ -10,15 +10,22 @@
 
 ## 1. 环境
 
+- `Visual Studio 2022`
 - `CMake3.15`
-- `Visual Studio 2017`
 
 
 
-## 2. 编译
+## 2. 下载及编译
 
-- `Visual Studio 2017` 使用 `cmake_vs2017.bat` 脚本即可生成
-- 使用 `CMakeLists.txt` 生成对应工程
+使用 `GoogleTest` 作为测试工具，所以需要下载 `submodule`。
+
+```
+git clone --recursive https://github.com/august295/EnDeCode.git
+```
+
+工程使用 `CMake` 构建。
+
+运行以 `test` 作为启动项即可，其他编译生成动态库。
 
 
 
@@ -35,6 +42,7 @@
 ### 3.3. 摘要算法（Digest Algorithm）
 
 - [x] MD5
+- [ ] SM3
 
 ### 3.4. 未分类
 
