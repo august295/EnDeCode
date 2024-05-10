@@ -4,7 +4,7 @@
 #define BASE64_ENCODE_OUT_SIZE(s) ((unsigned int)((((s) + 2) / 3) * 4 + 1))
 #define BASE64_DECODE_OUT_SIZE(s) ((unsigned int)(((s) / 4) * 3))
 
-#include "base64_export.hpp"
+#include "common/endecode_export.hpp"
 #ifdef __cplusplus
 extern "C"
 {
@@ -18,7 +18,7 @@ extern "C"
  * @param   out     加密后字符串
  * @return  加密后字符串长度
  ***************************************************************************/
-BASE64_API unsigned int base64_encode(const unsigned char* in, unsigned int inlen, char* out);
+ENDECODE_API unsigned int base64_encode(const unsigned char* in, unsigned int inlen, char* out);
 
 /***************************************************************************
  * @date    2021/04/19
@@ -28,7 +28,7 @@ BASE64_API unsigned int base64_encode(const unsigned char* in, unsigned int inle
  * @param   out     解密后字符串
  * @return  解密后字符串长度
  ***************************************************************************/
-BASE64_API unsigned int base64_decode(const char* in, unsigned int inlen, unsigned char* out);
+ENDECODE_API unsigned int base64_decode(const char* in, unsigned int inlen, unsigned char* out);
 
 #ifdef __cplusplus
 }

@@ -41,13 +41,20 @@ void md5(const uint8_t* initial_msg, uint64_t initial_len, uint8_t* digest);
  */
 void hex_to_ascii(const uint8_t* pHex, int flag, uint8_t* pAscii, int nLen);
 
-#include "md5_export.hpp"
+#include "common/endecode_export.hpp"
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-MD5_API void md5_ascii(const uint8_t* plaintext, uint64_t plaintext_len, int flag, uint8_t* ciphertext);
+/**
+ * @brief mds5 加密
+ * @param plaintext     明文
+ * @param plaintext_len 明文长度
+ * @param flag          0-大写，1-小写
+ * @param ciphertext    密文
+ */
+ENDECODE_API void md5_ascii(const uint8_t* plaintext, uint64_t plaintext_len, int flag, uint8_t* ciphertext);
 
 #ifdef __cplusplus
 }

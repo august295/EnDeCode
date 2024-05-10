@@ -103,7 +103,7 @@ uint8_t  reverse8(uint8_t data);
 uint16_t reverse16(uint16_t data);
 uint32_t reverse32(uint32_t data);
 
-#include "crc_export.hpp"
+#include "common/endecode_export.hpp"
 #ifdef __cplusplus
 extern "C"
 {
@@ -113,9 +113,9 @@ extern "C"
  * @brief   CRC函数声明
  * @details crc8/crc16/crc32
  ******************************************************************************/
-CRC_API uint8_t  crc8(uint8_t* addr, int num, CRC_8 type);
-CRC_API uint16_t crc16(uint8_t* addr, int num, CRC_16 type);
-CRC_API uint32_t crc32(uint8_t* addr, int num, CRC_32 type);
+ENDECODE_API uint8_t  crc8(uint8_t* addr, int num, CRC_8 type);
+ENDECODE_API uint16_t crc16(uint8_t* addr, int num, CRC_16 type);
+ENDECODE_API uint32_t crc32(uint8_t* addr, int num, CRC_32 type);
 
 #ifdef __cplusplus
 }

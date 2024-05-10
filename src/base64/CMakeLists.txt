@@ -1,3 +1,3 @@
 ﻿# 预编译
-add_compile_definitions(BASE64_EXPORT)
+add_compile_definitions(ENDECODE_EXPORT)
 CreateTarget(base64 "Dll" "unknown")

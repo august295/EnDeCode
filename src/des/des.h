@@ -48,7 +48,7 @@ void key_schedule(uint64_t* key, uint64_t* next_key, int round);
  */
 void rounds(uint64_t* data, uint64_t key);
 
-#include "des_export.hpp"
+#include "common/endecode_export.hpp"
 #ifdef __cplusplus
 extern "C"
 {
@@ -57,7 +57,7 @@ extern "C"
  * @brief 生成密钥
  * @param key          [out] 密钥
  */
-DES_API void genkey(uint64_t* key);
+ENDECODE_API void genkey(uint64_t* key);
 
 /**
  * @brief 以 ECB(电子密码本) 模式和 0 填充方式进行加密和解密
@@ -67,7 +67,7 @@ DES_API void genkey(uint64_t* key);
  * @param key          密钥
  * @param output       密文
  */
-DES_API int des_ecb_zero(char* input, int input_len, bool encrypt, uint64_t key, char* output);
+ENDECODE_API int des_ecb_zero(char* input, int input_len, bool encrypt, uint64_t key, char* output);
 
 #ifdef __cplusplus
 }

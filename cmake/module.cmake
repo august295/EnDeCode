@@ -24,6 +24,9 @@ macro(CreateTarget ProjectName Type Group)
     elseif(CMAKE_CXX_PLATFORM_ID MATCHES "Linux")
     endif()
 
+    # 包含头文件
+    include_directories(${ROOT_DIR}/src)
+
     # 生成项目
     if(${Type} STREQUAL "Exe")
         # 生成可执行文件

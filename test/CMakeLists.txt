@@ -1,5 +1,4 @@
-﻿include_directories(${ROOT_DIR}/src)
-set(ProjectName "test")
+﻿set(ProjectName "test")
 CreateTarget(${ProjectName} "Exe" "test")
 target_link_libraries(${ProjectName} gtest gtest_main)
 
