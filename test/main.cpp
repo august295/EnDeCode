@@ -4,6 +4,7 @@
 #include "test_crc.h"
 #include "test_des.h"
 #include "test_md5.h"
+#include "test_snow_3g.h"
 
 int main(int argc, char** argv)
 {

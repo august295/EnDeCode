@@ -33,15 +33,26 @@ git clone --recursive https://github.com/august295/EnDeCode.git
 
 ### 3.1. 对称密码算法（Symmetric-key Algorithm）
 
-- [x] DES
+- [ ] A5-1
+- [ ] RC4
+- [x] SNOW_3GPP
+- [ ] ZUC
+- [x] DES/3DES
+- [ ] AES
+- [ ] SM4(ECB, CBC, CFB, OFB, CTR)
 
 ### 3.2. 非对称密码算法（Asymmetric-key Algorithm）
 
 - [ ] RSA
+- [ ] ECC
+- [ ] SM2
+- [ ] SM9
 
 ### 3.3. 摘要算法（Digest Algorithm）
 
 - [x] MD5
+- [ ] SH!-1/SHA-2
+- [ ] SHA-3
 - [ ] SM3
 
 ### 3.4. 未分类
