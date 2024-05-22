@@ -51,7 +51,7 @@ git clone --recursive https://github.com/august295/EnDeCode.git
 ### 3.3. 摘要算法（Digest Algorithm）
 
 - [x] MD5
-- [ ] SH!-1/SHA-2
+- [ ] SHA-1/SHA-2
 - [ ] SHA-3
 - [ ] SM3
 

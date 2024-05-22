@@ -3,98 +3,55 @@
 
 #include <gtest/gtest.h>
 
-#include "snow_3g/snow_3g.h"
+#include "snow_3g/uea2.h"
+#include "snow_3g/uia2.h"
 
-TEST(test_snow_3g, case1)
+bool my_equal(uint8_t* data, uint8_t* temp, uint32_t n)
 {
-    uint32_t k[4]  = {0};
-    uint32_t IV[4] = {0};
-    int      n     = 2;
-    uint32_t ks[2] = {0};
-
-    k[0] = 0x2BD6459F;
-    k[1] = 0x82C5B300;
-    k[2] = 0x952C4910;
-    k[3] = 0x4881FF48;
-
-    IV[0] = 0xEA024714;
-    IV[1] = 0xAD5C4D84;
-    IV[2] = 0xDF1F9B25;
-    IV[3] = 0x1C0BF45F;
-
-    snow_3g(k, IV, n, ks);
-
-    EXPECT_EQ(0xABEE9704, ks[0]);
-    EXPECT_EQ(0x7AC31373, ks[1]);
+    for (size_t i = 0; i < n; i++)
+    {
+        if (data[i] != temp[i])
+        {
+            return false;
+        }
+    }
+    return true;
 }
 
-TEST(test_snow_3g, case2)
+TEST(test_snow_3g, uea2)
 {
-    uint32_t k[4]  = {0};
-    uint32_t IV[4] = {0};
-    int      n     = 2;
-    uint32_t ks[2] = {0};
+    // 最好是 32bit 倍数，算法内部没有实现补位
+    uint8_t  key[16]  = {0x5A, 0xCB, 0x1D, 0x64, 0x4C, 0x0D, 0x51, 0x20, 0x4E, 0xA5, 0xF1, 0x45, 0x10, 0x10, 0xD8, 0x52};
+    uint32_t count    = 0xFA556B26;
+    uint32_t bearer   = 0x03;
+    uint32_t dir      = 0x01;
+    uint32_t size     = 16;
+    uint8_t  data[16] = {0xAD, 0x9C, 0x44, 0x1F, 0x89, 0x0B, 0x38, 0xC4, 0x57, 0xA4, 0x9D, 0x42, 0x14, 0x07, 0xE8};
+    uint32_t length   = 120;
 
-    k[0] = 0x8CE33E2C;
-    k[1] = 0xC3C0B5FC;
-    k[2] = 0x1F3DE8A6;
-    k[3] = 0xDC66B1F3;
+    uint8_t temp[16] = {0};
+    memcpy(temp, data, size);
+    snow_3g_uea2(key, count, bearer, dir, temp, length);
 
-    IV[0] = 0xD3C5D592;
-    IV[1] = 0x327FB11C;
-    IV[2] = 0xDE551988;
-    IV[3] = 0xCEB2F9B7;
-
-    snow_3g(k, IV, n, ks);
-
-    EXPECT_EQ(0xEFF8A342, ks[0]);
-    EXPECT_EQ(0xF751480F, ks[1]);
+    snow_3g_uea2(key, count, bearer, dir, temp, length);
+    EXPECT_TRUE(my_equal(data, temp, size));
 }
 
-TEST(test_snow_3g, case3)
+TEST(test_snow_3g, uia2)
 {
-    uint32_t k[4]  = {0};
-    uint32_t IV[4] = {0};
-    int      n     = 2;
-    uint32_t ks[2] = {0};
+    // 最好是 32bit 倍数，算法内部没有实现补位
+    uint8_t  key[16]  = {0x2B, 0xD6, 0x45, 0x9F, 0x82, 0xC5, 0xB3, 0x00, 0x95, 0x2C, 0x49, 0x10, 0x48, 0x81, 0xFF, 0x48};
+    uint32_t count    = 0x38A6F056;
+    uint32_t fresh    = 0x05D2EC49;
+    uint32_t dir      = 0x01;
+    uint32_t size     = 24;
+    uint8_t  data[24] = {0x6B, 0x22, 0x77, 0x37, 0x29, 0x6F, 0x39, 0x3C, 0x80, 0x79, 0x35, 0x3E, 0xDC, 0x87, 0xE2, 0xE8, 0x05, 0xD2, 0xEC, 0x49, 0xA4, 0xF2, 0xD8, 0xE0};
+    uint32_t length   = 189;
 
-    k[0] = 0x4035C668;
-    k[1] = 0x0AF8C6D1;
-    k[2] = 0xA8FF8667;
-    k[3] = 0xB1714013;
+    uint8_t temp[24] = {0};
+    memcpy(temp, data, size);
+    snow_3g_uia2(key, count, fresh, dir, temp, length);
 
-    IV[0] = 0x62A54098;
-    IV[1] = 0x1BA6F9B7;
-    IV[2] = 0x4592B0E7;
-    IV[3] = 0x8690F71B;
-
-    snow_3g(k, IV, n, ks);
-
-    EXPECT_EQ(0xA8C874A9, ks[0]);
-    EXPECT_EQ(0x7AE7C4F8, ks[1]);
-}
-
-TEST(test_snow_3g, case4)
-{
-    uint32_t k[4]     = {0};
-    uint32_t IV[4]    = {0};
-    int      n        = 2500;
-    uint32_t ks[2500] = {0};
-
-    k[0] = 0x0DED7263;
-    k[1] = 0x109CF92E;
-    k[2] = 0x3352255A;
-    k[3] = 0x140E0F76;
-
-    IV[0] = 0x6B68079A;
-    IV[1] = 0x41A7C4C9;
-    IV[2] = 0x1BEFD79F;
-    IV[3] = 0x7FDCC233;
-
-    snow_3g(k, IV, n, ks);
-
-    EXPECT_EQ(0xD712C05C, ks[0]);
-    EXPECT_EQ(0xA937C2A6, ks[1]);
-    EXPECT_EQ(0xEB7EAAE3, ks[2]);
-    EXPECT_EQ(0x9C0DB3AA, ks[2499]);
+    snow_3g_uia2(key, count, fresh, dir, temp, length);
+    EXPECT_TRUE(my_equal(data, temp, size));
 }

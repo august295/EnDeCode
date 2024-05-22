@@ -10,7 +10,7 @@
 
 
 
-## 2. 原理[^1]
+## 2. SNOW原理[^1]
 
 ### 2.1. Functions used in different Components of SNOW 3G
 
@@ -103,6 +103,14 @@ $$
 
 
 
+## 3. UEA2/UIA2原理[^2]
+
+
+
+
+
 # 参考
 
 [^1]: [snow3gspec.pdf](https://www.gsma.com/security/wp-content/uploads/2019/05/snow3gspec.pdf)
+[^2]: [uea2uia2d1v21.pdf](https://www.gsma.com/security/wp-content/uploads/2019/05/uea2uia2d1v21.pdf)
+

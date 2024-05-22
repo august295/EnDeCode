@@ -100,8 +100,10 @@ uint8_t MULxPOW(uint8_t V, uint8_t i, uint8_t c)
  */
 uint32_t MULalpha(uint8_t c)
 {
-    return ((((uint32_t)MULxPOW(c, 23, 0xa9)) << 24) | (((uint32_t)MULxPOW(c, 245, 0xa9)) << 16) |
-            (((uint32_t)MULxPOW(c, 48, 0xa9)) << 8) | (((uint32_t)MULxPOW(c, 239, 0xa9))));
+    return ((((uint32_t)MULxPOW(c, 23, 0xa9)) << 24) |
+            (((uint32_t)MULxPOW(c, 245, 0xa9)) << 16) |
+            (((uint32_t)MULxPOW(c, 48, 0xa9)) << 8) |
+            (((uint32_t)MULxPOW(c, 239, 0xa9))));
 }
 
 /* The function DIV alpha.
@@ -111,8 +113,10 @@ uint32_t MULalpha(uint8_t c)
  */
 uint32_t DIValpha(uint8_t c)
 {
-    return ((((uint32_t)MULxPOW(c, 16, 0xa9)) << 24) | (((uint32_t)MULxPOW(c, 39, 0xa9)) << 16) |
-            (((uint32_t)MULxPOW(c, 6, 0xa9)) << 8) | (((uint32_t)MULxPOW(c, 64, 0xa9))));
+    return ((((uint32_t)MULxPOW(c, 16, 0xa9)) << 24) |
+            (((uint32_t)MULxPOW(c, 39, 0xa9)) << 16) |
+            (((uint32_t)MULxPOW(c, 6, 0xa9)) << 8) |
+            (((uint32_t)MULxPOW(c, 64, 0xa9))));
 }
 
 /* The 32x32-bit S-Box S1
@@ -170,8 +174,12 @@ uint32_t S2(uint32_t w)
  */
 void ClockLFSRInitializationMode(uint32_t F)
 {
-    uint32_t v = (((LFSR_S0 << 8) & 0xffffff00) ^ (MULalpha((uint8_t)((LFSR_S0 >> 24) & 0xff))) ^ (LFSR_S2) ^
-                  ((LFSR_S11 >> 8) & 0x00ffffff) ^ (DIValpha((uint8_t)((LFSR_S11) & 0xff))) ^ (F));
+    uint32_t v = (((LFSR_S0 << 8) & 0xffffff00) ^
+                  (MULalpha((uint8_t)((LFSR_S0 >> 24) & 0xff))) ^
+                  (LFSR_S2) ^
+                  ((LFSR_S11 >> 8) & 0x00ffffff) ^
+                  (DIValpha((uint8_t)((LFSR_S11) & 0xff))) ^
+                  (F));
 
     LFSR_S0  = LFSR_S1;
     LFSR_S1  = LFSR_S2;
@@ -197,24 +205,28 @@ void ClockLFSRInitializationMode(uint32_t F)
  */
 void ClockLFSRKeyStreamMode()
 {
-    uint32_t v = (((LFSR_S0 << 8) & 0xffffff00) ^ (MULalpha((uint8_t)((LFSR_S0 >> 24) & 0xff))) ^ (LFSR_S2) ^
-                  ((LFSR_S11 >> 8) & 0x00ffffff) ^ (DIValpha((uint8_t)((LFSR_S11) & 0xff))));
-    LFSR_S0    = LFSR_S1;
-    LFSR_S1    = LFSR_S2;
-    LFSR_S2    = LFSR_S3;
-    LFSR_S3    = LFSR_S4;
-    LFSR_S4    = LFSR_S5;
-    LFSR_S5    = LFSR_S6;
-    LFSR_S6    = LFSR_S7;
-    LFSR_S7    = LFSR_S8;
-    LFSR_S8    = LFSR_S9;
-    LFSR_S9    = LFSR_S10;
-    LFSR_S10   = LFSR_S11;
-    LFSR_S11   = LFSR_S12;
-    LFSR_S12   = LFSR_S13;
-    LFSR_S13   = LFSR_S14;
-    LFSR_S14   = LFSR_S15;
-    LFSR_S15   = v;
+    uint32_t v = (((LFSR_S0 << 8) & 0xffffff00) ^
+                  (MULalpha((uint8_t)((LFSR_S0 >> 24) & 0xff))) ^
+                  (LFSR_S2) ^
+                  ((LFSR_S11 >> 8) & 0x00ffffff) ^
+                  (DIValpha((uint8_t)((LFSR_S11) & 0xff))));
+
+    LFSR_S0  = LFSR_S1;
+    LFSR_S1  = LFSR_S2;
+    LFSR_S2  = LFSR_S3;
+    LFSR_S3  = LFSR_S4;
+    LFSR_S4  = LFSR_S5;
+    LFSR_S5  = LFSR_S6;
+    LFSR_S6  = LFSR_S7;
+    LFSR_S7  = LFSR_S8;
+    LFSR_S8  = LFSR_S9;
+    LFSR_S9  = LFSR_S10;
+    LFSR_S10 = LFSR_S11;
+    LFSR_S11 = LFSR_S12;
+    LFSR_S12 = LFSR_S13;
+    LFSR_S13 = LFSR_S14;
+    LFSR_S14 = LFSR_S15;
+    LFSR_S15 = v;
 }
 
 /* Clocking FSM.
@@ -298,10 +310,4 @@ void GenerateKeystream(uint32_t n, uint32_t* ks)
         /* Note that ks[t] corresponds to z_{t+1} in section 4.2 */
         ClockLFSRKeyStreamMode(); /* STEP 3 */
     }
-}
-
-void snow_3g(uint32_t k[4], uint32_t IV[4], uint32_t n, uint32_t* ks)
-{
-    Initialize(k, IV);
-    GenerateKeystream(n, ks);
 }
