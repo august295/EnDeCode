@@ -7,7 +7,7 @@
 
 TEST(test_des, str_ascii)
 {
-    char* plaintext     = "123456";
+    char* plaintext     = (char*)"123456";
     int   plaintext_len = strlen(plaintext);
 
     uint64_t key = 0;
@@ -24,7 +24,7 @@ TEST(test_des, str_ascii)
 
 TEST(test_des, str_gbk)
 {
-    char* plaintext     = "中文";
+    char* plaintext     = (char*)"中文";
     int   plaintext_len = strlen(plaintext);
 
     uint64_t key = 0;

@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include "test_a5_1.h"
 #include "test_base64.h"
 #include "test_crc.h"
 #include "test_des.h"

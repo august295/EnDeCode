@@ -1,4 +1,3 @@
-#include <stdlib.h>
 #include <string.h>
 
 #include <gtest/gtest.h>
@@ -6,17 +5,7 @@
 #include "snow_3g/uea2.h"
 #include "snow_3g/uia2.h"
 
-bool my_equal(uint8_t* data, uint8_t* temp, uint32_t n)
-{
-    for (size_t i = 0; i < n; i++)
-    {
-        if (data[i] != temp[i])
-        {
-            return false;
-        }
-    }
-    return true;
-}
+#include "test_util.h"
 
 TEST(test_snow_3g, uea2)
 {

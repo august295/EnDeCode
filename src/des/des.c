@@ -1,3 +1,8 @@
+#include <stdio.h>
+#include <stdlib.h> // rand(), srand()
+#include <string.h> // memcpy()
+#include <time.h>   // time()
+
 #include "des.h"
 
 // Tables bellow can be verified on wikipedia:

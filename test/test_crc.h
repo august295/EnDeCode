@@ -1,4 +1,3 @@
-#include <stdlib.h>
 #include <string.h>
 
 #include <gtest/gtest.h>
@@ -7,7 +6,7 @@
 
 TEST(test_crc, str_ascii_crc_32)
 {
-    char*    plaintext     = "123456";
+    char*    plaintext     = (char*)"123456";
     int      plaintext_len = strlen(plaintext);
     uint32_t ciphertext    = crc32((uint8_t*)plaintext, plaintext_len, crc_32);
     char     result[32]    = {0};
@@ -18,7 +17,7 @@ TEST(test_crc, str_ascii_crc_32)
 
 TEST(test_crc, str_gbk_crc_32)
 {
-    char*    plaintext     = "中文";
+    char*    plaintext     = (char*)"中文";
     int      plaintext_len = strlen(plaintext);
     uint32_t ciphertext    = crc32((uint8_t*)plaintext, plaintext_len, crc_32);
     char     result[32]    = {0};

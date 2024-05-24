@@ -6,6 +6,7 @@ add_subdirectory(crc)
 add_subdirectory(md5)
 
 # symmetric_key 
+add_subdirectory(a5_1)
 add_subdirectory(snow_3g)
 add_subdirectory(des)
 

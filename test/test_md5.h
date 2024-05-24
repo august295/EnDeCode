@@ -7,7 +7,7 @@
 
 TEST(test_md5, str_ascii)
 {
-    char* plaintext     = "123456";
+    char* plaintext     = (char*)"123456";
     int   plaintext_len = strlen(plaintext);
 
     char* ciphertext     = (char*)malloc(sizeof(char) * 32);
@@ -19,7 +19,7 @@ TEST(test_md5, str_ascii)
 
 TEST(test_md5, str_gbk)
 {
-    char* plaintext     = "中文";
+    char* plaintext     = (char*)"中文";
     int   plaintext_len = strlen(plaintext);
 
     char* ciphertext     = (char*)malloc(sizeof(char) * 32);

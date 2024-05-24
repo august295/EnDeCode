@@ -7,7 +7,7 @@
 
 TEST(test_base64, str_ascii)
 {
-    char* plaintext     = "123456";
+    char* plaintext     = (char*)"123456";
     int   plaintext_len = strlen(plaintext);
 
     char* ciphertext     = (char*)malloc(BASE64_ENCODE_OUT_SIZE(plaintext_len));
@@ -24,7 +24,7 @@ TEST(test_base64, str_ascii)
 
 TEST(test_base64, str_gbk)
 {
-    char* plaintext     = "中文";
+    char* plaintext     = (char*)"中文";
     int   plaintext_len = strlen(plaintext);
 
     char* ciphertext     = (char*)malloc(BASE64_ENCODE_OUT_SIZE(plaintext_len));

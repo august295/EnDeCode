@@ -12,8 +12,6 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 /**
  * @brief 将 from 中的第 position_from 位添加到 block 中的第 position_to 位

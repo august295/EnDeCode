@@ -1,6 +1,4 @@
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 #include "uea2.h"
 
@@ -10,12 +8,9 @@
  * Input bearer: 5-bit Bearer identity (in the LSB side).
  * Input dir:1 bit, direction of transmission.
  * Input data: length number of bits, input bit stream.
- * Input length: 32 bit Length, i.e., the number of bits to be encrypted or
- *               decrypted.
- * Output data: Output bit stream. Assumes data is suitably memory
- * allocated.
- * Encrypts/decrypts blocks of data between 1 and 2^32 bits in length as
- * defined in Section 3.
+ * Input length: 32 bit Length, i.e., the number of bits to be encrypted or decrypted.
+ * Output data: Output bit stream. Assumes data is suitably memory allocated.
+ * Encrypts/decrypts blocks of data between 1 and 2^32 bits in length as defined in Section 3.
  */
 void snow_3g_uea2(uint8_t* key, uint32_t count, uint32_t bearer, uint32_t dir, uint8_t* data, uint32_t length)
 {
