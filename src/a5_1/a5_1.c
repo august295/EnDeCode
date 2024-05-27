@@ -175,20 +175,3 @@ void a5_1_generate_keystream(uint8_t key[8], uint32_t frame, uint8_t* AtoBkeystr
     }
 }
 
-void a5_1(uint8_t key[8], uint32_t frame, uint8_t* data)
-{
-    keysetup(key, frame);
-
-    for (int i = 0; i < 114; i++)
-    {
-        a5_1_clock();
-        data[i / 8] ^= getbit() << (7 - (i & 7));
-    }
-
-    for (int i = 0; i < 114; i++)
-    {
-        a5_1_clock();
-        data[i / 8] ^= getbit() << (7 - (i & 7));
-    }
-}
-
