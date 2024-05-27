@@ -174,4 +174,3 @@ void a5_1_generate_keystream(uint8_t key[8], uint32_t frame, uint8_t* AtoBkeystr
         BtoAkeystream[i / 8] |= getbit() << (7 - (i & 7));
     }
 }
-

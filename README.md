@@ -23,9 +23,7 @@
 git clone --recursive https://github.com/august295/EnDeCode.git
 ```
 
-工程使用 `CMake` 构建。
-
-运行以 `test` 作为启动项即可，其他编译生成动态库。
+工程使用 `CMake` 构建。运行以 `test` 作为启动项即可，其他编译生成动态库。
 
 
 
@@ -33,13 +31,13 @@ git clone --recursive https://github.com/august295/EnDeCode.git
 
 ### 3.1. 对称密码算法（Symmetric-key Algorithm）
 
-- [ ] A5-1
-- [ ] RC4
+- [x] A5-1
+- [x] RC4
 - [x] SNOW_3GPP
 - [ ] ZUC
 - [x] DES/3DES
 - [ ] AES
-- [ ] SM4(ECB, CBC, CFB, OFB, CTR)
+- [ ] SM4
 
 ### 3.2. 非对称密码算法（Asymmetric-key Algorithm）
 

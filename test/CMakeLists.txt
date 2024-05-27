@@ -11,5 +11,6 @@ target_link_libraries(${ProjectName} md5)
 
 # symmetric_key 
 target_link_libraries(${ProjectName} a5_1)
+target_link_libraries(${ProjectName} rc4)
 target_link_libraries(${ProjectName} snow_3g)
 target_link_libraries(${ProjectName} des)
