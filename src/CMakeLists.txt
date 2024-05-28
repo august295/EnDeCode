@@ -12,6 +12,7 @@ add_subdirectory(md5)
 add_subdirectory(a5_1)
 add_subdirectory(rc4)
 add_subdirectory(snow_3g)
+add_subdirectory(zuc)
 add_subdirectory(des)
 
 # asymmetric_key

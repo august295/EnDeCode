@@ -23,7 +23,7 @@ TEST(test_snow_3g, uea2)
     snow_3g_uea2(key, count, bearer, dir, temp, length);
 
     snow_3g_uea2(key, count, bearer, dir, temp, length);
-    EXPECT_TRUE(my_equal(data, temp, size));
+    EXPECT_TRUE(my_equal_array_8bit(data, temp, size));
 }
 
 TEST(test_snow_3g, uia2)
@@ -42,5 +42,5 @@ TEST(test_snow_3g, uia2)
     snow_3g_uia2(key, count, fresh, dir, temp, length);
 
     snow_3g_uia2(key, count, fresh, dir, temp, length);
-    EXPECT_TRUE(my_equal(data, temp, size));
+    EXPECT_TRUE(my_equal_array_8bit(data, temp, size));
 }

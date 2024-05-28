@@ -28,6 +28,6 @@ TEST(test_rc4, crypt)
     rc4_crypt(&context, (uint8_t*)cipher, (uint8_t*)plaintext, data_len);
     rc4_crypt(&context, (uint8_t*)cipher2, (uint8_t*)plaintext2, data2_len);
 
-    EXPECT_TRUE(my_equal((uint8_t*)data, (uint8_t*)plaintext, data_len));
-    EXPECT_TRUE(my_equal((uint8_t*)data2, (uint8_t*)plaintext2, data2_len));
+    EXPECT_TRUE(my_equal_array_8bit((uint8_t*)data, (uint8_t*)plaintext, data_len));
+    EXPECT_TRUE(my_equal_array_8bit((uint8_t*)data2, (uint8_t*)plaintext2, data2_len));
 }

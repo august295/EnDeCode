@@ -4,6 +4,7 @@
 #include "test_des.h"
 #include "test_rc4.h"
 #include "test_snow_3g.h"
+#include "test_zuc.h"
 
 #include "test_md5.h"
 

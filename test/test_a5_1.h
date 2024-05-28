@@ -15,6 +15,6 @@ TEST(test_a5_1, keystream)
 
     a5_1_generate_keystream(key, frame, AtoB, BtoA);
 
-    EXPECT_TRUE(my_equal(goodAtoB, AtoB, 15));
-    EXPECT_TRUE(my_equal(goodBtoA, BtoA, 15));
+    EXPECT_TRUE(my_equal_array_8bit(goodAtoB, AtoB, 15));
+    EXPECT_TRUE(my_equal_array_8bit(goodBtoA, BtoA, 15));
 }

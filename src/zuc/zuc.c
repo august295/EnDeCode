@@ -66,7 +66,7 @@ uint8_t S1[256] = {
 }; 
 /* the constants D */ 
 uint32_t EK_d[16] = {
-    0x44D7, 0x26BC, 0x626B, 0x135E, 0x5789, 0x35E2, 0x7135, 0x09A,
+    0x44D7, 0x26BC, 0x626B, 0x135E, 0x5789, 0x35E2, 0x7135, 0x09AF,
     0x4D78, 0x2F13, 0x6BC4, 0x1AF1, 0x5E26, 0x3C4D, 0x789A, 0x47AC,
 };
 // clang-format on
@@ -236,4 +236,13 @@ void GenerateKeystream(uint32_t* pKeystream, int KeystreamLen)
         pKeystream[i] = F() ^ BRC_X3;
         LFSRWithWorkMode();
     }
+}
+
+/* The ZUC algorithm, see ref. [3]*/
+void ZUC(uint8_t* k, uint8_t* iv, uint32_t* ks, int len)
+{
+    /* The initialization of ZUC, see page 17 of ref. [3]*/
+    Initialization(k, iv);
+    /* The procedure of generating keystream of ZUC, see page 18 of ref. [3]*/
+    GenerateKeystream(ks, len);
 }
