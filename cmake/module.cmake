@@ -15,13 +15,12 @@ macro(CreateTarget ProjectName Type Group)
     file(GLOB_RECURSE SOURCE_FILES "${CURRENT_PATH}/*.c" "${CURRENT_PATH}/*.cpp")
 
     # 文件分类
-    if(CMAKE_CXX_PLATFORM_ID MATCHES "Windows")
+    if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
         source_group(TREE ${CURRENT_PATH} PREFIX "Header Files" FILES ${HEADER_FILES})
         source_group(TREE ${CURRENT_PATH} PREFIX "Source Files" FILES ${SOURCE_FILES})
-    elseif(CMAKE_CXX_PLATFORM_ID MATCHES "MinGW")
+    elseif()
         source_group("Header Files" FILES ${HEADER_FILES})
         source_group("Source Files" FILES ${SOURCE_FILES})
-    elseif(CMAKE_CXX_PLATFORM_ID MATCHES "Linux")
     endif()
 
     # 包含头文件
@@ -30,22 +29,32 @@ macro(CreateTarget ProjectName Type Group)
     # 生成项目
     if(${Type} STREQUAL "Exe")
         # 生成可执行文件
-        add_executable(${PROJECT_NAME}
+        add_executable(${ProjectName}
             ${HEADER_FILES} ${SOURCE_FILES}
         )
-        set_target_properties(${PROJECT_NAME} PROPERTIES
+        set_target_properties(${ProjectName} PROPERTIES
             DEBUG_POSTFIX "d"
             VS_DEBUGGER_WORKING_DIRECTORY "$(OutDir)"
         )
     else()
         # 生成链接库
         if(${Type} STREQUAL "Lib")
-            add_library(${PROJECT_NAME} STATIC ${HEADER_FILES} ${SOURCE_FILES})
+            add_library(${ProjectName} STATIC ${HEADER_FILES} ${SOURCE_FILES})
         elseif(${Type} STREQUAL "Dll")
-            add_library(${PROJECT_NAME} SHARED ${HEADER_FILES} ${SOURCE_FILES})
+            add_library(${ProjectName} SHARED ${HEADER_FILES} ${SOURCE_FILES})
         endif()
     endif()
 
     # 项目分组
-    set_property(TARGET ${PROJECT_NAME} PROPERTY FOLDER ${Group})
+    set_property(TARGET ${ProjectName} PROPERTY FOLDER ${Group})
+
+    # 拷贝头文件
+    if(NOT(${Group} STREQUAL "test"))
+        set(TargetInclude "${ROOT_DIR}/include/${ProjectName}/")
+        file(MAKE_DIRECTORY ${TargetInclude})
+        add_custom_command(TARGET ${ProjectName} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy
+            ${HEADER_FILES}
+            ${TargetInclude})
+    endif()
 endmacro()

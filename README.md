@@ -25,6 +25,27 @@ git clone --recursive https://github.com/august295/EnDeCode.git
 
 工程使用 `CMake` 构建。运行以 `test` 作为启动项即可，其他编译生成动态库。
 
+### 2.1. Windows
+
+#### 2.1.1. Visual Studio 2022
+
+双击 `cmake_vs2022.bat`，工程文件在 `build` 目录下。
+
+#### 2.1.2. Qt Creator
+
+`CMakeLists.txt` 以 `Qt Creator` 打开即可创建工程。
+
+### 2.2. Linux
+
+#### 2.2.1. Unix Makefiles
+
+```bash
+# 仅编译测试
+cmake -S"." -B"build" -G"Unix Makefiles"
+cmake --build build -j4
+./build/bin/test
+```
+
 
 
 ## 3. 分类

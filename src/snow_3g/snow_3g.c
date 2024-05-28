@@ -1,4 +1,4 @@
-#include "SNOW_3G.h"
+#include "snow_3g.h"
 
 /* LFSR */
 uint32_t LFSR_S0  = 0x00;
