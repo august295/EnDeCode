@@ -1,28 +1,5 @@
 #include "snow_3g.h"
 
-/* LFSR */
-uint32_t LFSR_S0  = 0x00;
-uint32_t LFSR_S1  = 0x00;
-uint32_t LFSR_S2  = 0x00;
-uint32_t LFSR_S3  = 0x00;
-uint32_t LFSR_S4  = 0x00;
-uint32_t LFSR_S5  = 0x00;
-uint32_t LFSR_S6  = 0x00;
-uint32_t LFSR_S7  = 0x00;
-uint32_t LFSR_S8  = 0x00;
-uint32_t LFSR_S9  = 0x00;
-uint32_t LFSR_S10 = 0x00;
-uint32_t LFSR_S11 = 0x00;
-uint32_t LFSR_S12 = 0x00;
-uint32_t LFSR_S13 = 0x00;
-uint32_t LFSR_S14 = 0x00;
-uint32_t LFSR_S15 = 0x00;
-
-/* FSM */
-uint32_t FSM_R1 = 0x00;
-uint32_t FSM_R2 = 0x00;
-uint32_t FSM_R3 = 0x00;
-
 // clang-format off
 /* Rijndael S-box SR */
 uint8_t SR[256] = {
@@ -172,61 +149,65 @@ uint32_t S2(uint32_t w)
  * Input F: a 32-bit word comes from output of FSM.
  * See section 3.4.4.
  */
-void ClockLFSRInitializationMode(uint32_t F)
+void ClockLFSRInitializationMode(snow_3g_context* ctx, uint32_t F)
 {
-    uint32_t v = (((LFSR_S0 << 8) & 0xffffff00) ^
-                  (MULalpha((uint8_t)((LFSR_S0 >> 24) & 0xff))) ^
-                  (LFSR_S2) ^
-                  ((LFSR_S11 >> 8) & 0x00ffffff) ^
-                  (DIValpha((uint8_t)((LFSR_S11) & 0xff))) ^
+    uint32_t* LFSR_S = ctx->LFSR_S;
+
+    uint32_t v = (((LFSR_S[0] << 8) & 0xffffff00) ^
+                  (MULalpha((uint8_t)((LFSR_S[0] >> 24) & 0xff))) ^
+                  (LFSR_S[2]) ^
+                  ((LFSR_S[11] >> 8) & 0x00ffffff) ^
+                  (DIValpha((uint8_t)((LFSR_S[11]) & 0xff))) ^
                   (F));
 
-    LFSR_S0  = LFSR_S1;
-    LFSR_S1  = LFSR_S2;
-    LFSR_S2  = LFSR_S3;
-    LFSR_S3  = LFSR_S4;
-    LFSR_S4  = LFSR_S5;
-    LFSR_S5  = LFSR_S6;
-    LFSR_S6  = LFSR_S7;
-    LFSR_S7  = LFSR_S8;
-    LFSR_S8  = LFSR_S9;
-    LFSR_S9  = LFSR_S10;
-    LFSR_S10 = LFSR_S11;
-    LFSR_S11 = LFSR_S12;
-    LFSR_S12 = LFSR_S13;
-    LFSR_S13 = LFSR_S14;
-    LFSR_S14 = LFSR_S15;
-    LFSR_S15 = v;
+    LFSR_S[0]  = LFSR_S[1];
+    LFSR_S[1]  = LFSR_S[2];
+    LFSR_S[2]  = LFSR_S[3];
+    LFSR_S[3]  = LFSR_S[4];
+    LFSR_S[4]  = LFSR_S[5];
+    LFSR_S[5]  = LFSR_S[6];
+    LFSR_S[6]  = LFSR_S[7];
+    LFSR_S[7]  = LFSR_S[8];
+    LFSR_S[8]  = LFSR_S[9];
+    LFSR_S[9]  = LFSR_S[10];
+    LFSR_S[10] = LFSR_S[11];
+    LFSR_S[11] = LFSR_S[12];
+    LFSR_S[12] = LFSR_S[13];
+    LFSR_S[13] = LFSR_S[14];
+    LFSR_S[14] = LFSR_S[15];
+    LFSR_S[15] = v;
 }
 
 /* Clocking LFSR in keystream mode.
  * LFSR Registers S0 to S15 are updated as the LFSR receives a single clock.
  * See section 3.4.5.
  */
-void ClockLFSRKeyStreamMode()
+void ClockLFSRKeyStreamMode(snow_3g_context* ctx)
 {
-    uint32_t v = (((LFSR_S0 << 8) & 0xffffff00) ^
-                  (MULalpha((uint8_t)((LFSR_S0 >> 24) & 0xff))) ^
-                  (LFSR_S2) ^
-                  ((LFSR_S11 >> 8) & 0x00ffffff) ^
-                  (DIValpha((uint8_t)((LFSR_S11) & 0xff))));
+    uint32_t* LFSR_S = ctx->LFSR_S;
 
-    LFSR_S0  = LFSR_S1;
-    LFSR_S1  = LFSR_S2;
-    LFSR_S2  = LFSR_S3;
-    LFSR_S3  = LFSR_S4;
-    LFSR_S4  = LFSR_S5;
-    LFSR_S5  = LFSR_S6;
-    LFSR_S6  = LFSR_S7;
-    LFSR_S7  = LFSR_S8;
-    LFSR_S8  = LFSR_S9;
-    LFSR_S9  = LFSR_S10;
-    LFSR_S10 = LFSR_S11;
-    LFSR_S11 = LFSR_S12;
-    LFSR_S12 = LFSR_S13;
-    LFSR_S13 = LFSR_S14;
-    LFSR_S14 = LFSR_S15;
-    LFSR_S15 = v;
+    uint32_t v = (((LFSR_S[0] << 8) & 0xffffff00) ^
+                  (MULalpha((uint8_t)((LFSR_S[0] >> 24) & 0xff))) ^
+                  (LFSR_S[2]) ^
+                  ((LFSR_S[11] >> 8) & 0x00ffffff) ^
+                  (DIValpha((uint8_t)((LFSR_S[11]) & 0xff))));
+
+    LFSR_S[0]  = LFSR_S[1];
+    LFSR_S[1]  = LFSR_S[2];
+    LFSR_S[2]  = LFSR_S[3];
+    LFSR_S[3]  = LFSR_S[4];
+    LFSR_S[4]  = LFSR_S[5];
+    LFSR_S[5]  = LFSR_S[6];
+    LFSR_S[6]  = LFSR_S[7];
+    LFSR_S[7]  = LFSR_S[8];
+    LFSR_S[8]  = LFSR_S[9];
+    LFSR_S[9]  = LFSR_S[10];
+    LFSR_S[10] = LFSR_S[11];
+    LFSR_S[11] = LFSR_S[12];
+    LFSR_S[12] = LFSR_S[13];
+    LFSR_S[13] = LFSR_S[14];
+    LFSR_S[14] = LFSR_S[15];
+    LFSR_S[15] = v;
 }
 
 /* Clocking FSM.
@@ -234,14 +215,16 @@ void ClockLFSRKeyStreamMode()
  * Updates FSM registers R1, R2, R3.
  * See Section 3.4.6.
  */
-uint32_t ClockFSM()
+uint32_t ClockFSM(snow_3g_context* ctx)
 {
-    uint32_t F = ((LFSR_S15 + FSM_R1) & 0xffffffff) ^ FSM_R2;
-    uint32_t r = (FSM_R2 + (FSM_R3 ^ LFSR_S5)) & 0xffffffff;
+    uint32_t* LFSR_S = ctx->LFSR_S;
 
-    FSM_R3 = S2(FSM_R2);
-    FSM_R2 = S1(FSM_R1);
-    FSM_R1 = r;
+    uint32_t F = ((LFSR_S[15] + ctx->FSM_R1) & 0xffffffff) ^ ctx->FSM_R2;
+    uint32_t r = (ctx->FSM_R2 + (ctx->FSM_R3 ^ LFSR_S[5])) & 0xffffffff;
+
+    ctx->FSM_R3 = S2(ctx->FSM_R2);
+    ctx->FSM_R2 = S1(ctx->FSM_R1);
+    ctx->FSM_R1 = r;
 
     return F;
 }
@@ -252,39 +235,37 @@ uint32_t ClockFSM()
  * Output: All the LFSRs and FSM are initialized for key generation.
  * See Section 4.1.
  */
-void Initialize(uint32_t k[4], uint32_t IV[4])
+void Initialize(snow_3g_context* ctx, uint32_t k[4], uint32_t IV[4])
 {
-    uint8_t  i = 0;
-    uint32_t F = 0x0;
+    uint32_t* LFSR_S = ctx->LFSR_S;
+    uint8_t   i      = 0;
+    uint32_t  F      = 0x0;
 
-    LFSR_S15 = k[3] ^ IV[0];
-    LFSR_S14 = k[2];
-    LFSR_S13 = k[1];
-    LFSR_S12 = k[0] ^ IV[1];
+    LFSR_S[15] = k[3] ^ IV[0];
+    LFSR_S[14] = k[2];
+    LFSR_S[13] = k[1];
+    LFSR_S[12] = k[0] ^ IV[1];
+    LFSR_S[11] = k[3] ^ 0xffffffff;
+    LFSR_S[10] = k[2] ^ 0xffffffff ^ IV[2];
+    LFSR_S[9]  = k[1] ^ 0xffffffff ^ IV[3];
+    LFSR_S[8]  = k[0] ^ 0xffffffff;
+    LFSR_S[7]  = k[3];
+    LFSR_S[6]  = k[2];
+    LFSR_S[5]  = k[1];
+    LFSR_S[4]  = k[0];
+    LFSR_S[3]  = k[3] ^ 0xffffffff;
+    LFSR_S[2]  = k[2] ^ 0xffffffff;
+    LFSR_S[1]  = k[1] ^ 0xffffffff;
+    LFSR_S[0]  = k[0] ^ 0xffffffff;
 
-    LFSR_S11 = k[3] ^ 0xffffffff;
-    LFSR_S10 = k[2] ^ 0xffffffff ^ IV[2];
-    LFSR_S9  = k[1] ^ 0xffffffff ^ IV[3];
-    LFSR_S8  = k[0] ^ 0xffffffff;
-
-    LFSR_S7 = k[3];
-    LFSR_S6 = k[2];
-    LFSR_S5 = k[1];
-    LFSR_S4 = k[0];
-
-    LFSR_S3 = k[3] ^ 0xffffffff;
-    LFSR_S2 = k[2] ^ 0xffffffff;
-    LFSR_S1 = k[1] ^ 0xffffffff;
-    LFSR_S0 = k[0] ^ 0xffffffff;
-
-    FSM_R1 = 0x0;
-    FSM_R2 = 0x0;
-    FSM_R3 = 0x0;
+    ctx->FSM_R1 = 0x0;
+    ctx->FSM_R2 = 0x0;
+    ctx->FSM_R3 = 0x0;
 
     for (i = 0; i < 32; i++)
     {
-        F = ClockFSM();
-        ClockLFSRInitializationMode(F);
+        F = ClockFSM(ctx);
+        ClockLFSRInitializationMode(ctx, F);
     }
 }
 
@@ -295,19 +276,26 @@ void Initialize(uint32_t k[4], uint32_t IV[4])
  * output: generated keystream which is filled in z
  * See section 4.2.
  */
-void GenerateKeystream(uint32_t n, uint32_t* ks)
+void GenerateKeystream(snow_3g_context* ctx, uint32_t n, uint32_t* ks)
 {
     uint32_t t = 0;
     uint32_t F = 0x0;
 
-    ClockFSM();               /* Clock FSM once. Discard the output. */
-    ClockLFSRKeyStreamMode(); /* Clock LFSR in keystream mode once. */
+    ClockFSM(ctx);               /* Clock FSM once. Discard the output. */
+    ClockLFSRKeyStreamMode(ctx); /* Clock LFSR in keystream mode once. */
 
     for (t = 0; t < n; t++)
     {
-        F     = ClockFSM();  /* STEP 1 */
-        ks[t] = F ^ LFSR_S0; /* STEP 2 */
+        F     = ClockFSM(ctx);      /* STEP 1 */
+        ks[t] = F ^ ctx->LFSR_S[0]; /* STEP 2 */
         /* Note that ks[t] corresponds to z_{t+1} in section 4.2 */
-        ClockLFSRKeyStreamMode(); /* STEP 3 */
+        ClockLFSRKeyStreamMode(ctx); /* STEP 3 */
     }
+}
+
+void snow_3g(uint32_t k[4], uint32_t IV[4], uint32_t n, uint32_t* z)
+{
+    snow_3g_context ctx = {0};
+    Initialize(&ctx, k, IV);
+    GenerateKeystream(&ctx, n, z);
 }

@@ -12,8 +12,8 @@ TEST(test_zuc, zuc_test1)
     uint8_t  iv[16]        = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
     uint32_t good_ouput[2] = {0x27bede74, 0x018082da};
 
-    uint32_t temp[2] = {0};
-    int      len     = 2;
+    uint32_t     temp[2] = {0};
+    int          len     = 2;
     ZUC(key, iv, temp, len);
     EXPECT_TRUE(my_equal_array_32bit(good_ouput, temp, len));
 }

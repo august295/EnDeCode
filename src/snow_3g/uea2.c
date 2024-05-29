@@ -37,9 +37,8 @@ void snow_3g_uea2(uint8_t* key, uint32_t count, uint32_t bearer, uint32_t dir, u
     IV[0] = IV[2];
 
     /* Run SNOW 3G algorithm to generate sequence of key stream bits KS*/
-    Initialize(K, IV);
     KS = (uint32_t*)malloc(4 * n);
-    GenerateKeystream(n, (uint32_t*)KS);
+    snow_3g(K, IV, n, KS);
 
     /* Exclusive-OR the input data with keystream to generate the output bit stream */
     for (i = 0; i < n; i++)

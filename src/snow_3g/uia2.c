@@ -109,8 +109,7 @@ uint8_t* snow_3g_uia2(uint8_t* key, uint32_t count, uint32_t fresh, uint32_t dir
     z[0] = z[1] = z[2] = z[3] = z[4] = 0;
 
     /* Run SNOW 3G to produce 5 keystream words z_1, z_2, z_3, z_4 and z_5. */
-    Initialize(K, IV);
-    GenerateKeystream(5, z);
+    snow_3g(K, IV, 5, z);
 
     P = (uint64_t)z[0] << 32 | (uint64_t)z[1];
     Q = (uint64_t)z[2] << 32 | (uint64_t)z[3];
