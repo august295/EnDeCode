@@ -55,10 +55,10 @@ cmake --build build -j4
 - [x] A5-1
 - [x] RC4
 - [x] SNOW_3GPP
-- [ ] ZUC
-- [x] DES/3DES
+- [x] ZUC
+- [x] DES
 - [ ] AES
-- [ ] SM4
+- [x] SM4
 
 ### 3.2. 非对称密码算法（Asymmetric-key Algorithm）
 
@@ -74,7 +74,7 @@ cmake --build build -j4
 - [ ] SHA-3
 - [ ] SM3
 
-### 3.4. 未分类
+### 3.4. 未分类（Unknown Algorithm）
 
 - [x] BASE64
 - [x] CRC
