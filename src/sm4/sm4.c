@@ -81,7 +81,7 @@ static const uint8_t s[256] =
  * @param[in] keyLen Length of the key
  * @return Error code
  **/
-int sm4Init(Sm4Context* context, const uint8_t* key, size_t keyLen)
+int sm4Init(Sm4Context* context, const uint8_t* key, uint64_t keyLen)
 {
     uint32_t i;
     uint32_t temp;

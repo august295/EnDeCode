@@ -8,6 +8,7 @@ target_link_libraries(${ProjectName} crc)
 
 # digest
 target_link_libraries(${ProjectName} md5)
+target_link_libraries(${ProjectName} sha1)
 
 # symmetric_key 
 target_link_libraries(${ProjectName} a5_1)

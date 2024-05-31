@@ -23,7 +23,7 @@ typedef struct
  * @param[in]     key            16x8bit 密钥
  * @param[in]     keyLen         密钥长度
  */
-ENDECODE_API int sm4Init(Sm4Context* context, const uint8_t* key, size_t keyLen);
+ENDECODE_API int sm4Init(Sm4Context* context, const uint8_t* key, uint64_t keyLen);
 
 /**
  * @brief 加密

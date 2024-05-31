@@ -1,6 +1,6 @@
 #include "rc4.h"
 
-int rc4_init(Rc4Context* context, const uint8_t* key, size_t length)
+int rc4_init(Rc4Context* context, const uint8_t* key, uint64_t length)
 {
     uint16_t i;
     uint16_t j;
@@ -36,7 +36,7 @@ int rc4_init(Rc4Context* context, const uint8_t* key, size_t length)
     return 0;
 }
 
-void rc4_crypt(Rc4Context* context, const uint8_t* input, uint8_t* output, size_t length)
+void rc4_crypt(Rc4Context* context, const uint8_t* input, uint8_t* output, uint64_t length)
 {
     uint8_t temp;
 

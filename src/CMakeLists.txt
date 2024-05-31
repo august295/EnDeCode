@@ -7,6 +7,7 @@ add_subdirectory(crc)
 
 # digest
 add_subdirectory(md5)
+add_subdirectory(sha1)
 
 # symmetric_key
 add_subdirectory(a5_1)

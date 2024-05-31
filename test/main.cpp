@@ -8,6 +8,7 @@
 #include "test_zuc.h"
 
 #include "test_md5.h"
+#include "test_sha1.h"
 
 #include "test_base64.h"
 #include "test_crc.h"

@@ -3,18 +3,8 @@
 // leftrotate function definition
 #define LEFTROTATE(x, c) (((x) << (c)) | ((x) >> (32 - (c))))
 
-// 四个固定变量
-#define A 0x67452301
-#define B 0xefcdab89
-#define C 0x98badcfe
-#define D 0x10325476
-
 // clang-format off
-/**
- * 常量ti
- * 公式 unsigned int(abs(sin(i+1))*(2pow32))
- */
-const static uint32_t k[64] = {
+const uint32_t T[64] = {
     0xd76aa478, 0xe8c7b756, 0x242070db, 0xc1bdceee, 0xf57c0faf, 0x4787c62a, 0xa8304613, 0xfd469501,
     0x698098d8, 0x8b44f7af, 0xffff5bb1, 0x895cd7be, 0x6b901122, 0xfd987193, 0xa679438e, 0x49b40821,
     0xf61e2562, 0xc040b340, 0x265e5a51, 0xe9b6c7aa, 0xd62f105d, 0x02441453, 0xd8a1e681, 0xe7d3fbc8,
@@ -25,8 +15,7 @@ const static uint32_t k[64] = {
     0x6fa87e4f, 0xfe2ce6e0, 0xa3014314, 0x4e0811a1, 0xf7537e82, 0xbd3af235, 0x2ad7d2bb, 0xeb86d391
 };
 
-// 每次左移位数
-const static uint32_t r[64] = {
+const uint32_t S[64] = {
     7, 12, 17, 22, 7, 12, 17, 22,
     7, 12, 17, 22, 7, 12, 17, 22,
     5, 9, 14, 20, 5, 9, 14, 20,
@@ -36,160 +25,128 @@ const static uint32_t r[64] = {
     6, 10, 15, 21, 6, 10, 15, 21,
     6, 10, 15, 21, 6, 10, 15, 21
 };
+
+const uint8_t md5_padding[64] = {
+    0x80, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0
+};
 // clang-format on
 
-void to_bytes(const uint32_t val, uint8_t* bytes)
+void md5_init(md5_context* ctx)
 {
-    bytes[0] = (uint8_t)val;
-    bytes[1] = (uint8_t)(val >> 8);
-    bytes[2] = (uint8_t)(val >> 16);
-    bytes[3] = (uint8_t)(val >> 24);
+    ctx->state[0] = 0x67452301;
+    ctx->state[1] = 0xefcdab89;
+    ctx->state[2] = 0x98badcfe;
+    ctx->state[3] = 0x10325476;
+
+    ctx->count[0] = 0;
+    ctx->count[1] = 0;
 }
 
-void to_int32(const uint8_t* bytes, uint32_t* val)
+void md5_transform(md5_context* ctx, const uint8_t* block)
 {
-    *val = (uint32_t)bytes[0] | ((uint32_t)bytes[1] << 8) | ((uint32_t)bytes[2] << 16) | ((uint32_t)bytes[3] << 24);
-}
+    uint32_t a = ctx->state[0], b = ctx->state[1], c = ctx->state[2], d = ctx->state[3];
+    uint32_t X[16];
 
-void md5(const uint8_t* initial_msg, uint64_t initial_len, uint8_t* digest)
-{
-    // 初始化
-    uint32_t h0 = A;
-    uint32_t h1 = B;
-    uint32_t h2 = C;
-    uint32_t h3 = D;
+    // Convert block (64 bytes) to 16 uint32_t
+    for (int i = 0; i < 16; ++i)
+        X[i] = (block[i * 4]) | (block[i * 4 + 1] << 8) | (block[i * 4 + 2] << 16) | (block[i * 4 + 3] << 24);
 
-    // Message (to prepare)
-    uint8_t* msg = NULL;
-
-    uint64_t new_len, offset;
-    uint32_t w[16];
-    uint32_t a, b, c, d, i, f, g, temp;
-
-    /**
-     * 填充函数
-     *  - 处理后应满足 bits ≡ 448 (mod512)，字节就是 bytes ≡ 56 (mode64)
-     *  - 填充方式为先加一个 1，其它位补零
-     *  - 最后加上 64 位的原来长度
-     */
-    new_len = initial_len + 1;
-    while (new_len % (512 / 8) != 448 / 8)
+    for (int i = 0; i < 64; ++i)
     {
-        new_len++;
-    }
-
-    msg = (uint8_t*)malloc(new_len + 8);
-    memcpy(msg, initial_msg, initial_len);
-    // 首部填充 "1"
-    msg[initial_len] = 0x80;
-    // 后面填充 "0"
-    for (offset = initial_len + 1; offset < new_len; offset++)
-    {
-        msg[offset] = 0;
-    }
-
-    // 在缓冲区末尾附加 len 长度，以 bit 为单位
-    to_bytes(initial_len * 8, msg + new_len);
-    // initial_len>>29 == initial_len*8>>32, 但是防止溢出
-    to_bytes(initial_len >> 29, msg + new_len + 4);
-
-    // 处理 512bits
-    for (offset = 0; offset < new_len; offset += (512 / 8))
-    {
-        // 512bits 分为 16*32 bits, 16 组
-        for (i = 0; i < 16; i++)
+        uint32_t f, g;
+        if (i < 16)
         {
-            to_int32(msg + offset + i * 4, &w[i]);
+            f = (b & c) | ((~b) & d);
+            g = i;
         }
-        // 赋值
-        a = h0;
-        b = h1;
-        c = h2;
-        d = h3;
-
-        // 主循环
-        for (i = 0; i < 64; i++)
+        else if (i < 32)
         {
-            if (i < 16)
-            {
-                f = (b & c) | ((~b) & d);
-                g = i;
-            }
-            else if (i < 32)
-            {
-                f = (d & b) | ((~d) & c);
-                g = (5 * i + 1) % 16;
-            }
-            else if (i < 48)
-            {
-                f = b ^ c ^ d;
-                g = (3 * i + 5) % 16;
-            }
-            else
-            {
-                f = c ^ (b | (~d));
-                g = (7 * i) % 16;
-            }
-
-            temp = d;
-            d    = c;
-            c    = b;
-            b    = b + LEFTROTATE((a + f + k[i] + w[g]), r[i]);
-            a    = temp;
+            f = (d & b) | ((~d) & c);
+            g = (5 * i + 1) % 16;
+        }
+        else if (i < 48)
+        {
+            f = b ^ c ^ d;
+            g = (3 * i + 5) % 16;
+        }
+        else
+        {
+            f = c ^ (b | (~d));
+            g = (7 * i) % 16;
         }
 
-        // 更新
-        h0 += a;
-        h1 += b;
-        h2 += c;
-        h3 += d;
+        uint32_t temp = d;
+        d             = c;
+        c             = b;
+        b             = b + LEFTROTATE((a + f + T[i] + X[g]), S[i]);
+        a             = temp;
     }
 
-    free(msg);
+    ctx->state[0] += a;
+    ctx->state[1] += b;
+    ctx->state[2] += c;
+    ctx->state[3] += d;
 
-    // 32 bit 转 4*8 bit，依次存储数据
-    to_bytes(h0, digest);
-    to_bytes(h1, digest + 4);
-    to_bytes(h2, digest + 8);
-    to_bytes(h3, digest + 12);
+    // Clear sensitive information
+    memset(X, 0, sizeof(X));
 }
 
-void hex_to_ascii(const uint8_t* pHex, int flag, uint8_t* pAscii, int nLen)
+void md5_update(md5_context* ctx, const uint8_t* input, uint64_t inputlen)
 {
-    uint8_t Nibble[2];
-    for (int i = 0; i < nLen; i++)
+    uint32_t i, index, partlen;
+
+    index = (ctx->count[0] >> 3) & 0x3F;
+
+    if ((ctx->count[0] += inputlen << 3) < (inputlen << 3))
+        ctx->count[1]++;
+    ctx->count[1] += (inputlen >> 29);
+
+    partlen = 64 - index;
+
+    if (inputlen >= partlen)
     {
-        Nibble[0] = (pHex[i] & 0xF0) >> 4;
-        Nibble[1] = pHex[i] & 0x0F;
-        for (int j = 0; j < 2; j++)
-        {
-            if (Nibble[j] < 10)
-            {
-                Nibble[j] += 0x30;
-            }
-            else
-            {
-                if (Nibble[j] < 16)
-                {
-                    if (flag == 0)
-                    {
-                        Nibble[j] = Nibble[j] - 10 + 'A';
-                    }
-                    else
-                    {
-                        Nibble[j] = Nibble[j] - 10 + 'a';
-                    }
-                }
-            }
-            *pAscii++ = Nibble[j];
-        }
+        memcpy(&ctx->buffer[index], input, partlen);
+        md5_transform(ctx, ctx->buffer);
+
+        for (i = partlen; i + 63 < inputlen; i += 64)
+            md5_transform(ctx, &input[i]);
+
+        index = 0;
     }
-    *pAscii++ = '\0';
+    else
+        i = 0;
+
+    memcpy(&ctx->buffer[index], &input[i], inputlen - i);
 }
 
-void md5_ascii(const uint8_t* plaintext, uint64_t plaintext_len, int flag, uint8_t* ciphertext)
+void md5_final(md5_context* ctx, uint8_t* digest)
 {
-    uint8_t result[16] = {0};
-    md5(plaintext, plaintext_len, result);
-    hex_to_ascii(result, flag, ciphertext, 16);
+    unsigned char bits[8];
+    uint32_t      index, padlen;
+
+    md5_encode(bits, ctx->count, 8);
+
+    index  = (ctx->count[0] >> 3) & 0x3f;
+    padlen = (index < 56) ? (56 - index) : (120 - index);
+    md5_update(ctx, md5_padding, padlen);
+
+    md5_update(ctx, bits, 8);
+
+    md5_encode(digest, ctx->state, 16);
+    memset(ctx, 0, sizeof(*ctx));
+}
+
+void md5(const uint8_t* data, uint64_t data_len, uint8_t* digest)
+{
+    md5_context context;
+    md5_init(&context);
+    md5_update(&context, data, data_len);
+    md5_final(&context, digest);
 }

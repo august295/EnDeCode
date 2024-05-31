@@ -392,7 +392,7 @@ int des_ecb_zero(char* input, int input_len, bool encrypt, uint64_t key, char* o
 
     // 3. 16 Rounds of enc/decryption
     int      output_len = 0;
-    size_t   amount     = 0;
+    uint64_t   amount     = 0;
     uint64_t data       = 0;
 
     for (int i = 0; i < input_len; i += 8)

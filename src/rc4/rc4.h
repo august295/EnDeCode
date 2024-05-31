@@ -1,7 +1,7 @@
 #ifndef __RC4_H__
 #define __RC4_H__
 
-#include <stddef.h> // size_t
+#include <stddef.h>
 #include <stdint.h>
 
 /**
@@ -26,7 +26,7 @@ extern "C"
  * @param[in] length    Length of the key
  * @return Error code
  **/
-ENDECODE_API int rc4_init(Rc4Context* context, const uint8_t* key, size_t length);
+ENDECODE_API int rc4_init(Rc4Context* context, const uint8_t* key, uint64_t length);
 
 /**
  * @brief Encrypt/decrypt data with the RC4 algorithm
@@ -35,7 +35,7 @@ ENDECODE_API int rc4_init(Rc4Context* context, const uint8_t* key, size_t length
  * @param[in] output    Pointer to the resulting data (optional)
  * @param[in] length    Length of the input data
  **/
-ENDECODE_API void rc4_crypt(Rc4Context* context, const uint8_t* input, uint8_t* output, size_t length);
+ENDECODE_API void rc4_crypt(Rc4Context* context, const uint8_t* input, uint8_t* output, uint64_t length);
 
 #ifdef __cplusplus
 }
