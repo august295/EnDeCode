@@ -1,4 +1,4 @@
-#include "md5.h"
+#include "md5/md5.h"
 
 // leftrotate function definition
 #define LEFTROTATE(x, c) (((x) << (c)) | ((x) >> (32 - (c))))
@@ -38,6 +38,29 @@ const uint8_t md5_padding[64] = {
 };
 // clang-format on
 
+static void md5_32bit8(uint8_t* output, const uint32_t* input, int len)
+{
+    int i, j;
+    for (i = 0, j = 0; j < len; i++, j += 4)
+    {
+        output[j]     = (uint8_t)(input[i] & 0xff);
+        output[j + 1] = (uint8_t)((input[i] >> 8) & 0xff);
+        output[j + 2] = (uint8_t)((input[i] >> 16) & 0xff);
+        output[j + 3] = (uint8_t)((input[i] >> 24) & 0xff);
+    }
+}
+
+static void md5_8bit32(uint32_t* output, const uint8_t* input, int len)
+{
+    int i, j;
+
+    for (i = 0, j = 0; j < len; i++, j += 4)
+        output[i] = ((uint32_t)input[j]) |
+                    (((uint32_t)input[j + 1]) << 8) |
+                    (((uint32_t)input[j + 2]) << 16) |
+                    (((uint32_t)input[j + 3]) << 24);
+}
+
 void md5_init(md5_context* ctx)
 {
     ctx->state[0] = 0x67452301;
@@ -52,11 +75,10 @@ void md5_init(md5_context* ctx)
 void md5_transform(md5_context* ctx, const uint8_t* block)
 {
     uint32_t a = ctx->state[0], b = ctx->state[1], c = ctx->state[2], d = ctx->state[3];
-    uint32_t X[16];
+    uint32_t X[16] = {0};
 
     // Convert block (64 bytes) to 16 uint32_t
-    for (int i = 0; i < 16; ++i)
-        X[i] = (block[i * 4]) | (block[i * 4 + 1] << 8) | (block[i * 4 + 2] << 16) | (block[i * 4 + 3] << 24);
+    md5_8bit32(X, block, 64);
 
     for (int i = 0; i < 64; ++i)
     {
@@ -93,9 +115,6 @@ void md5_transform(md5_context* ctx, const uint8_t* block)
     ctx->state[1] += b;
     ctx->state[2] += c;
     ctx->state[3] += d;
-
-    // Clear sensitive information
-    memset(X, 0, sizeof(X));
 }
 
 void md5_update(md5_context* ctx, const uint8_t* input, uint64_t inputlen)
@@ -131,15 +150,12 @@ void md5_final(md5_context* ctx, uint8_t* digest)
     unsigned char bits[8];
     uint32_t      index, padlen;
 
-    md5_encode(bits, ctx->count, 8);
-
+    md5_32bit8(bits, ctx->count, 8);
     index  = (ctx->count[0] >> 3) & 0x3f;
     padlen = (index < 56) ? (56 - index) : (120 - index);
     md5_update(ctx, md5_padding, padlen);
-
     md5_update(ctx, bits, 8);
-
-    md5_encode(digest, ctx->state, 16);
+    md5_32bit8(digest, ctx->state, 16);
     memset(ctx, 0, sizeof(*ctx));
 }
 

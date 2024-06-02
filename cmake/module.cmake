@@ -51,10 +51,8 @@ macro(CreateTarget ProjectName Type Group)
     # 拷贝头文件
     if(NOT(${Group} STREQUAL "test"))
         set(TargetInclude "${ROOT_DIR}/include/${ProjectName}/")
-        file(MAKE_DIRECTORY ${TargetInclude})
         add_custom_command(TARGET ${ProjectName} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy
-            ${HEADER_FILES}
-            ${TargetInclude})
+            COMMAND ${CMAKE_COMMAND} -E make_directory ${TargetInclude}
+            COMMAND ${CMAKE_COMMAND} -E copy ${HEADER_FILES} ${TargetInclude})
     endif()
 endmacro()

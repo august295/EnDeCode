@@ -9,6 +9,9 @@
 
 #include "test_md5.h"
 #include "test_sha1.h"
+#include "test_sha2.h"
+#include "test_sha3.h"
+#include "test_sm3.h"
 
 #include "test_base64.h"
 #include "test_crc.h"

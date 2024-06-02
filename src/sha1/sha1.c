@@ -1,7 +1,7 @@
 #include "sha1/sha1.h"
 
 // 位循环左移
-#define rol(value, bits) (((value) << (bits)) | ((value) >> (32 - (bits))))
+#define ROTL32(value, bits) (((value) << (bits)) | ((value) >> (32 - (bits))))
 
 // 初始化 SHA-1 上下文
 void SHA1Init(sha1_context* context)
@@ -27,7 +27,7 @@ void SHA1Transform(uint32_t* state, const uint8_t* buffer)
 
     // 扩展消息
     for (i = 16; i < 80; ++i)
-        m[i] = rol(m[i - 3] ^ m[i - 8] ^ m[i - 14] ^ m[i - 16], 1);
+        m[i] = ROTL32(m[i - 3] ^ m[i - 8] ^ m[i - 14] ^ m[i - 16], 1);
 
     a = state[0];
     b = state[1];
@@ -39,17 +39,17 @@ void SHA1Transform(uint32_t* state, const uint8_t* buffer)
     for (i = 0; i < 80; ++i)
     {
         if (i < 20)
-            t = rol(a, 5) + ((b & c) | (~b & d)) + e + m[i] + 0x5A827999;
+            t = ROTL32(a, 5) + ((b & c) | (~b & d)) + e + m[i] + 0x5A827999;
         else if (i < 40)
-            t = rol(a, 5) + (b ^ c ^ d) + e + m[i] + 0x6ED9EBA1;
+            t = ROTL32(a, 5) + (b ^ c ^ d) + e + m[i] + 0x6ED9EBA1;
         else if (i < 60)
-            t = rol(a, 5) + ((b & c) | (b & d) | (c & d)) + e + m[i] + 0x8F1BBCDC;
+            t = ROTL32(a, 5) + ((b & c) | (b & d) | (c & d)) + e + m[i] + 0x8F1BBCDC;
         else
-            t = rol(a, 5) + (b ^ c ^ d) + e + m[i] + 0xCA62C1D6;
+            t = ROTL32(a, 5) + (b ^ c ^ d) + e + m[i] + 0xCA62C1D6;
 
         e = d;
         d = c;
-        c = rol(b, 30);
+        c = ROTL32(b, 30);
         b = a;
         a = t;
     }
@@ -110,10 +110,10 @@ void SHA1Final(sha1_context* context, uint8_t* digest)
 }
 
 // 计算 SHA-1 哈希
-void SHA1(const uint8_t* data, uint64_t len, uint8_t* hash)
+void SHA1(const uint8_t* data, uint64_t data_len, uint8_t* digest)
 {
     sha1_context ctx;
     SHA1Init(&ctx);
-    SHA1Update(&ctx, data, len);
-    SHA1Final(&ctx, hash);
+    SHA1Update(&ctx, data, data_len);
+    SHA1Final(&ctx, digest);
 }

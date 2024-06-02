@@ -70,9 +70,10 @@ cmake --build build -j4
 ### 3.3. 摘要算法（Digest Algorithm）
 
 - [x] MD5
-- [x] SHA-1
-- [ ] SHA-3
-- [ ] SM3
+- [x] SHA1
+- [x] SHA2(SHA2_256)
+- [x] SHA3(SHA3_256)
+- [x] SM3
 
 ### 3.4. 未分类（Unknown Algorithm）
 

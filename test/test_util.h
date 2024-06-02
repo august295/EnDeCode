@@ -51,6 +51,94 @@ bool my_equal_array_32bit_1bit(uint32_t* data, uint32_t* temp, uint32_t len_bit)
 }
 
 /**
+ * @brief 32bit 转 8bit
+ * @param[out]    output         8bit 数据
+ * @param[in]     input          32bit 数据
+ * @param[in]     len            32bit 数据长度
+ * @param[in]     little         1-小端，0-大端
+ */
+void bit32_to_8(uint8_t* output, const uint32_t* input, int len, int little)
+{
+    int i, j;
+    for (i = 0, j = 0; j < len; i++, j += 4)
+    {
+        if (little)
+        {
+            output[j]     = (uint8_t)((input[i] >> 0) & 0xff);
+            output[j + 1] = (uint8_t)((input[i] >> 8) & 0xff);
+            output[j + 2] = (uint8_t)((input[i] >> 16) & 0xff);
+            output[j + 3] = (uint8_t)((input[i] >> 24) & 0xff);
+        }
+        else
+        {
+            output[j]     = (uint8_t)((input[i] >> 24) & 0xff);
+            output[j + 1] = (uint8_t)((input[i] >> 16) & 0xff);
+            output[j + 2] = (uint8_t)((input[i] >> 8) & 0xff);
+            output[j + 3] = (uint8_t)((input[i] >> 0) & 0xff);
+        }
+    }
+}
+
+/**
+ * @brief 8bit 转 32bit
+ * @param[out]    output         32bit 数据
+ * @param[in]     input          8bit 数据
+ * @param[in]     len            8bit 数据长度
+ * @param[in]     little         1-小端，0-大端
+ */
+void bit8_to_32(uint32_t* output, const uint8_t* input, int len, int little)
+{
+    int i, j;
+    for (i = 0, j = 0; j < len; i++, j += 4)
+    {
+        if (little)
+        {
+            output[i] = (((uint32_t)input[j]) << 0) |
+                        (((uint32_t)input[j + 1]) << 8) |
+                        (((uint32_t)input[j + 2]) << 16) |
+                        (((uint32_t)input[j + 3]) << 24);
+        }
+        else
+        {
+            output[i] = (((uint32_t)input[j]) << 24) |
+                        (((uint32_t)input[j + 1]) << 16) |
+                        (((uint32_t)input[j + 2]) << 8) |
+                        (((uint32_t)input[j + 3]) << 0);
+        }
+    }
+}
+
+/**
+ * @brief 交换 16 位整数的字节顺序
+ * @param[in]     value          64bit 整数
+ * @return uint16_t              交换后整数
+ */
+uint16_t swap16(uint16_t value)
+{
+    return ((value & 0x00FFU) << 8) | ((value & 0xFF00U) >> 8);
+}
+
+/**
+ * @brief 交换 32 位整数的字节顺序，复用 swap16
+ * @param[in]     value          64bit 整数
+ * @return uint32_t              交换后整数
+ */
+uint32_t swap32(uint32_t value)
+{
+    return ((uint32_t)swap16((uint16_t)(value & 0xFFFFU)) << 16) | (uint32_t)swap16((uint16_t)(value >> 16));
+}
+
+/**
+ * @brief 交换 64 位整数的字节顺序，复用 swap32
+ * @param[in]     value          64bit 整数
+ * @return uint64_t              交换后整数
+ */
+uint64_t swap64(uint64_t value)
+{
+    return ((uint64_t)swap32((uint32_t)(value & 0xFFFFFFFFULL)) << 32) | (uint64_t)swap32((uint32_t)(value >> 32));
+}
+
+/**
  * @brief 16进制转字符串
  * @param[in]     hex            16进制
  * @param[in]     hex_len        16进制长度

@@ -1,4 +1,4 @@
-﻿# cpoy common
+﻿# common
 execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory "${ROOT_DIR}/src/common/" "${ROOT_DIR}/include/common/")
 
 # unknown
@@ -8,6 +8,9 @@ add_subdirectory(crc)
 # digest
 add_subdirectory(md5)
 add_subdirectory(sha1)
+add_subdirectory(sha2)
+add_subdirectory(sha3)
+add_subdirectory(sm3)
 
 # symmetric_key
 add_subdirectory(a5_1)
