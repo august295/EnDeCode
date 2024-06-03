@@ -13,7 +13,7 @@ TEST(test_sm3, test1)
     uint32_t temp[SM3_DIGEST_LENGTH / 4]      = {0};
 
     sm3((uint8_t*)data, data_len, (uint8_t*)hash);
-    bit8_to_32(temp, hash, SM3_BLOCK_SIZE, 0);
+    array_bit8_to_bitn<uint32_t>(hash, temp, SM3_DIGEST_LENGTH / 4, 0);
     EXPECT_TRUE(my_equal_array_32bit(good_hash, temp, SM3_DIGEST_LENGTH / 4));
 }
 
@@ -30,6 +30,6 @@ TEST(test_sm3, test2)
         data[i] = swap32(data[i]);
     }
     sm3((uint8_t*)data, data_len, (uint8_t*)hash);
-    bit8_to_32(temp, hash, SM3_BLOCK_SIZE, 0);
+    array_bit8_to_bitn<uint32_t>(hash, temp, SM3_DIGEST_LENGTH / 4, 0);
     EXPECT_TRUE(my_equal_array_32bit(good_hash, temp, SM3_DIGEST_LENGTH / 4));
 }

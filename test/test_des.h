@@ -1,40 +1,47 @@
-#include <stdlib.h>
 #include <string.h>
 
 #include <gtest/gtest.h>
 
 #include "des/des.h"
 
-TEST(test_des, str_ascii)
+TEST(test_des, test1)
 {
-    char* plaintext     = (char*)"123456";
-    int   plaintext_len = strlen(plaintext);
+    uint64_t plaintext       = *(uint64_t*)"abcdefgh";
+    uint64_t key             = *(uint64_t*)"abcdefgh";
+    char*    good_ciphertext = (char*)"2a8d69de9d5fdff9";
+    uint8_t  temp[8]         = {0};
+    char     temp_str[17]    = {0};
 
-    uint64_t key = 0;
-    genkey(&key);
+    plaintext = swap64(plaintext);
+    key       = swap64(key);
+    // 加密
+    uint64_t ciphertext = des(plaintext, key, 1);
+    bitn_to_bit8<uint64_t>(ciphertext, temp, sizeof(uint64_t), 0);
+    hex_to_ascii(temp, 8, 0, (uint8_t*)temp_str);
+    EXPECT_STREQ(good_ciphertext, temp_str);
 
-    char* ciphertext     = (char*)calloc(plaintext_len + 1, sizeof(char));
-    int   ciphertext_len = des_ecb_zero(plaintext, plaintext_len, true, key, ciphertext);
-
-    char* result     = (char*)calloc(plaintext_len + 1, sizeof(char));
-    int   result_len = des_ecb_zero(ciphertext, ciphertext_len, false, key, result);
-
-    EXPECT_EQ(std::string(plaintext, plaintext_len), std::string(result, result_len));
+    // 解密
+    uint64_t decrypted_text = des(ciphertext, key, 0);
+    EXPECT_EQ(plaintext, decrypted_text);
 }
 
-TEST(test_des, str_gbk)
+TEST(test_des, test2)
 {
-    char* plaintext     = (char*)"中文";
-    int   plaintext_len = strlen(plaintext);
+    uint64_t plaintext       = *(uint64_t*)"12345678";
+    uint64_t key             = *(uint64_t*)"12345678";
+    char*    good_ciphertext = (char*)"96d0028878d58c89";
+    uint8_t  temp[8]         = {0};
+    char     temp_str[17]    = {0};
 
-    uint64_t key = 0;
-    genkey(&key);
+    plaintext = swap64(plaintext);
+    key       = swap64(key);
+    // 加密
+    uint64_t ciphertext = des(plaintext, key, 1);
+    bitn_to_bit8<uint64_t>(ciphertext, temp, sizeof(uint64_t), 0);
+    hex_to_ascii(temp, 8, 0, (uint8_t*)temp_str);
+    EXPECT_STREQ(good_ciphertext, temp_str);
 
-    char* ciphertext     = (char*)calloc(plaintext_len + 1, sizeof(char));
-    int   ciphertext_len = des_ecb_zero(plaintext, plaintext_len, true, key, ciphertext);
-
-    char* result     = (char*)calloc(plaintext_len + 1, sizeof(char));
-    int   result_len = des_ecb_zero(ciphertext, ciphertext_len, false, key, result);
-
-    EXPECT_EQ(std::string(plaintext, plaintext_len), std::string(result, result_len));
+    // 解密
+    uint64_t decrypted_text = des(ciphertext, key, 0);
+    EXPECT_EQ(plaintext, decrypted_text);
 }

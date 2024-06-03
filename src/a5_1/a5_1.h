@@ -3,20 +3,6 @@
 
 #include <stdint.h>
 
-uint32_t parity(uint32_t x);
-
-uint32_t clockone(uint32_t reg, uint32_t mask, uint32_t taps);
-
-uint32_t majority();
-
-void a5_1_clock();
-
-void clockallthree();
-
-uint32_t getbit();
-
-void keysetup(uint8_t key[8], uint32_t frame);
-
 #include "common/endecode_export.hpp"
 #ifdef __cplusplus
 extern "C"

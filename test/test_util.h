@@ -5,7 +5,7 @@
 
 bool my_equal_array_8bit(uint8_t* data, uint8_t* temp, uint32_t len)
 {
-    for (size_t i = 0; i < len; i++)
+    for (int i = 0; i < len; i++)
     {
         if (data[i] != temp[i])
         {
@@ -17,7 +17,7 @@ bool my_equal_array_8bit(uint8_t* data, uint8_t* temp, uint32_t len)
 
 bool my_equal_array_32bit(uint32_t* data, uint32_t* temp, uint32_t len)
 {
-    for (size_t i = 0; i < len; i++)
+    for (int i = 0; i < len; i++)
     {
         if (data[i] != temp[i])
         {
@@ -29,7 +29,7 @@ bool my_equal_array_32bit(uint32_t* data, uint32_t* temp, uint32_t len)
 
 bool my_equal_array_32bit_1bit(uint32_t* data, uint32_t* temp, uint32_t len_bit)
 {
-    size_t i   = 0;
+    int i   = 0;
     int    len = len_bit / 32;
     for (i = 0; i < len; i++)
     {
@@ -51,60 +51,74 @@ bool my_equal_array_32bit_1bit(uint32_t* data, uint32_t* temp, uint32_t len_bit)
 }
 
 /**
- * @brief 32bit 转 8bit
- * @param[out]    output         8bit 数据
- * @param[in]     input          32bit 数据
- * @param[in]     len            32bit 数据长度
+ * @brief 通用转换模板函数：将任意类型整数转换为字节数组
+ * @tparam T                     输入类型
+ * @param[in]     input          nbit 输入
+ * @param[out]    output         8bit 输出
+ * @param[in]     bit8_num       8bit 输出长度
  * @param[in]     little         1-小端，0-大端
  */
-void bit32_to_8(uint8_t* output, const uint32_t* input, int len, int little)
+template<typename T>
+void bitn_to_bit8(T input, uint8_t* output, int bit8_num, int little)
 {
-    int i, j;
-    for (i = 0, j = 0; j < len; i++, j += 4)
+    for (int i = 0; i < bit8_num; i++)
     {
-        if (little)
-        {
-            output[j]     = (uint8_t)((input[i] >> 0) & 0xff);
-            output[j + 1] = (uint8_t)((input[i] >> 8) & 0xff);
-            output[j + 2] = (uint8_t)((input[i] >> 16) & 0xff);
-            output[j + 3] = (uint8_t)((input[i] >> 24) & 0xff);
-        }
-        else
-        {
-            output[j]     = (uint8_t)((input[i] >> 24) & 0xff);
-            output[j + 1] = (uint8_t)((input[i] >> 16) & 0xff);
-            output[j + 2] = (uint8_t)((input[i] >> 8) & 0xff);
-            output[j + 3] = (uint8_t)((input[i] >> 0) & 0xff);
-        }
+        output[i] = little ? (uint8_t)((input >> (8 * i)) & 0xFF) : (uint8_t)((input >> (8 * (bit8_num - 1 - i))) & 0xFF);
     }
 }
 
 /**
- * @brief 8bit 转 32bit
- * @param[out]    output         32bit 数据
- * @param[in]     input          8bit 数据
- * @param[in]     len            8bit 数据长度
+ * @brief 通用转换模板函数：将字节数组转换为任意类型整数
+ * @tparam T                     输出类型
+ * @param[in]     input          8bit 输入
+ * @param[in]     bit8_num       8bit 输入长度
+ * @param[in]     little         1-小端，0-大端
+ * @return T                     Tbit 输出
+ */
+template<typename T>
+T bit8_to_bitn(const uint8_t* input, int bit8_num, int little)
+{
+    T result = 0;
+    for (int i = 0; i < bit8_num; i++)
+    {
+        result |= little ? ((T)input[i] << (8 * i)) : ((T)input[i] << (8 * (bit8_num - 1 - i)));
+    }
+    return result;
+}
+
+/**
+ * @brief 定义转换函数示例：将任意位数组转换为字节数组
+ * @tparam InType                输入类型
+ * @param[in]     input          nbit 输入
+ * @param[in]     input_num      nbit 输入长度
+ * @param[out]    output         8bit 输出
  * @param[in]     little         1-小端，0-大端
  */
-void bit8_to_32(uint32_t* output, const uint8_t* input, int len, int little)
+template<typename InType>
+void array_bitn_to_bit8(const InType* input, int input_num, uint8_t* output, int little)
 {
-    int i, j;
-    for (i = 0, j = 0; j < len; i++, j += 4)
+    int bit8_num = sizeof(InType);
+    for (int i = 0; i < input_num; ++i)
     {
-        if (little)
-        {
-            output[i] = (((uint32_t)input[j]) << 0) |
-                        (((uint32_t)input[j + 1]) << 8) |
-                        (((uint32_t)input[j + 2]) << 16) |
-                        (((uint32_t)input[j + 3]) << 24);
-        }
-        else
-        {
-            output[i] = (((uint32_t)input[j]) << 24) |
-                        (((uint32_t)input[j + 1]) << 16) |
-                        (((uint32_t)input[j + 2]) << 8) |
-                        (((uint32_t)input[j + 3]) << 0);
-        }
+        bitn_to_bit8<InType>(input[i], output + i * bit8_num, bit8_num, little);
+    }
+}
+
+/**
+ * @brief 定义转换函数示例：将字节数组转换为任意位数组
+ * @tparam OutType               输出类型
+ * @param[in]     input          8bit 输入
+ * @param[out]    output         nbit 输出
+ * @param[in]     output_num     nbit 输出长度
+ * @param[in]     little         1-小端，0-大端
+ */
+template<typename OutType>
+void array_bit8_to_bitn(const uint8_t* input, OutType* output, int output_num, int little)
+{
+    int bit8_num = sizeof(OutType);
+    for (int i = 0; i < output_num; ++i)
+    {
+        output[i] = bit8_to_bitn<OutType>(input + i * bit8_num, bit8_num, little);
     }
 }
 
