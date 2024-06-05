@@ -19,5 +19,6 @@ add_subdirectory(snow_3g)
 add_subdirectory(zuc)
 add_subdirectory(sm4)
 add_subdirectory(des)
+add_subdirectory(aes)
 
 # asymmetric_key

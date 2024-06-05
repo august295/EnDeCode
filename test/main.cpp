@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "test_a5_1.h"
+#include "test_aes.h"
 #include "test_des.h"
 #include "test_rc4.h"
 #include "test_sm4.h"
