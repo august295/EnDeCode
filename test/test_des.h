@@ -1,8 +1,8 @@
-#include <string.h>
-
 #include <gtest/gtest.h>
 
 #include "des/des.h"
+
+#include "test_util.h"
 
 TEST(test_des, test1)
 {

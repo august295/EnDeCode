@@ -57,7 +57,7 @@ cmake --build build -j4
 - [x] SNOW_3GPP
 - [x] ZUC
 - [x] DES
-- [ ] AES
+- [x] AES
 - [x] SM4
 
 ### 3.2. 非对称密码算法（Asymmetric-key Algorithm）
