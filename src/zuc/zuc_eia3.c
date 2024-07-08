@@ -1,6 +1,6 @@
 #include <malloc.h>
 
-#include "zuc_eia3.h"
+#include "endecode/zuc/zuc_eia3.h"
 
 uint32_t GET_WORD(uint32_t* DATA, uint32_t i)
 {

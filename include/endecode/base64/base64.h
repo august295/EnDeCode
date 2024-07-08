@@ -4,7 +4,7 @@
 #define BASE64_ENCODE_OUT_SIZE(s) ((unsigned int)((((s) + 2) / 3) * 4 + 1))
 #define BASE64_DECODE_OUT_SIZE(s) ((unsigned int)(((s) / 4) * 3))
 
-#include "common/endecode_export.hpp"
+#include "endecode/common/endecode_export.hpp"
 #ifdef __cplusplus
 extern "C"
 {

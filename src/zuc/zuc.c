@@ -1,4 +1,4 @@
-#include "zuc.h"
+#include "endecode/zuc/zuc.h"
 
 // clang-format off
 /* the s-boxes */

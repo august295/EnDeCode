@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "sm3/sm3.h"
+#include "endecode/sm3/sm3.h"
 
 #include "test_util.h"
 

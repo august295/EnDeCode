@@ -1,6 +1,4 @@
-#include <stdio.h>
-
-#include "crc.h"
+#include "endecode/crc/crc.h"
 
 /**
  * @brief 8 bit反转，如1100 0101 反转后为1010 0011

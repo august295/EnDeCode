@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "rc4/rc4.h"
+#include "endecode/rc4/rc4.h"
 
 #include "test_util.h"
 

@@ -15,7 +15,7 @@ typedef struct
     uint32_t roundKeys[Nb * (Nr + 1)];
 } AESContext;
 
-#include "common/endecode_export.hpp"
+#include "endecode/common/endecode_export.hpp"
 #ifdef __cplusplus
 extern "C"
 {

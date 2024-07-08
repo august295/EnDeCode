@@ -1,4 +1,4 @@
-#include "des.h"
+#include "endecode/des/des.h"
 
 // clang-format off
 // 初始置换表

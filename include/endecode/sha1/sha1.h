@@ -15,7 +15,7 @@ typedef struct sha1_context
     uint8_t  buffer[SHA1_BLOCK_SIZE];
 } sha1_context;
 
-#include "common/endecode_export.hpp"
+#include "endecode/common/endecode_export.hpp"
 #ifdef __cplusplus
 extern "C"
 {

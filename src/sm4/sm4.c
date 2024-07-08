@@ -1,4 +1,4 @@
-#include "sm4/sm4.h"
+#include "endecode/sm4/sm4.h"
 
 // clang-format off
 // Family key FK

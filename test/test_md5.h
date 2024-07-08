@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "md5/md5.h"
+#include "endecode/md5/md5.h"
 
 #include "test_util.h"
 

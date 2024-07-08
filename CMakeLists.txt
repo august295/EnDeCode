@@ -2,7 +2,8 @@
 cmake_minimum_required(VERSION 3.15.0)
 
 # 项目名称
-project(EnDeCode)
+set(UseProjectName "endecode")
+project(${UseProjectName})
 
 # C++标准
 set(CMAKE_CXX_STANDARD 11)

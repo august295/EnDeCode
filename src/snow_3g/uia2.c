@@ -1,4 +1,4 @@
-#include "uia2.h"
+#include "endecode/snow_3g/uia2.h"
 
 /* MUL64x.
  * Input V: a 64-bit input.

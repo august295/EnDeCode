@@ -1,6 +1,6 @@
 #include <stdint.h>
 
-#include "a5_1.h"
+#include "endecode/a5_1/a5_1.h"
 
 /* Masks for the three shift registers */
 #define R1MASK 0x07FFFF /* 19 bits, numbered 0..18 */

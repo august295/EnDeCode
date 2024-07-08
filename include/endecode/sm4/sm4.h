@@ -4,7 +4,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "common/endecode_export.hpp"
+#include "endecode/common/endecode_export.hpp"
 #ifdef __cplusplus
 extern "C"
 {

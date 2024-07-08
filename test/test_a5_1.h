@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "a5_1/a5_1.h"
+#include "endecode/a5_1/a5_1.h"
 
 #include "test_util.h"
 

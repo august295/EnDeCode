@@ -14,7 +14,7 @@ typedef struct
     uint8_t  s[256];
 } Rc4Context;
 
-#include "common/endecode_export.hpp"
+#include "endecode/common/endecode_export.hpp"
 #ifdef __cplusplus
 extern "C"
 {

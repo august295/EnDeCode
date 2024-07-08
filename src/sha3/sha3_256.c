@@ -1,4 +1,4 @@
-#include "sha3/sha3_256.h"
+#include "endecode/sha3/sha3_256.h"
 
 // clang-format off
 const uint64_t keccakf_rndc[KECCAKF_ROUNDS] = {

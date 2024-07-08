@@ -2,7 +2,7 @@
 
 #include <gtest/gtest.h>
 
-#include "crc/crc.h"
+#include "endecode/crc/crc.h"
 
 TEST(test_crc, str_ascii_crc_32)
 {

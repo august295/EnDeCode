@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "sm4/sm4.h"
+#include "endecode/sm4/sm4.h"
 
 #include "test_util.h"
 

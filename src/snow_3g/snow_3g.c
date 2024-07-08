@@ -1,4 +1,4 @@
-#include "snow_3g.h"
+#include "endecode/snow_3g/snow_3g.h"
 
 // clang-format off
 /* Rijndael S-box SR */

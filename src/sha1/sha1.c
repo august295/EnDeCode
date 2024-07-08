@@ -1,4 +1,4 @@
-#include "sha1/sha1.h"
+#include "endecode/sha1/sha1.h"
 
 // 位循环左移
 #define ROTL32(value, bits) (((value) << (bits)) | ((value) >> (32 - (bits))))

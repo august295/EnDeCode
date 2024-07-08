@@ -3,7 +3,7 @@
 
 #include <gtest/gtest.h>
 
-#include "base64/base64.h"
+#include "endecode/base64/base64.h"
 
 TEST(test_base64, str_ascii)
 {

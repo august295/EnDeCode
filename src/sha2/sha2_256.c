@@ -1,4 +1,4 @@
-#include "sha2/sha2_256.h"
+#include "endecode/sha2/sha2_256.h"
 
 // clang-format off
 const uint32_t K[64] = {

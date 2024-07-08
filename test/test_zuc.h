@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 
-#include "zuc/zuc.h"
-#include "zuc/zuc_eea3.h"
-#include "zuc/zuc_eia3.h"
+#include "endecode/zuc/zuc.h"
+#include "endecode/zuc/zuc_eea3.h"
+#include "endecode/zuc/zuc_eia3.h"
 
 #include "test_util.h"
 

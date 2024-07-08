@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "sha1/sha1.h"
+#include "endecode/sha1/sha1.h"
 
 #include "test_util.h"
 

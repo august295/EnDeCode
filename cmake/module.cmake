@@ -11,12 +11,23 @@ macro(CreateTarget ProjectName Type Group)
     set(CURRENT_PATH ${CMAKE_CURRENT_SOURCE_DIR})
     set(HEADER_FILES "")
     set(SOURCE_FILES "")
-    file(GLOB_RECURSE HEADER_FILES "${CURRENT_PATH}/*.h" "${CURRENT_PATH}/*.hpp")
+
+    if(NOT ${Type} STREQUAL "Exe")
+        file(GLOB_RECURSE HEADER_FILES "${ROOT_DIR}/include/${UseProjectName}/${ProjectName}/*.h" "${ROOT_DIR}/include/${UseProjectName}/${ProjectName}/*.hpp")
+    else()
+        file(GLOB_RECURSE HEADER_FILES "${CURRENT_PATH}/*.h" "${CURRENT_PATH}/*.hpp")
+    endif()
+
     file(GLOB_RECURSE SOURCE_FILES "${CURRENT_PATH}/*.c" "${CURRENT_PATH}/*.cpp")
 
     # 文件分类
     if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-        source_group(TREE ${CURRENT_PATH} PREFIX "Header Files" FILES ${HEADER_FILES})
+        if(NOT ${Type} STREQUAL "Exe")
+            source_group(TREE ${ROOT_DIR}/include/${UseProjectName}/${ProjectName} PREFIX "Header Files" FILES ${HEADER_FILES})
+        else()
+            source_group(TREE ${CURRENT_PATH} PREFIX "Header Files" FILES ${HEADER_FILES})
+        endif()
+
         source_group(TREE ${CURRENT_PATH} PREFIX "Source Files" FILES ${SOURCE_FILES})
     elseif()
         source_group("Header Files" FILES ${HEADER_FILES})
@@ -24,7 +35,7 @@ macro(CreateTarget ProjectName Type Group)
     endif()
 
     # 包含头文件
-    include_directories(${ROOT_DIR}/src)
+    include_directories(${ROOT_DIR}/include)
 
     # 生成项目
     if(${Type} STREQUAL "Exe")
@@ -46,13 +57,5 @@ macro(CreateTarget ProjectName Type Group)
     endif()
 
     # 项目分组
-    set_property(TARGET ${ProjectName} PROPERTY FOLDER ${Group})
-
-    # 拷贝头文件
-    if(NOT(${Group} STREQUAL "test"))
-        set(TargetInclude "${ROOT_DIR}/include/${ProjectName}/")
-        add_custom_command(TARGET ${ProjectName} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E make_directory ${TargetInclude}
-            COMMAND ${CMAKE_COMMAND} -E copy ${HEADER_FILES} ${TargetInclude})
-    endif()
+    set_property(TARGET ${ProjectName} PROPERTY FOLDER ${UseProjectName}/${Group})
 endmacro()

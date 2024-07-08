@@ -1,4 +1,4 @@
-#include "rc4.h"
+#include "endecode/rc4/rc4.h"
 
 int rc4_init(Rc4Context* context, const uint8_t* key, uint64_t length)
 {

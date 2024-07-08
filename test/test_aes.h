@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "aes/aes.h"
+#include "endecode/aes/aes.h"
 
 #include "test_util.h"
 

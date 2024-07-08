@@ -1,6 +1,6 @@
 #include <stdlib.h>
 
-#include "uea2.h"
+#include "endecode/snow_3g/uea2.h"
 
 /* f8.
  * Input key: 128 bit Confidentiality Key.

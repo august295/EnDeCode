@@ -1,4 +1,4 @@
-#include "md5/md5.h"
+#include "endecode/md5/md5.h"
 
 // leftrotate function definition
 #define LEFTROTATE(x, c) (((x) << (c)) | ((x) >> (32 - (c))))

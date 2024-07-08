@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "des/des.h"
+#include "endecode/des/des.h"
 
 #include "test_util.h"
 

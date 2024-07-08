@@ -2,8 +2,9 @@
 
 #include <gtest/gtest.h>
 
-#include "snow_3g/uea2.h"
-#include "snow_3g/uia2.h"
+#include "endecode/snow_3g/snow_3g.h"
+#include "endecode/snow_3g/uea2.h"
+#include "endecode/snow_3g/uia2.h"
 
 #include "test_util.h"
 
