@@ -17,6 +17,8 @@
 #include "test_base64.h"
 #include "test_crc.h"
 
+#include "test_asn1.h"
+
 int main(int argc, char** argv)
 {
     testing::InitGoogleTest(&argc, argv);

@@ -21,3 +21,6 @@ target_link_libraries(${ProjectName} zuc)
 target_link_libraries(${ProjectName} sm4)
 target_link_libraries(${ProjectName} des)
 target_link_libraries(${ProjectName} aes)
+
+# 
+target_link_libraries(${ProjectName} asn1)
