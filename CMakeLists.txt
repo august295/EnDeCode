@@ -35,7 +35,9 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${BUILD_DIR}/lib) # .so and .dylib
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BUILD_DIR}/bin) # .exe and .dll
 endif()
+
 set(CMAKE_DEBUG_POSTFIX "d")
+option(BUILD_SINGLE_LIBRARY "Build as a single shared library" OFF)
 
 # 算法库
 include(${ROOT_DIR}/cmake/module.cmake)

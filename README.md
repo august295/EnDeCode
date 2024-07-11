@@ -29,7 +29,15 @@ git clone --recursive https://github.com/august295/EnDeCode.git
 
 #### 2.1.1. Visual Studio 2022
 
-双击 `cmake_vs2022.bat`，工程文件在 `build` 目录下。
+```cmd
+cmake -S"." -B"build" -G"Visual Studio 17 2022"
+```
+
+如果只想生成单个动态库，添加参数即可
+
+```cmd
+cmake -S"." -B"build" -G"Visual Studio 17 2022" -D"BUILD_SINGLE_LIBRARY=ON"
+```
 
 #### 2.1.2. Qt Creator
 
@@ -50,7 +58,9 @@ cmake --build build -j4
 
 ## 3. 分类
 
-### 3.1. 对称密码算法（Symmetric-key Algorithm）
+### 3.1. 密码
+
+#### 3.1.1. 对称密码算法（Symmetric-key Algorithm）
 
 - [x] A5-1
 - [x] RC4
@@ -60,14 +70,14 @@ cmake --build build -j4
 - [x] AES
 - [x] SM4
 
-### 3.2. 非对称密码算法（Asymmetric-key Algorithm）
+#### 3.1.2. 非对称密码算法（Asymmetric-key Algorithm）
 
 - [ ] RSA
 - [ ] ECC
 - [ ] SM2
 - [ ] SM9
 
-### 3.3. 摘要算法（Digest Algorithm）
+#### 3.1.3. 摘要算法（Digest Algorithm）
 
 - [x] MD5
 - [x] SHA1
@@ -75,7 +85,13 @@ cmake --build build -j4
 - [x] SHA3(SHA3_256)
 - [x] SM3
 
-### 3.4. 未分类（Unknown Algorithm）
+#### 3.1.4. 未分类（Unknown Algorithm）
 
 - [x] BASE64
 - [x] CRC
+
+### 3.2. 证书
+
+- [x] ASN1
+- [ ] X509
+
