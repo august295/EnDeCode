@@ -25,6 +25,9 @@ else()
     target_link_libraries(${ProjectName} des)
     target_link_libraries(${ProjectName} aes)
 
+    # asymmetric_key
+    target_link_libraries(${ProjectName} rsa)
+
     # certification
     target_link_libraries(${ProjectName} asn1)
 endif()

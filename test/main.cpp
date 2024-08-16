@@ -14,6 +14,8 @@
 #include "test_sha3.h"
 #include "test_sm3.h"
 
+#include "test_rsa.h"
+
 #include "test_base64.h"
 #include "test_crc.h"
 

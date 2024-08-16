@@ -24,6 +24,7 @@ else()
     add_subdirectory(aes)
 
     # asymmetric_key
+    add_subdirectory(rsa)
 
     # certification
     add_subdirectory(asn1)
