@@ -39,6 +39,9 @@ endif()
 set(CMAKE_DEBUG_POSTFIX "d")
 option(BUILD_SINGLE_LIBRARY "Build as a single shared library" OFF)
 
+# vcpkg
+include(${ROOT_DIR}/cmake/module_vcpkg.cmake)
+
 # 算法库
 include(${ROOT_DIR}/cmake/module.cmake)
 add_subdirectory(src)
