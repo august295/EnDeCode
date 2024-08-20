@@ -12,6 +12,7 @@
 
 - `Visual Studio 2022`
 - `CMake3.15`
+- `vcpkg`
 
 
 
@@ -24,6 +25,8 @@ git clone --recursive https://github.com/august295/EnDeCode.git
 ```
 
 工程使用 `CMake` 构建。运行以 `test` 作为启动项即可，其他编译生成动态库。
+
+`vcpkg` 作为可跨平台包管理器。
 
 ### 2.1. Windows
 
@@ -72,7 +75,7 @@ cmake --build build -j4
 
 #### 3.1.2. 非对称密码算法（Asymmetric-key Algorithm）
 
-- [ ] RSA
+- [x] RSA
 - [ ] ECC
 - [ ] SM2
 - [ ] SM9

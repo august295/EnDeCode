@@ -8,13 +8,11 @@
     #include <sys/time.h>
 #endif
 
-#include <gmp.h>
-
-#include "endecode/pad/pkcs.h"
 #include "endecode/rsa/rsa.h"
 
 // 生成随机素数 p 和 q
-void generate_prime(mpz_t p, unsigned int bits)
+// 保证生成素数不一样
+void generate_prime(mpz_t p, uint32_t bits)
 {
     gmp_randstate_t state;
     gmp_randinit_default(state);
@@ -33,85 +31,100 @@ void generate_prime(mpz_t p, unsigned int bits)
 }
 
 // 生成密钥对
-void rsa_keygen(mpz_t n, mpz_t e, mpz_t d, unsigned int bits)
+rsa_st* rsa_key_gen(uint32_t bits, uint32_t e)
 {
-    mpz_t p, q, phi, gcd;
-    mpz_inits(p, q, phi, gcd, NULL);
+    rsa_st* ctx = (rsa_st*)malloc(sizeof(rsa_st));
+    ctx->bits   = bits;
+    mpz_inits(ctx->n, ctx->e, ctx->d, ctx->p, ctx->q, ctx->p1, ctx->q1, ctx->phi, NULL);
 
     // 生成 p 和 q
-    generate_prime(p, bits / 2);
-    generate_prime(q, bits / 2);
+    generate_prime(ctx->p, bits / 2);
+    generate_prime(ctx->q, bits / 2);
 
     // n = p * q
-    mpz_mul(n, p, q);
+    mpz_mul(ctx->n, ctx->p, ctx->q);
 
     // phi = (p - 1) * (q - 1)
-    mpz_t p1, q1;
-    mpz_inits(p1, q1, NULL);
-    mpz_sub_ui(p1, p, 1);
-    mpz_sub_ui(q1, q, 1);
-    mpz_mul(phi, p1, q1);
+    mpz_sub_ui(ctx->p1, ctx->p, 1);
+    mpz_sub_ui(ctx->q1, ctx->q, 1);
+    mpz_mul(ctx->phi, ctx->p1, ctx->q1);
 
     // 选择 e，通常选择 65537
-    mpz_set_ui(e, 7);
-    while (mpz_gcd_ui(NULL, e, mpz_get_ui(phi)) != 1)
+    mpz_set_ui(ctx->e, e);
+    while (mpz_gcd_ui(NULL, ctx->e, mpz_get_ui(ctx->phi)) != 1)
     {
-        mpz_add_ui(e, e, 2); // 尝试下一个奇数
+        mpz_add_ui(ctx->e, ctx->e, 2); // 尝试下一个奇数
     }
 
     // 计算 d = e^(-1) mod phi
-    mpz_invert(d, e, phi);
+    mpz_invert(ctx->d, ctx->e, ctx->phi);
+    return ctx;
+}
+
+void rsa_key_free(rsa_st* ctx)
+{
+    mpz_clears(ctx->n, ctx->e, ctx->d, ctx->p, ctx->q, ctx->p1, ctx->q1, ctx->phi, NULL);
+}
+
+int rsa_public_encrypt(const uint8_t* input, uint32_t input_len, uint8_t* output, const rsa_st* ctx, _func_pad func_pad)
+{
+    int      ret        = -1;
+    uint32_t block_size = ctx->bits / 8;
+    char*    pad        = NULL;
+    mpz_t    in, out;
+    mpz_inits(in, out, NULL);
+    if (func_pad)
+    {
+        char* pad = (char*)malloc(block_size);
+        func_pad(pad, block_size, input, input_len);
+        mpz_import(in, block_size, 1, 1, 0, 0, pad);
+    }
+    else
+    {
+        char* pad = (char*)malloc(input_len);
+        memcpy(pad, input, input_len);
+        mpz_import(in, input_len, 1, 1, 0, 0, pad);
+    }
+
+    // 加密 c = m^e mod n
+    mpz_powm(out, in, ctx->e, ctx->n);
+    size_t output_len = 0;
+    mpz_export(output, &output_len, 1, 1, 0, 0, out);
+    ret = output_len;
 
     // 清理
-    mpz_clears(p, q, phi, gcd, p1, q1, NULL);
+    mpz_clears(in, out, NULL);
+    free(pad);
+    return ret;
 }
 
-void rsa_encrypt(mpz_t ciphertext, const mpz_t plaintext, const mpz_t e, const mpz_t n)
+int rsa_private_decrypt(const uint8_t* input, uint32_t input_len, uint8_t* output, const rsa_st* ctx, _func_unpad func_unpad)
 {
-    // c = m^e mod n
-    mpz_powm(ciphertext, plaintext, e, n);
-}
+    int ret = -1;
 
-void rsa_decrypt(mpz_t plaintext, const mpz_t ciphertext, const mpz_t d, const mpz_t n)
-{
-    // m = c^d mod n
-    mpz_powm(plaintext, ciphertext, d, n);
-}
+    mpz_t in, out;
+    mpz_inits(in, out, NULL);
+    mpz_import(in, input_len, 1, 1, 0, 0, input);
 
-void rsa()
-{
-    int bit_len = 1024;
+    // 解密 m = c^d mod n
+    mpz_powm(out, in, ctx->d, ctx->n);
 
-    // 生成 1024 位的密钥对
-    mpz_t n, e, d;
-    mpz_inits(n, e, d, NULL);
-    rsa_keygen(n, e, d, bit_len);
-
-    mpz_t plaintext, ciphertext, decryptedtext;
-    mpz_inits(plaintext, ciphertext, decryptedtext, NULL);
-    const char* message     = "Hello, RSA!";
-    size_t      message_len = strlen(message);
-    char pad[128] = {0};
-    pkcs1_v1_5_pad(pad, bit_len / 8, message, message_len);
-    mpz_import(plaintext, bit_len / 8, 1, 1, 0, 0, pad);
-    gmp_printf("m: %Zd\n", plaintext);
-
-    // 加密
-    rsa_encrypt(ciphertext, plaintext, e, n);
-    gmp_printf("c: %Zd\n", ciphertext);
-
-    // 解密
-    rsa_decrypt(decryptedtext, ciphertext, d, n);
-    gmp_printf("m: %Zd\n", decryptedtext);
-
-    char export[128]  = {0};
     size_t export_len = 0;
-    mpz_export(export, &export_len, 1, 1, 0, 0, decryptedtext);
-    char   unpad[128] = {0};
-    size_t unpad_len  = 0;
-    pkcs1_v1_5_unpad(unpad, &unpad_len, export, export_len);
-    printf("Origin text: %s\n", unpad);
+    char* export      = mpz_export(NULL, &export_len, 1, 1, 0, 0, out);
+    ret               = export_len;
+    if (func_unpad)
+    {
+        size_t output_len = 0;
+        func_unpad(output, &output_len, export, export_len);
+        ret = output_len;
+    }
+    else
+    {
+        memcpy(output, export, export_len);
+    }
 
     // 清理
-    mpz_clears(n, e, d, plaintext, ciphertext, decryptedtext, NULL);
+    mpz_clears(in, out, NULL);
+    free(export);
+    return ret;
 }
