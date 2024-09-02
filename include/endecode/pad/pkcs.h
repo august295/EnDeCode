@@ -82,6 +82,23 @@ static int pkcs1_v1_5_unpad(uint8_t* message, size_t* message_len, const uint8_t
     return 0;
 }
 
+static int pkcs7_pad(uint8_t* padded, size_t block_size, const uint8_t* message, size_t message_len)
+{
+    size_t padding_len = block_size - message_len;
+    memcpy(padded, message, message_len);
+    memset(padded + message_len, (int)padding_len, padding_len);
+    return 0;
+}
+
+static int pkcs7_unpad(uint8_t* message, size_t* message_len, const uint8_t* padded, size_t block_size)
+{
+    size_t padding_len = padded[block_size - 1];
+    *message_len       = block_size - padding_len;
+    memcpy(message, padded, *message_len);
+    message[*message_len] = '\0';
+    return 0;
+}
+
 #ifdef __cplusplus
 }
 #endif

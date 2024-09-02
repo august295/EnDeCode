@@ -27,6 +27,7 @@ else()
 
     # asymmetric_key
     target_link_libraries(${ProjectName} rsa)
+    target_link_libraries(${ProjectName} ecc)
 
     # certification
     target_link_libraries(${ProjectName} asn1)
