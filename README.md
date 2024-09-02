@@ -26,9 +26,11 @@ git clone --recursive https://github.com/august295/EnDeCode.git
 
 工程使用 `CMake` 构建。运行以 `test` 作为启动项即可，其他编译生成动态库。
 
-`vcpkg` 作为可跨平台包管理器。
+对于**非对称密码算法**通常需要使用大数计算，所以采用 `gmp` 三方库进行大数计算。
 
 ### 2.1. Windows
+
+在 `Windows` 上使用 `vcpkg + cmake` 导入 `gmp`。
 
 #### 2.1.1. Visual Studio 2022
 
@@ -40,21 +42,6 @@ cmake -S"." -B"build" -G"Visual Studio 17 2022"
 
 ```cmd
 cmake -S"." -B"build" -G"Visual Studio 17 2022" -D"BUILD_SINGLE_LIBRARY=ON"
-```
-
-#### 2.1.2. Qt Creator
-
-`CMakeLists.txt` 以 `Qt Creator` 打开即可创建工程。
-
-### 2.2. Linux
-
-#### 2.2.1. Unix Makefiles
-
-```bash
-# 仅编译测试
-cmake -S"." -B"build" -G"Unix Makefiles"
-cmake --build build -j4
-./build/bin/test
 ```
 
 

@@ -109,9 +109,10 @@ int rsa_private_decrypt(const uint8_t* input, uint32_t input_len, uint8_t* outpu
     // 解密 m = c^d mod n
     mpz_powm(out, in, ctx->d, ctx->n);
 
+    char* export      = malloc(input_len);
     size_t export_len = 0;
-    char* export      = mpz_export(NULL, &export_len, 1, 1, 0, 0, out);
-    ret               = export_len;
+    mpz_export(export, &export_len, 1, 1, 0, 0, out);
+    ret = export_len;
     if (func_unpad)
     {
         size_t output_len = 0;
