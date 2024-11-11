@@ -34,16 +34,21 @@ git clone --recursive https://github.com/august295/EnDeCode.git
 
 #### 2.1.1. Visual Studio 2022
 
-```cmd
-cmake -S"." -B"build" -G"Visual Studio 17 2022"
-```
-
-如果只想生成单个动态库，添加参数即可
+生成单个动态库
 
 ```cmd
-cmake -S"." -B"build" -G"Visual Studio 17 2022" -D"BUILD_SINGLE_LIBRARY=ON"
+-D"BUILD_SINGLE_LIBRARY=ON"
 ```
 
+生成测试工程
+
+```cmd
+-D"BUILD_TEST=ON"
+```
+
+```cmd
+cmake -B"build" -G"Visual Studio 17 2022" -D"BUILD_SINGLE_LIBRARY=ON" -D"BUILD_TEST=ON"
+```
 
 
 ## 3. 分类

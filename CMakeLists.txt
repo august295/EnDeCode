@@ -20,24 +20,21 @@ set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "CMakePredefinedTargets")
 
 # 设置根目录
 set(ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-set(BUILD_DIR ${ROOT_DIR}/build)
+set(BUILD_DIR ${CMAKE_BINARY_DIR})
 
-# 输出目录
-if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${BUILD_DIR}/lib) # .lib and .a
-    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG ${BUILD_DIR}/lib) # .so and .dylib
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${BUILD_DIR}/bin) # .exe and .dll
-    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${BUILD_DIR}/lib) # .lib and .a
-    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${BUILD_DIR}/lib) # .so and .dylib
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${BUILD_DIR}/bin) # .exe and .dll
-elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${BUILD_DIR}/lib) # .lib and .a
-    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${BUILD_DIR}/lib) # .so and .dylib
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BUILD_DIR}/bin) # .exe and .dll
-endif()
+# 为多种构建类型设置输出目录
+set(CONFIGURATION_TYPES "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
+
+foreach(CONFIGURATION_TYPE ${CONFIGURATION_TYPES})
+    string(TOUPPER ${CONFIGURATION_TYPE} TYPE)
+    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${TYPE} ${BUILD_DIR}/${CONFIGURATION_TYPE}/lib) # .lib and .a
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_${TYPE} ${BUILD_DIR}/${CONFIGURATION_TYPE}/lib) # .so and .dylib
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${TYPE} ${BUILD_DIR}/${CONFIGURATION_TYPE}/bin) # .exe and .dll
+endforeach()
 
 set(CMAKE_DEBUG_POSTFIX "d")
 option(BUILD_SINGLE_LIBRARY "Build as a single shared library" OFF)
+option(BUILD_TEST "Build test executable" OFF)
 
 # vcpkg
 include(${ROOT_DIR}/cmake/module_vcpkg.cmake)
@@ -47,5 +44,7 @@ include(${ROOT_DIR}/cmake/module.cmake)
 add_subdirectory(src)
 
 # 测试程序
-include(${ROOT_DIR}/cmake/module_gtest.cmake)
-add_subdirectory(test)
+if(BUILD_TEST)
+    include(${ROOT_DIR}/cmake/module_gtest.cmake)
+    add_subdirectory(test)
+endif()
