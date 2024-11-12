@@ -1,7 +1,6 @@
 #ifndef __ASN1_H__
 #define __ASN1_H__
 
-#include <malloc.h>
 #include <stdint.h>
 
 /* ASN.1 tag values */
@@ -34,26 +33,20 @@
 #define V_ASN1_UNIVERSALSTRING   28
 #define V_ASN1_BMPSTRING         30 /* 2-byte unicode with zeros */
 
-struct asn1_string_st
+typedef struct asn1_string_st
 {
     uint8_t  tag;
     uint32_t length;
     uint8_t* value;
-};
+} asn1_string_st;
 
-struct asn1_tree_st
+typedef struct asn1_tree_st
 {
     struct asn1_string_st value;
     uint32_t              level;
     uint32_t              children_size;
     struct asn1_tree_st** children;
-};
-
-const char*    asn1_tag_name(int tag);
-const uint8_t* asn1_parse_tag(const uint8_t* data, uint8_t* tag);
-const uint8_t* asn1_parse_length(const uint8_t* data, uint32_t* length);
-
-struct asn1_tree_st* asn1_create_node(uint8_t type, uint32_t length, uint8_t* value, uint32_t level);
+} asn1_tree_st;
 
 #include "endecode/common/endecode_export.hpp"
 #ifdef __cplusplus
@@ -61,9 +54,19 @@ extern "C"
 {
 #endif
 
-ENDECODE_API const uint8_t*       asn1_parse_string(const uint8_t* data, struct asn1_string_st* str);
-ENDECODE_API struct asn1_tree_st* asn1_parse(const uint8_t* data, size_t len, int level);
-ENDECODE_API void                 asn1_free_tree(struct asn1_tree_st* node);
+ENDECODE_API const char*    asn1_tag_name(int tag);
+ENDECODE_API const uint8_t* asn1_parse_tag(const uint8_t* data, uint8_t* tag);
+ENDECODE_API const uint8_t* asn1_parse_length(const uint8_t* data, uint32_t* length);
+ENDECODE_API const uint8_t* asn1_parse_string(const uint8_t* data, asn1_string_st* str);
+
+ENDECODE_API int           get_byte_length(uint32_t value);
+ENDECODE_API asn1_tree_st* asn1_create_node(uint8_t type, uint32_t length, uint8_t* value, uint32_t level);
+ENDECODE_API asn1_tree_st* asn1_parse(const uint8_t* data, size_t len, int level);
+
+ENDECODE_API void asn1_print_string(asn1_string_st* str);
+ENDECODE_API void asn1_print_tree(asn1_tree_st* node);
+ENDECODE_API void asn1_free_node(asn1_string_st* string);
+ENDECODE_API void asn1_free_tree(asn1_tree_st* node);
 
 #ifdef __cplusplus
 }

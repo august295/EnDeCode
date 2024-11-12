@@ -85,7 +85,7 @@ void ecc_init_set(EllipticCurve* curve, ECPoint* G, int nid)
     ecc_point_init_set(G, params->Gx, params->Gy, 16);
 }
 
-// 释放资源-
+// 释放资源
 void ecc_curve_clear(EllipticCurve* curve)
 {
     mpz_clear(curve->a);
@@ -198,7 +198,7 @@ void ecc_generate_keypair(ecc_key_st* st, int nid)
     gmp_randinit_default(state);
     gmp_randseed_ui(state, time(NULL));
 
-    mpz_urandomm(st->private_key, state, st->curve.p);                         // 生成私钥
+    mpz_urandomm(st->private_key, state, st->curve.p);                        // 生成私钥
     ecc_point_multiply(&st->public_key, &st->G, st->private_key, &st->curve); // 生成公钥
 
     gmp_randclear(state);
@@ -262,7 +262,7 @@ int ecc_private_decrypt(uint8_t* output, ECPoint* C1, ECPoint* C2, ecc_key_st* s
     ecc_point_init(&decrypted_point);
 
     ecc_point_multiply(&temp, C1, st->private_key, &st->curve); // temp = d * C1
-    mpz_neg(temp.y, temp.y);                                     // 求负 temp.y = -temp.y
+    mpz_neg(temp.y, temp.y);                                    // 求负 temp.y = -temp.y
     mpz_mod(temp.y, temp.y, st->curve.p);
     ecc_point_add(&decrypted_point, C2, &temp, &st->curve); // M = C2 + (-temp)
     ecc_point_clear(&temp);

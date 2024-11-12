@@ -1,3 +1,7 @@
+#include <malloc.h>
+#include <memory.h>
+#include <stdio.h>
+
 #include "endecode/asn1/asn1.h"
 
 const char* asn1_tag_name(int tag)
@@ -58,6 +62,15 @@ const uint8_t* asn1_parse_length(const uint8_t* data, uint32_t* length)
     return data;
 }
 
+const uint8_t* asn1_parse_string(const uint8_t* data, asn1_string_st* str)
+{
+    data       = asn1_parse_tag(data, &str->tag);
+    data       = asn1_parse_length(data, &str->length);
+    str->value = (uint8_t*)malloc(sizeof(uint8_t) * str->length);
+    memcpy(str->value, data, str->length);
+    return data + str->length;
+}
+
 int get_byte_length(uint32_t value)
 {
     int byte_length = 0;
@@ -69,21 +82,12 @@ int get_byte_length(uint32_t value)
     return byte_length;
 }
 
-const uint8_t* asn1_parse_string(const uint8_t* data, struct asn1_string_st* str)
+asn1_tree_st* asn1_create_node(uint8_t tag, uint32_t length, uint8_t* value, uint32_t level)
 {
-    data       = asn1_parse_tag(data, &str->tag);
-    data       = asn1_parse_length(data, &str->length);
-    str->value = malloc(sizeof(uint8_t) * str->length);
-    memcpy(str->value, data, str->length);
-    return data + str->length;
-}
-
-struct asn1_tree_st* asn1_create_node(uint8_t tag, uint32_t length, uint8_t* value, uint32_t level)
-{
-    struct asn1_tree_st* node = (struct asn1_tree_st*)malloc(sizeof(struct asn1_tree_st));
-    node->value.tag           = tag;
-    node->value.length        = length;
-    node->value.value         = (uint8_t*)malloc(length);
+    asn1_tree_st* node = (asn1_tree_st*)malloc(sizeof(asn1_tree_st));
+    node->value.tag    = tag;
+    node->value.length = length;
+    node->value.value  = (uint8_t*)malloc(length);
     memcpy(node->value.value, value, length);
     node->level         = level;
     node->children_size = 0;
@@ -91,29 +95,15 @@ struct asn1_tree_st* asn1_create_node(uint8_t tag, uint32_t length, uint8_t* val
     return node;
 }
 
-void asn1_free_tree(struct asn1_tree_st* node)
+asn1_tree_st* asn1_parse(const uint8_t* data, size_t len, int level)
 {
-    if (node)
-    {
-        for (uint32_t i = 0; i < node->children_size; i++)
-        {
-            asn1_free_tree(node->children[i]);
-        }
-        free(node->value.value);
-        free(node->children);
-        free(node);
-    }
-}
-
-struct asn1_tree_st* asn1_parse(const uint8_t* data, size_t len, int level)
-{
-    const uint8_t*        end     = data + len;
-    struct asn1_tree_st*  root    = NULL;
-    struct asn1_tree_st** current = &root;
+    const uint8_t* end     = data + len;
+    asn1_tree_st*  root    = NULL;
+    asn1_tree_st** current = &root;
 
     while (data < end)
     {
-        struct asn1_string_st str;
+        asn1_string_st str;
         asn1_parse_string(data, &str);
         *current = asn1_create_node(str.tag, str.length, str.value, level);
         free(str.value);
@@ -126,11 +116,11 @@ struct asn1_tree_st* asn1_parse(const uint8_t* data, size_t len, int level)
 
             while (child_length != 0)
             {
-                struct asn1_tree_st* child = asn1_parse(child_data, child_length, level + 1);
+                asn1_tree_st* child = asn1_parse(child_data, child_length, level + 1);
                 if (child)
                 {
                     (*current)->children_size++;
-                    (*current)->children                                = (struct asn1_tree_st**)realloc((*current)->children, (*current)->children_size * sizeof(struct asn1_tree_st*));
+                    (*current)->children                                = (asn1_tree_st**)realloc((*current)->children, (*current)->children_size * sizeof(asn1_tree_st*));
                     (*current)->children[(*current)->children_size - 1] = child;
 
                     uint32_t child_total_length = 2 + child->value.length;
@@ -152,4 +142,63 @@ struct asn1_tree_st* asn1_parse(const uint8_t* data, size_t len, int level)
         current = &((*current)->children[(*current)->children_size - 1]);
     }
     return root;
+}
+
+void asn1_print_string(asn1_string_st* str)
+{
+    printf("Tag: 0x%02X, Length: %d, Data: ", str->tag, str->length);
+    for (size_t i = 0; i < str->length; i++)
+    {
+        printf("%02X ", str->value[i]);
+    }
+    printf("\n");
+}
+
+void asn1_print_tree(asn1_tree_st* node)
+{
+    if (node)
+    {
+        for (uint32_t i = 0; i < node->level; i++)
+        {
+            printf("    ");
+        }
+
+        printf("tag: %u, Length: %u", node->value.tag, node->value.length);
+        if (node->children_size == 0)
+        {
+            printf(", Value: ");
+            for (uint32_t i = 0; i < node->value.length; i++)
+            {
+                printf("%02X ", node->value.value[i]);
+            }
+        }
+        printf("\n");
+
+        for (uint32_t i = 0; i < node->children_size; i++)
+        {
+            asn1_print_tree(node->children[i]);
+        }
+    }
+}
+
+void asn1_free_node(asn1_string_st* string)
+{
+    if (string)
+    {
+        free(string->value);
+    }
+}
+
+void asn1_free_tree(asn1_tree_st* node)
+{
+    if (node)
+    {
+        for (uint32_t i = 0; i < node->children_size; i++)
+        {
+            asn1_free_tree(node->children[i]);
+        }
+        free(node->value.value);
+        free(node->children);
+        free(node);
+    }
 }
