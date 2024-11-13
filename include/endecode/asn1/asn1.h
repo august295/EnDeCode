@@ -65,7 +65,7 @@ ENDECODE_API asn1_tree_st* asn1_parse(const uint8_t* data, size_t len, int level
 
 ENDECODE_API void asn1_print_string(asn1_string_st* str);
 ENDECODE_API void asn1_print_tree(asn1_tree_st* node);
-ENDECODE_API void asn1_free_node(asn1_string_st* string);
+ENDECODE_API void asn1_free_string(asn1_string_st* string);
 ENDECODE_API void asn1_free_tree(asn1_tree_st* node);
 
 #ifdef __cplusplus

@@ -181,7 +181,7 @@ void asn1_print_tree(asn1_tree_st* node)
     }
 }
 
-void asn1_free_node(asn1_string_st* string)
+void asn1_free_string(asn1_string_st* string)
 {
     if (string)
     {
