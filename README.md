@@ -40,6 +40,12 @@ git clone --recursive https://github.com/august295/EnDeCode.git
 -D"BUILD_SINGLE_LIBRARY=ON"
 ```
 
+使用 vcpkg
+
+```cmd
+-D"BUILD_VCPKG=ON"
+```
+
 生成测试工程
 
 ```cmd
@@ -47,7 +53,9 @@ git clone --recursive https://github.com/august295/EnDeCode.git
 ```
 
 ```cmd
-cmake -B"build" -G"Visual Studio 17 2022" -D"BUILD_SINGLE_LIBRARY=ON" -D"BUILD_TEST=ON"
+cmake -B"build" -G"Visual Studio 17 2022" -D"BUILD_TEST=ON"
+
+cmake -B"build_single" -G"Visual Studio 17 2022" -D"BUILD_SINGLE_LIBRARY=ON" -D"BUILD_TEST=ON"
 ```
 
 

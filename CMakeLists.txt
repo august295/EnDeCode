@@ -40,10 +40,14 @@ set(CMAKE_RELWITHDEBINFO_POSTFIX "rd")
 
 # 选项
 option(BUILD_SINGLE_LIBRARY "Build as a single shared library" OFF)
+option(BUILD_VCPKG "Build use vcpkg" OFF)
 option(BUILD_TEST "Build test executable" OFF)
 
 # vcpkg
-include(${ROOT_DIR}/cmake/module_vcpkg.cmake)
+if(BUILD_VCPKG)
+    include(${ROOT_DIR}/cmake/module_vcpkg.cmake)
+    add_compile_definitions(ENABLE_GMP)
+endif(BUILD_VCPKG)
 
 # 算法库
 include(${ROOT_DIR}/cmake/module.cmake)

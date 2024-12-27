@@ -24,8 +24,10 @@ else()
     add_subdirectory(aes)
 
     # asymmetric_key
-    add_subdirectory(rsa)
-    add_subdirectory(ecc)
+    if(BUILD_VCPKG)
+        add_subdirectory(rsa)
+        add_subdirectory(ecc)
+    endif(BUILD_VCPKG)
 
     # certification
     add_subdirectory(asn1)

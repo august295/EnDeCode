@@ -138,7 +138,7 @@ void sm3_final(sm3_context* ctx, uint8_t digest[SM3_DIGEST_LENGTH])
     bits[6] = (count >> 8) & 0xFF;
     bits[7] = count & 0xFF;
 
-    static const uint8_t padding[SM3_BLOCK_SIZE] = { 0x80 };
+    static const uint8_t padding[SM3_BLOCK_SIZE] = {0x80};
     sm3_update(ctx, padding, padLen);
     sm3_update(ctx, bits, 8);
 
@@ -157,4 +157,78 @@ void sm3(const uint8_t* data, uint64_t data_len, uint8_t* digest)
     sm3_init(&ctx);
     sm3_update(&ctx, data, data_len);
     sm3_final(&ctx, digest);
+}
+
+void sm3_hmac(const uint8_t* key, size_t key_len, const uint8_t* data, size_t data_len, uint8_t* hmac)
+{
+    uint8_t k_ipad[SM3_BLOCK_SIZE];
+    uint8_t k_opad[SM3_BLOCK_SIZE];
+    uint8_t key_hash[SM3_DIGEST_LENGTH];
+    uint8_t inner_hash[SM3_DIGEST_LENGTH];
+    size_t  i;
+
+    // Step 1: Process the key
+    if (key_len > SM3_BLOCK_SIZE)
+    {
+        sm3(key, key_len, key_hash);
+        key     = key_hash;
+        key_len = SM3_DIGEST_LENGTH;
+    }
+
+    memset(k_ipad, 0x36, SM3_BLOCK_SIZE);
+    memset(k_opad, 0x5C, SM3_BLOCK_SIZE);
+
+    for (i = 0; i < key_len; i++)
+    {
+        k_ipad[i] ^= key[i];
+        k_opad[i] ^= key[i];
+    }
+
+    // Step 2: Calculate inner hash
+    sm3_context ctx;
+    sm3_init(&ctx);
+    sm3_update(&ctx, k_ipad, SM3_BLOCK_SIZE);
+    sm3_update(&ctx, data, data_len);
+    sm3_final(&ctx, inner_hash);
+
+    // Step 3: Calculate outer hash
+    sm3_init(&ctx);
+    sm3_update(&ctx, k_opad, SM3_BLOCK_SIZE);
+    sm3_update(&ctx, inner_hash, SM3_DIGEST_LENGTH);
+    sm3_final(&ctx, hmac);
+}
+
+void sm3_x9_63_kdf(const uint8_t* z, size_t z_len, const uint8_t* shared_info, size_t shared_info_len, uint8_t* derived_key, size_t key_len)
+{
+    uint8_t counter[4];
+    uint8_t hash_output[SM3_DIGEST_LENGTH];
+    size_t  hash_count  = (key_len + SM3_DIGEST_LENGTH - 1) / SM3_DIGEST_LENGTH;
+    size_t  derived_pos = 0;
+
+    for (uint32_t i = 1; i <= hash_count; i++)
+    {
+        // Encode counter (big-endian)
+        counter[0] = (i >> 24) & 0xFF;
+        counter[1] = (i >> 16) & 0xFF;
+        counter[2] = (i >> 8) & 0xFF;
+        counter[3] = i & 0xFF;
+
+        sm3_context ctx;
+        sm3_init(&ctx);
+
+        // Hash Z || counter || shared_info
+        sm3_update(&ctx, z, z_len);
+        sm3_update(&ctx, counter, 4);
+        if (shared_info && shared_info_len > 0)
+        {
+            sm3_update(&ctx, shared_info, shared_info_len);
+        }
+
+        sm3_final(&ctx, hash_output);
+
+        // Copy to derived key
+        size_t copy_len = (derived_pos + SM3_DIGEST_LENGTH > key_len) ? (key_len - derived_pos) : SM3_DIGEST_LENGTH;
+        memcpy(derived_key + derived_pos, hash_output, copy_len);
+        derived_pos += copy_len;
+    }
 }

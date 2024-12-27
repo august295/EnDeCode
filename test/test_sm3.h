@@ -33,3 +33,18 @@ TEST(test_sm3, test2)
     array_bit8_to_bitn<uint32_t>(hash, temp, SM3_DIGEST_LENGTH / 4, 0);
     EXPECT_TRUE(my_equal_array_32bit(good_hash, temp, SM3_DIGEST_LENGTH / 4));
 }
+
+TEST(test_sm3, sm3_hmac)
+{
+    char*    data                             = (char*)"12345678";
+    int      data_len                         = strlen(data);
+    char*    key                              = (char*)"12345678";
+    int      key_len                          = strlen(key);
+    uint32_t good_hash[SM3_DIGEST_LENGTH / 4] = {0xacbf5c1e, 0x7ff1e4e8, 0x543d8ed1, 0xe1d48a0a, 0x20dce2a2, 0x40805599, 0xa57fb884, 0x0660f86f};
+    uint8_t  hash[SM3_DIGEST_LENGTH]          = {0};
+    uint32_t temp[SM3_DIGEST_LENGTH / 4]      = {0};
+
+    sm3_hmac((uint8_t*)key, key_len, (uint8_t*)data, data_len, (uint8_t*)hash);
+    array_bit8_to_bitn<uint32_t>(hash, temp, SM3_DIGEST_LENGTH / 4, 0);
+    EXPECT_TRUE(my_equal_array_32bit(good_hash, temp, SM3_DIGEST_LENGTH / 4));
+}

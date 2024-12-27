@@ -12,6 +12,7 @@ macro(CreateTarget ProjectName Type Group)
     set(HEADER_FILES "")
     set(SOURCE_FILES "")
 
+    # 搜集源文件
     if(NOT ${Type} STREQUAL "Exe")
         if(BUILD_SINGLE_LIBRARY)
             file(GLOB_RECURSE HEADER_FILES "${ROOT_DIR}/include/${UseProjectName}/*.h" "${ROOT_DIR}/include/${UseProjectName}/*.hpp")
@@ -21,8 +22,14 @@ macro(CreateTarget ProjectName Type Group)
     else()
         file(GLOB_RECURSE HEADER_FILES "${CURRENT_PATH}/*.h" "${CURRENT_PATH}/*.hpp")
     endif()
-
     file(GLOB_RECURSE SOURCE_FILES "${CURRENT_PATH}/*.c" "${CURRENT_PATH}/*.cpp")
+
+    # 过滤文件
+    if(NOT BUILD_VCPKG)
+        list(FILTER HEADER_FILES EXCLUDE REGEX ".*(rsa|ecc).*")
+        list(FILTER SOURCE_FILES EXCLUDE REGEX ".*(rsa|ecc).*")
+    endif(NOT BUILD_VCPKG)
+    
 
     # 文件分类
     if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
@@ -63,7 +70,7 @@ macro(CreateTarget ProjectName Type Group)
         elseif(${Type} STREQUAL "Dll")
             add_library(${ProjectName} SHARED ${HEADER_FILES} ${SOURCE_FILES})
         endif()
-        if(BUILD_SINGLE_LIBRARY)
+        if(BUILD_SINGLE_LIBRARY AND BUILD_VCPKG)
             target_link_libraries(${ProjectName} PkgConfig::gmp)
         endif()
     endif()
