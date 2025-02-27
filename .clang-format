@@ -1,7 +1,8 @@
 ---
-# 语言 ： None, Cpp, Java, JavaScript, ObjC, Proto, TableGen, TextProto
+# 语言  None, Cpp, Java, JavaScript, ObjC, Proto, TableGen, TextProto
 Language: Cpp
-# BasedOnStyle:  LLVM
+# 样式  LLVM, Google, Chromium, Mozilla, WebKit, Microsoft, GNU
+# BasedOnStyle: LLVM
 
 # 访问权限说明符的偏移（public/private等）
 AccessModifierOffset: -4
@@ -21,13 +22,13 @@ AlignAfterOpenBracket: Align
 ##################################################
 
 # 连续宏定义时的对齐方式 （@ref AlignConsecutiveStyle）
-AlignConsecutiveMacros: Consecutive
+AlignConsecutiveMacros: AcrossEmptyLinesAndComments
 
 # 连续赋值时的对齐方式（@ref AlignConsecutiveStyle）
 AlignConsecutiveAssignments: Consecutive 
 
 # 连续位域的对齐方式（@ref AlignConsecutiveStyle）
-AlignConsecutiveBitFields: Consecutive
+AlignConsecutiveBitFields: AcrossEmptyLinesAndComments
 
 # 连续声明时，变量名的对齐方式（@ref AlignConsecutiveStyle）
 AlignConsecutiveDeclarations: Consecutive
@@ -47,7 +48,10 @@ AlignOperands: Align
 # 是否对齐行尾注释？
 # -- true - 启用对齐
 # -- false - 无需对齐
-AlignTrailingComments: true
+# clang-format 16 设置多少空行以内对齐
+AlignTrailingComments:
+  Kind: Always
+  OverEmptyLines: 2
 
 # 当函数调用和参数无法放在同一行时，是否将参数全部放在下一行
 # -- true - 全部放在下一行
@@ -134,10 +138,6 @@ AlwaysBreakBeforeMultilineStrings: false
 # -- Yes - 总是换行
 AlwaysBreakTemplateDeclarations: Yes
 
-# 定义语言或编译器的扩展属性字符串，以免 clang 无法识别
-AttributeMacros:
-  - __capability
-
 # 函数调用时，参数的放置规则
 # -- false - 参数要么放在同一行，要么每个参数占用一行
 # -- true - 不做强制要求
@@ -151,7 +151,7 @@ BinPackParameters: false
 # 大括号换行规则，只有当 @ref BreakBeforeBraces 设置为 Custom 时才有效
 BraceWrapping:
   # 是否在 case 后面换行？ (true\false)
-  AfterCaseLabel: true
+  AfterCaseLabel: false
 
   # 是否在 class 后换行？(true\false)
   AfterClass: true
@@ -171,6 +171,9 @@ BraceWrapping:
   # 是否在命名空间后换行？(true\false)
   AfterNamespace: true
 
+  # 是否在 ObjC 定义后换行？(true\false)
+  AfterObjCDeclaration: true
+
   # 是否在 struct 定义时换行？(true\false)
   AfterStruct: true
 
@@ -178,7 +181,7 @@ BraceWrapping:
   AfterUnion: true
 
   # 是否在 extern 后换行？(true\false)
-  AfterExternBlock: true
+  AfterExternBlock: false
 
   # 是否在 catch 前换行？(true\false)
   BeforeCatch: true
@@ -190,7 +193,7 @@ BraceWrapping:
   BeforeLambdaBody: false
 
   # 是否在 do-while 的 while 前换行？(true\false)
-  BeforeWhile: true
+  BeforeWhile: false
 
   # 大括号是否参与缩进？
   IndentBraces: false
@@ -238,11 +241,6 @@ BreakBeforeBraces: Custom
 # -- AfterComma - 仅在逗号后方分割，冒号和首个基类位于同一行
 BreakInheritanceList: BeforeComma
 
-# 当三元表达式不能放在同一行时，是否在三元操作符前方换行
-# -- true - 操作符位于新行的首部
-# -- false - 操作符位于上一行的尾部
-BreakBeforeTernaryOperators: true
-
 # 构造函数初始化列表分割方式
 # -- BeforeColon - 在冒号 ':' 前方分割，冒号位于行首，逗号','位于行尾
 # -- BeforeComma - 在冒号和逗号前方分割，冒号和逗号都位于行首，并且对齐
@@ -255,10 +253,6 @@ BreakStringLiterals: true
 # 列宽长度限制
 # -- 0 - 0代表没有限制
 ColumnLimit: 0
-
-# 用于匹配注释信息的正则表达式，被匹配的行不会做任何修改
-CommentPragmas: "^ IWYU pragma:"
-QualifierAlignment: Leave
 
 # 是否压缩紧接的命名空间？
 # -- true - 将紧跟的命名空间放在同一行
@@ -307,48 +301,10 @@ EmptyLineAfterAccessModifier: Never
 # -- Always - 除第一个外，都在前方加空行
 EmptyLineBeforeAccessModifier: LogicalBlock
 
-# 实验性功能：是否自动分析 bin pack 类型？
-# NOTE : 不建议启用
-ExperimentalAutoDetectBinPacking: false
-
 # 是否自动修正命名空间的结束注释？
 # -- true - 在短的命名空间尾部，自动添加或修改错误的命名空间结束注释
 # -- false - 不自动修正
 FixNamespaceComments: true
-
-# 应该被解释为 foreach 循环，而不是函数调用的宏定义
-ForEachMacros:
-  - foreach
-  - Q_FOREACH
-  - BOOST_FOREACH
-
-# 需要被忽略的宏定义，这些宏定义类似属性标签
-StatementAttributeLikeMacros:
-  - Q_EMIT
-
-# 多个 include 块（有空行分隔的include）排序时的分组规则
-# -- Preserve - 保留原有的块分隔，各自排序
-# -- Merge - 将所有的块视为同一个，然后进行排序
-# -- Regroup - 将所有的块视为同一个进行排序，然后按照 @ref IncludeCategories 的规则进行分组
-IncludeBlocks: Preserve
-
-# 用于 include 排序的规则
-IncludeCategories:
-  - Regex: '^"(llvm|llvm-c|clang|clang-c)/'
-    Priority: 2
-    SortPriority: 0
-    CaseSensitive: false
-  - Regex: '^(<|"(gtest|gmock|isl|json)/)'
-    Priority: 3
-    SortPriority: 0
-    CaseSensitive: false
-  - Regex: ".*"
-    Priority: 1
-    SortPriority: 0
-    CaseSensitive: false
-IncludeIsMainRegex: "(Test)?$"
-IncludeIsMainSourceRegex: ""
-IndentAccessModifiers: false
 
 # 是否缩进 case 标签？
 # -- true - case 不与 switch 对齐
@@ -386,21 +342,9 @@ IndentWidth: 4
 # 当函数过长导致换行时，是否进行缩进？(true\false)
 IndentWrappedFunctionNames: false
 
-# 是否在块的起始位置保留空行？(true\false)
-# -- true - 保留块起始的空行
-# -- false - 删除块起始的空行
-KeepEmptyLinesAtTheStartOfBlocks: false
-
 # Lambda 正文缩进
-# -- Signature      将 lambda 主体与 lambda 函数对齐（默认）
-# -- OuterScope     将 lambda 主体相对于 lambda 函数所在外部作用域的缩进级别对齐
+# --
 LambdaBodyIndentation: Signature
-
-# 用于识别宏定义型块起始的正则表达式
-MacroBlockBegin: ""
-
-# 用于识别宏定义型块结束的正则表达式
-MacroBlockEnd: ""
 
 # 允许保留的空行行数
 MaxEmptyLinesToKeep: 1
@@ -422,11 +366,11 @@ PointerAlignment: Left
 # 是否重排注释？(true\false)
 ReflowComments: true
 
-# include 排序规则
-# -- Never - 不进行排序
-# -- CaseSensitive - 排序时大小写敏感
-# -- CaseInsensitive - 排序时大小写不敏感
-SortIncludes: CaseSensitive
+# 是否排序 include
+# Never             不排序
+# CaseSensitive     排序区分大小写
+# CaseInsensitive   排序不区分大小写
+SortIncludes: Never
 
 # 是否排序所有 using 声明？(true\false)
 SortUsingDeclarations: true
@@ -530,15 +474,6 @@ SpaceBeforeSquareBrackets: false
 # -- After -- 只在后方加空格
 BitFieldColonSpacing: Both
 
-# 语言标准
-Standard: Latest
-
-# 应被视为表达式的宏定义列表
-# NOTE : 主要用于宏扩展后自带分包的语句
-StatementMacros:
-  - Q_UNUSED
-  - QT_REQUIRE_VERSION
-
 # tab 宽度
 TabWidth: 4
 
@@ -552,12 +487,4 @@ UseCRLF: false
 # -- AlignWithSpaces -
 # -- Always -
 UseTab: Never
-
-# 对括号敏感的宏定义列表，不允许修改这些宏定义
-WhitespaceSensitiveMacros:
-  - STRINGIZE
-  - PP_STRINGIZE
-  - BOOST_PP_STRINGIZE
-  - NS_SWIFT_NAME
-  - CF_SWIFT_NAME
 ...

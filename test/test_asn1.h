@@ -3,14 +3,13 @@
 
 #include <gtest/gtest.h>
 
+#include "endecode/base64/base64.h"
 #include "endecode/asn1/asn1.h"
 #include "endecode/asn1/x509.h"
-#include "endecode/base64/base64.h"
+#include "endecode/asn1/cert_sm2.h"
+#include "endecode/asn1/gm_sof.h"
 
 #include "test_util.h"
-
-#define PEM_CERT_BEGIN "-----BEGIN CERTIFICATE-----"
-#define PEM_CERT_END   "-----END CERTIFICATE-----"
 
 TEST(test_asn1, asn1_test1)
 {
@@ -18,10 +17,10 @@ TEST(test_asn1, asn1_test1)
     const uint8_t* dataPtr     = asn1_data;
     size_t         dataLen     = sizeof(asn1_data);
 
-    asn1_string_st str;
-    asn1_parse_string(dataPtr, &str);
-    // asn1_print_string(&str);
-    free(str.value);
+    easy_asn1_string_st str;
+    easy_asn1_parse_string(dataPtr, &str);
+    // easy_asn1_print_string(&str, 0);
+    easy_asn1_free_string(&str);
 }
 
 TEST(test_asn1, asn1_test2)
@@ -37,9 +36,10 @@ TEST(test_asn1, asn1_test2)
        0x02, 0x01, 0x03     // INTEGER, length 1, value 3
     };
     // clang-format on
-    asn1_tree_st* tree = asn1_parse(asn1_data, sizeof(asn1_data), 0);
-    // asn1_print_tree(tree);
-    asn1_free_tree(tree);
+    easy_asn1_tree_st* tree = NULL;
+    easy_asn1_parse(asn1_data, sizeof(asn1_data), 0, &tree);
+    // easy_asn1_print_tree(tree);
+    easy_asn1_free_tree(tree);
 }
 
 TEST(test_asn1, x509_test1)
@@ -63,7 +63,54 @@ TEST(test_asn1, x509_test1)
     uint8_t* data     = (uint8_t*)malloc(BASE64_DECODE_OUT_SIZE(str_size));
     size_t   data_len = base64_decode(str.c_str(), str_size, (unsigned char*)data);
 
-    asn1_tree_st* tree = x509_parse_cert(data, data_len, 0);
-    // asn1_print_tree(tree);
-    asn1_free_tree(tree);
+    easy_asn1_tree_st* tree = NULL;
+    easy_asn1_parse(data, data_len, 0, &tree);
+    // easy_asn1_print_tree(tree);
+    easy_asn1_free_tree(tree);
+}
+
+TEST(test_asn1, sm2_test1)
+{
+    std::string   filename = "./cer/sm2-x509.cer";
+    std::ifstream in(filename);
+
+    std::string str;
+    std::string line;
+    while (std::getline(in, line))
+    {
+        if (line == PEM_CERT_BEGIN || line == PEM_CERT_END || line.empty())
+        {
+            continue;
+        }
+        str += line;
+    }
+    in.close();
+
+    size_t   str_size = str.size();
+    uint8_t* data     = (uint8_t*)malloc(BASE64_DECODE_OUT_SIZE(str_size));
+    size_t   data_len = base64_decode(str.c_str(), str_size, (unsigned char*)data);
+
+    SM2Certificate* cert = sm2_cert_parse(data, data_len);
+    sm2_cert_free(cert);
+}
+
+TEST(test_asn1, sm2_test2)
+{
+    std::string   filename = "./cer/sm2-x509.cer";
+    std::ifstream in(filename);
+
+    std::string str;
+    std::string line;
+    while (std::getline(in, line))
+    {
+        if (line == PEM_CERT_BEGIN || line == PEM_CERT_END || line.empty())
+        {
+            continue;
+        }
+        str += line;
+    }
+    in.close();
+
+    BSTR info = SOF_GetCertInfo((BSTR)str.c_str(), SGD_CERT_VERSION);
+    printf("%s\n", info);
 }
