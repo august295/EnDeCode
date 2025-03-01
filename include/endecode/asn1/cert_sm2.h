@@ -9,6 +9,8 @@
  */
 #define SGD_CERT_VERSION                         0x00000001 // 证书版本
 #define SGD_CERT_SERIAL                          0x00000002 // 证书序列号
+#define SGD_CERT_SIGNATURE_ALGORITHM             0x00000003 // 证书签名算法
+#define SGD_CERT_PUBLIC_KEY_PARAMETERS           0x00000004 // 证书公钥参数
 #define SGD_CERT_ISSUER                          0x00000005 // 证书颁发者信息
 #define SGD_CERT_VALID_TIME                      0x00000006 // 证书有效期
 #define SGD_CERT_SUBJECT                         0x00000007 // 证书拥有者信息
@@ -129,8 +131,25 @@ typedef struct SM2Certificate
 extern "C" {
 #endif
 
-ENDECODE_API void            sm2_cert_init(SM2Certificate* cert);
-ENDECODE_API void            sm2_cert_free(SM2Certificate* cert);
+/**
+ * @brief   初始化证书结构体
+ * @param   cert                    [IN]        证书结构体
+ */
+ENDECODE_API void sm2_cert_init(SM2Certificate* cert);
+
+/**
+ * @brief   释放证书结构体
+ * @param   cert                    [IN]        证书结构体
+ */
+ENDECODE_API void sm2_cert_free(SM2Certificate* cert);
+
+/**
+ * @brief   解析证书
+ * @param   data                    [IN]        二进制证书数据
+ * @param   len                     [IN]        二进制证书数据长度
+ * @return  SM2Certificate*                     证书结构体（可能部分解析成功）
+ *          NULL                                解析失败
+ */
 ENDECODE_API SM2Certificate* sm2_cert_parse(const uint8_t* data, size_t len);
 
 #ifdef __cplusplus

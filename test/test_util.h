@@ -153,33 +153,19 @@ uint64_t swap64(uint64_t value)
 }
 
 /**
- * @brief 16进制转字符串
- * @param[in]     hex            16进制
- * @param[in]     hex_len        16进制长度
- * @param[in]     upper          1-大写，0-小写
- * @param[out]    ascii          字符串
+ * @brief   . 替换为 _
+ * @param   input                   [IN]        输入字符串，2.5.4.6
+ * @param   output                  [IN/OUT]    输出字符串，2_5_4_6
  */
-void hex_to_ascii(const uint8_t* hex, int hex_len, int upper, uint8_t* ascii)
+void replace_dot(const char* input, char* output)
 {
-    uint8_t temp[2];
-    for (int i = 0; i < hex_len; i++)
+    while (*input)
     {
-        temp[0] = (hex[i] & 0xF0) >> 4;
-        temp[1] = (hex[i] & 0x0F);
-        for (int j = 0; j < 2; j++)
-        {
-            if (temp[j] < 10)
-            {
-                temp[j] += '0';
-            }
-            else
-            {
-                temp[j] = upper ? temp[j] - 10 + 'A' : temp[j] - 10 + 'a';
-            }
-            *ascii++ = temp[j];
-        }
+        *output = (*input == '.') ? '_' : *input;
+        input++;
+        output++;
     }
-    *ascii++ = '\0';
+    *output = '\0';
 }
 
 #endif

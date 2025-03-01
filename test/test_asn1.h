@@ -111,6 +111,18 @@ TEST(test_asn1, sm2_test2)
     }
     in.close();
 
-    BSTR info = SOF_GetCertInfo((BSTR)str.c_str(), SGD_CERT_VERSION);
-    printf("%s\n", info);
+    // BSTR info = NULL;
+    // printf("Cert info:\n");
+    // info = SOF_GetCertInfo((BSTR)str.c_str(), SGD_CERT_VERSION);
+    // printf("SGD_CERT_VERSION: %s\n", info);
+    // info = SOF_GetCertInfo((BSTR)str.c_str(), SGD_CERT_SERIAL);
+    // printf("SGD_CERT_SERIAL: %s\n", info);
+    // info = SOF_GetCertInfo((BSTR)str.c_str(), SGD_CERT_SIGNATURE_ALGORITHM);
+    // printf("SGD_CERT_SIGNATURE_ALGORITHM: %s\n", info);
+    // info = SOF_GetCertInfo((BSTR)str.c_str(), SGD_CERT_ISSUER);
+    // printf("SGD_CERT_ISSUER: %s\n", info);
+    // info = SOF_GetCertInfo((BSTR)str.c_str(), SGD_CERT_VALID_TIME);
+    // printf("SGD_CERT_VALID_TIME: %s\n", info);
+    // info = SOF_GetCertInfo((BSTR)str.c_str(), SGD_CERT_SUBJECT);
+    // printf("SGD_CERT_SUBJECT: %s\n", info);
 }

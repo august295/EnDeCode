@@ -24,6 +24,31 @@
 
 #include "test_asn1.h"
 
+void printf_oid()
+{
+    for (size_t i = 0; i < sizeof(sm_oid_mapping_x500) / sizeof(SM_OID_MAPPING); i++)
+    {
+        uint8_t oid_bin[128];
+        size_t  oid_bin_len = 0;
+        string_to_oid(sm_oid_mapping_x500[i].oid_string, oid_bin, &oid_bin_len);
+        char temp[128] = {0};
+        replace_dot(sm_oid_mapping_x500[i].oid_string, temp);
+        printf("static uint8_t OID_%s[] = {", temp);
+        for (size_t j = 0; j < oid_bin_len; j++)
+        {
+            if (j == oid_bin_len - 1)
+            {
+                printf("0x%02X", oid_bin[j]);
+            }
+            else
+            {
+                printf("0x%02X, ", oid_bin[j]);
+            }
+        }
+        printf("};\n");
+    }
+}
+
 int main(int argc, char** argv)
 {
     testing::InitGoogleTest(&argc, argv);
