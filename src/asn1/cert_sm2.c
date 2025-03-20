@@ -20,8 +20,7 @@ void sm2_cert_init(SM2Certificate* cert)
     easy_asn1_init_string(&cert->tbsCertificate.subjectPublicKeyInfo.subjectPublicKey);
     easy_asn1_init_string(&cert->tbsCertificate.issuerUniqueId);
     easy_asn1_init_string(&cert->tbsCertificate.subjectUniqueId);
-    cert->tbsCertificate.extensions.count      = 0;
-    cert->tbsCertificate.extensions.extensions = NULL;
+    easy_asn1_init_string(&cert->tbsCertificate.extensions);
 
     // signatureAlgorithm
     easy_asn1_init_string(&cert->signatureAlgorithm.algorithm);
@@ -66,14 +65,7 @@ void sm2_cert_free(SM2Certificate* cert)
     easy_asn1_free_string(&cert->tbsCertificate.subjectPublicKeyInfo.subjectPublicKey);
     easy_asn1_free_string(&cert->tbsCertificate.issuerUniqueId);
     easy_asn1_free_string(&cert->tbsCertificate.subjectUniqueId);
-    for (uint32_t i = 0; i < cert->tbsCertificate.extensions.count; i++)
-    {
-        easy_asn1_free_string(&cert->tbsCertificate.extensions.extensions[i].extnId);
-        easy_asn1_free_string(&cert->tbsCertificate.extensions.extensions[i].critical);
-        easy_asn1_free_string(&cert->tbsCertificate.extensions.extensions[i].extnValue);
-    }
-    cert->tbsCertificate.extensions.count      = 0;
-    cert->tbsCertificate.extensions.extensions = NULL;
+    easy_asn1_free_string(&cert->tbsCertificate.extensions);
 
     // signatureAlgorithm
     easy_asn1_free_string(&cert->signatureAlgorithm.algorithm);
@@ -121,10 +113,13 @@ SM2Certificate* sm2_cert_parse(const uint8_t* data, size_t len)
                 if (tbs->children_size > 2)
                 {
                     easy_asn1_tree_st* signatureNode = tbs->children[2];
-                    if (signatureNode->children && signatureNode->children_size > 1)
+                    if (signatureNode->children)
                     {
                         easy_asn1_copy_string(&signatureNode->children[0]->value, &cert->tbsCertificate.signature.algorithm);
-                        easy_asn1_copy_string(&signatureNode->children[1]->value, &cert->tbsCertificate.signature.parameters);
+                        if (signatureNode->children_size > 1)
+                        {
+                            easy_asn1_copy_string(&signatureNode->children[1]->value, &cert->tbsCertificate.signature.parameters);
+                        }
                     }
                 }
                 // 解析颁发者
@@ -216,32 +211,8 @@ SM2Certificate* sm2_cert_parse(const uint8_t* data, size_t len)
                 // 解析扩展项
                 if (tbs->children_size > 7)
                 {
-                    if (tbs->children[7]->children_size == 0)
-                    {
-                        break;
-                    }
-                    easy_asn1_tree_st* extensionsNode          = tbs->children[7]->children[0];
-                    cert->tbsCertificate.extensions.count      = extensionsNode->children_size;
-                    cert->tbsCertificate.extensions.extensions = (Extension*)calloc(1, sizeof(Extension) * extensionsNode->children_size);
-                    if (cert->tbsCertificate.extensions.extensions == NULL)
-                    {
-                        break;
-                    }
-                    for (uint32_t i = 0; i < extensionsNode->children_size; i++)
-                    {
-                        easy_asn1_tree_st* extensionNode = extensionsNode->children[i];
-                        easy_asn1_copy_string(&extensionNode->children[0]->value, &cert->tbsCertificate.extensions.extensions[i].extnId);
-                        if (extensionNode->children[1]->value.tag == EASY_ASN1_BOOLEAN)
-                        {
-                            easy_asn1_copy_string(&extensionNode->children[1]->value, &cert->tbsCertificate.extensions.extensions[i].critical);
-                            easy_asn1_copy_string(&extensionNode->children[2]->value, &cert->tbsCertificate.extensions.extensions[i].extnValue);
-                        }
-                        else
-                        {
-                            easy_asn1_init_string(&cert->tbsCertificate.extensions.extensions[i].critical);
-                            easy_asn1_copy_string(&extensionNode->children[1]->value, &cert->tbsCertificate.extensions.extensions[i].extnValue);
-                        }
-                    }
+                    easy_asn1_tree_st* extensionsNode = tbs->children[7];
+                    easy_asn1_copy_string(&extensionsNode->value, &cert->tbsCertificate.extensions);
                 }
             }
 

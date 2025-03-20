@@ -148,13 +148,14 @@ void convertUTCTimeToStandard(const char* utcTime, size_t utcOffset, char* stand
         return;
     }
 
-    if (tm.tm_year < 99)
+    if (tm.tm_year < 50)
     {
         tm.tm_year += 100;
     }
 
     tm.tm_mon -= 1;
     tm.tm_hour += utcOffset;
+    mktime(&tm);
 
     // 格式化输出为标准时间
     strftime(standardTime, 20, "%Y-%m-%d %H:%M:%S", &tm);
@@ -175,6 +176,7 @@ void convertGeneralizedTimeToStandard(const char* generalizedTime, size_t utcOff
     tm.tm_year -= 1900;
     tm.tm_mon -= 1;
     tm.tm_hour += utcOffset;
+    mktime(&tm);
 
     // 格式化输出为标准时间
     strftime(standardTime, 20, "%Y-%m-%d %H:%M:%S", &tm);

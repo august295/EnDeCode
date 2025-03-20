@@ -76,7 +76,7 @@ cmake -B"build_single" -G"Visual Studio 17 2022" -D"BUILD_SINGLE_LIBRARY=ON" -D"
 #### 3.1.2. 非对称密码算法（Asymmetric-key Algorithm）
 
 - [x] RSA
-- [ ] ECC
+- [x] ECC
 - [ ] SM2
 - [ ] SM9
 

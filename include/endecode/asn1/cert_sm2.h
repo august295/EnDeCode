@@ -88,21 +88,6 @@ typedef struct SubjectPublicKeyInfo
     easy_asn1_string_st subjectPublicKey; // 公钥值（DER编码）
 } SubjectPublicKeyInfo;
 
-// 定义扩展字段
-typedef struct Extension
-{
-    easy_asn1_string_st extnId;    // 扩展oid
-    easy_asn1_string_st critical;  // 是否关键
-    easy_asn1_string_st extnValue; // 扩展值（DER编码）
-} Extension;
-
-// 定义扩展字段列表
-typedef struct Extensions
-{
-    Extension* extensions; // 扩展字段数组
-    uint32_t   count;      // 扩展字段数量
-} Extensions;
-
 // 定义证书主体（TBS）
 typedef struct TBSCertificate
 {
@@ -115,7 +100,7 @@ typedef struct TBSCertificate
     SubjectPublicKeyInfo subjectPublicKeyInfo; // 主体公钥信息
     easy_asn1_string_st  issuerUniqueId;       // 颁发者唯一标识符
     easy_asn1_string_st  subjectUniqueId;      // 主体唯一标识符
-    Extensions           extensions;           // 扩展项
+    easy_asn1_string_st  extensions;           // 扩展项
 } TBSCertificate;
 
 // 定义证书结构

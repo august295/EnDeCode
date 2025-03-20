@@ -1,8 +1,8 @@
 #include "endecode/base64/base64.h"
 
-#define BASE64_PAD                '='
-#define BASE64DE_FIRST            '+'
-#define BASE64DE_LAST             'z'
+#define BASE64_PAD     '='
+#define BASE64DE_FIRST '+'
+#define BASE64DE_LAST  'z'
 
 // clang-format off
 /* BASE 64 encode table */
@@ -18,7 +18,7 @@ static const char base64en[] = {
 };
 
 /* ASCII order for BASE 64 decode, 255 in unused character */
-static const unsigned char base64de[] = {
+static const uint8_t base64de[] = {
     /*nul, soh, stx,  etx,  eot,  enq,  ack,  bel, */
     0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
     /*bs,  ht,  nl,   vt,   np,   cr,   so,   si,  */
@@ -54,13 +54,13 @@ static const unsigned char base64de[] = {
 };
 // clang-format on
 
-unsigned int base64_encode(const unsigned char* in, unsigned int inlen, char* out)
+size_t base64_encode(const uint8_t* in, size_t inlen, char* out)
 {
-    int           s;
-    unsigned int  i;
-    unsigned int  j;
-    unsigned char c;
-    unsigned char l;
+    size_t  s;
+    size_t  i;
+    size_t  j;
+    uint8_t c;
+    uint8_t l;
 
     s = 0;
     l = 0;
@@ -105,11 +105,11 @@ unsigned int base64_encode(const unsigned char* in, unsigned int inlen, char* ou
     return j;
 }
 
-unsigned int base64_decode(const char* in, unsigned int inlen, unsigned char* out)
+size_t base64_decode(const char* in, size_t inlen, uint8_t* out)
 {
-    unsigned int  i;
-    unsigned int  j;
-    unsigned char c;
+    size_t  i;
+    size_t  j;
+    uint8_t c;
 
     if (inlen & 0x3)
     {
@@ -127,7 +127,7 @@ unsigned int base64_decode(const char* in, unsigned int inlen, unsigned char* ou
             return 0;
         }
 
-        c = base64de[(unsigned char)in[i]];
+        c = base64de[(uint8_t)in[i]];
         if (c == 0xFF)
         {
             return 0;

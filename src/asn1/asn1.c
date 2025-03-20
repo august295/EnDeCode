@@ -111,7 +111,7 @@ const char* easy_asn1_tag_name(int tag)
     case EASY_ASN1_BIT_STRING: return "BIT_STRING";
     case EASY_ASN1_OCTET_STRING: return "OCTET_STRING";
     case EASY_ASN1_NULL: return "NULL";
-    case EASY_ASN1_OBJECT: return "OBJECT";
+    case EASY_ASN1_OBJECT: return "OBJECT_IDENTIFIER";
     case EASY_ASN1_OBJECT_DESCRIPTOR: return "OBJECT_DESCRIPTOR";
     case EASY_ASN1_EXTERNAL: return "EXTERNAL";
     case EASY_ASN1_REAL: return "REAL";
@@ -131,6 +131,12 @@ const char* easy_asn1_tag_name(int tag)
     case EASY_ASN1_GENERALSTRING: return "GENERALSTRING";
     case EASY_ASN1_UNIVERSALSTRING: return "UNIVERSALSTRING";
     case EASY_ASN1_BMPSTRING: return "BMPSTRING";
+    case ESAY_X509_ASN1_SEQUENCE: return "SEQUENCE";
+    case ESAY_X509_ASN1_SET: return "SET";
+    case ESAY_X509_CONTEXT0: return "CONTEXT_SPECIFIC [0]";
+    case ESAY_X509_CONTEXT1: return "CONTEXT_SPECIFIC [1]";
+    case ESAY_X509_CONTEXT2: return "CONTEXT_SPECIFIC [2]";
+    case ESAY_X509_CONTEXT3: return "CONTEXT_SPECIFIC [3]";
     }
 
     return NULL;

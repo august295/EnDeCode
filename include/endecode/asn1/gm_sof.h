@@ -43,6 +43,7 @@ public:
     void InitX500Map();
 
     std::string GetX500Name(const std::string& name);
+    std::string Capture(const std::string& str, const std::string& flag);
 
 private:
     GMSOF();

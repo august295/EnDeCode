@@ -38,7 +38,7 @@ BSTR SOF_GetCertInfo(BSTR Base64Cert, SHORT Type)
         oid_to_string(cert->tbsCertificate.signature.algorithm.value, cert->tbsCertificate.signature.algorithm.length, info);
         infoLen = strlen(info);
     }
-    else if (Type == SGD_CERT_ISSUER)
+    else if (Type == SGD_CERT_ISSUER || Type == SGD_CERT_ISSUER_CN || Type == SGD_CERT_ISSUER_O || Type == SGD_CERT_ISSUER_OU)
     {
         Name        issuer = cert->tbsCertificate.issuer;
         std::string info_str;
@@ -56,11 +56,24 @@ BSTR SOF_GetCertInfo(BSTR Base64Cert, SHORT Type)
                 info_str += ";";
             }
         }
+
+        if (Type == SGD_CERT_ISSUER_CN)
+        {
+            info_str = GMSOF::instance().Capture(info_str, "CN=");
+        }
+        else if (Type == SGD_CERT_ISSUER_O)
+        {
+            info_str = GMSOF::instance().Capture(info_str, "O=");
+        }
+        else if (Type == SGD_CERT_ISSUER_OU)
+        {
+            info_str = GMSOF::instance().Capture(info_str, "OU=");
+        }
         infoLen = info_str.size();
         info    = (BSTR)calloc(1, infoLen + 1);
         memcpy(info, info_str.c_str(), info_str.size());
     }
-    else if (Type == SGD_CERT_VALID_TIME)
+    else if (Type == SGD_CERT_VALID_TIME || Type == SGD_CERT_NOTBEFORE_TIME || Type == SGD_CERT_NOTAFTER_TIME)
     {
         Validity    time          = cert->tbsCertificate.validity;
         char        notBefore[20] = {0};
@@ -87,11 +100,19 @@ BSTR SOF_GetCertInfo(BSTR Base64Cert, SHORT Type)
         }
         info_str += notAfter;
 
+        if (Type == SGD_CERT_NOTBEFORE_TIME)
+        {
+            info_str = notBefore;
+        }
+        else if (Type == SGD_CERT_NOTAFTER_TIME)
+        {
+            info_str = notAfter;
+        }
         infoLen = info_str.size();
         info    = (BSTR)calloc(1, infoLen + 1);
         memcpy(info, info_str.c_str(), info_str.size());
     }
-    else if (Type == SGD_CERT_SUBJECT)
+    else if (Type == SGD_CERT_SUBJECT || Type == SGD_CERT_SUBJECT_CN || Type == SGD_CERT_SUBJECT_O || Type == SGD_CERT_SUBJECT_OU)
     {
         Name        subject = cert->tbsCertificate.subject;
         std::string info_str;
@@ -109,20 +130,65 @@ BSTR SOF_GetCertInfo(BSTR Base64Cert, SHORT Type)
                 info_str += ";";
             }
         }
+
+        if (Type == SGD_CERT_SUBJECT_CN)
+        {
+            info_str = GMSOF::instance().Capture(info_str, "CN=");
+        }
+        else if (Type == SGD_CERT_SUBJECT_O)
+        {
+            info_str = GMSOF::instance().Capture(info_str, "O=");
+        }
+        else if (Type == SGD_CERT_SUBJECT_OU)
+        {
+            info_str = GMSOF::instance().Capture(info_str, "OU=");
+        }
         infoLen = info_str.size();
         info    = (BSTR)calloc(1, infoLen + 1);
         memcpy(info, info_str.c_str(), info_str.size());
     }
     else if (Type == SGD_CERT_DER_PUBLIC_KEY)
     {
+        SubjectPublicKeyInfo subjectPublicKeyInfo = cert->tbsCertificate.subjectPublicKeyInfo;
+
+        std::string info_str;
+        char        temp[MAX_OID] = {0};
+        char        tempHex[3]    = {0};
+        oid_to_string(subjectPublicKeyInfo.algorithm.algorithm.value, subjectPublicKeyInfo.algorithm.algorithm.length, temp);
+        info_str += temp;
+        info_str += ";";
+        for (size_t i = 0; i < subjectPublicKeyInfo.subjectPublicKey.length; i++)
+        {
+            sprintf(tempHex, "%02X", subjectPublicKeyInfo.subjectPublicKey.value[i]);
+            if (i % 16)
+            {
+                info_str += std::string(tempHex) + " ";
+            }
+            else
+            {
+                if (i != 0)
+                {
+                    info_str += std::string(tempHex) + "\r\n";
+                }
+            }
+        }
+        infoLen = info_str.size();
+        info    = (char*)calloc(1, infoLen + 1);
+        memcpy(info, info_str.c_str(), info_str.size());
     }
     else if (Type == SGD_CERT_DER_EXTENSIONS)
     {
+        infoLen = cert->tbsCertificate.extensions.length;
+        info    = (char*)calloc(1, infoLen + 1);
+        memcpy(info, cert->tbsCertificate.extensions.value, infoLen);
     }
 
     sm2_cert_free(cert);
 
-    return info;
+    size_t infoBase64Len = BASE64_ENCODE_OUT_SIZE(infoLen);
+    char*  infoBase64    = (char*)calloc(1, infoBase64Len + 1);
+    base64_encode((uint8_t*)info, infoLen, infoBase64);
+    return (BSTR)infoBase64;
 }
 
 struct GMSOF::GMSOFImpl
@@ -134,6 +200,11 @@ GMSOF::GMSOF()
     : m_impl(new GMSOFImpl())
 {
     InitX500Map();
+}
+
+GMSOF::~GMSOF()
+{
+    m_impl->m_x500Map.clear();
 }
 
 void GMSOF::InitX500Map()
@@ -149,7 +220,19 @@ std::string GMSOF::GetX500Name(const std::string& name)
     return m_impl->m_x500Map[name].oid_name;
 }
 
-GMSOF::~GMSOF()
+std::string GMSOF::Capture(const std::string& str, const std::string& flag)
 {
-    m_impl->m_x500Map.clear();
+    std::string res;
+    size_t      start = str.find(flag);
+    size_t      end   = 0;
+    if (start != std::string::npos)
+    {
+        size_t temp = start + flag.size();
+        end         = str.substr(temp).find(";");
+        if (end != std::string::npos)
+        {
+            res = str.substr(temp, end);
+        }
+    }
+    return res;
 }
