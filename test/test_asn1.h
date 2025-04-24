@@ -69,6 +69,41 @@ TEST(test_asn1, x509_test1)
     easy_asn1_free_tree(tree);
 }
 
+TEST(test_asn1, asn1_serialize)
+{
+    std::string   filename = "./cer/github.cer";
+    std::ifstream in(filename);
+
+    std::string str;
+    std::string line;
+    while (std::getline(in, line))
+    {
+        if (line == PEM_CERT_BEGIN || line == PEM_CERT_END || line.empty())
+        {
+            continue;
+        }
+        str += line;
+    }
+    in.close();
+
+    size_t   str_size = str.size();
+    uint8_t* data     = (uint8_t*)malloc(BASE64_DECODE_OUT_SIZE(str_size));
+    size_t   data_len = base64_decode(str.c_str(), str_size, (unsigned char*)data);
+
+    // 解析
+    easy_asn1_tree_st* tree = NULL;
+    easy_asn1_parse(data, data_len, 0, &tree);
+
+    // 序列化
+    size_t   tree_size = easy_asn1_serialize(tree, NULL);
+    uint8_t* tree_ser  = (uint8_t*)malloc(tree_size);
+    easy_asn1_serialize(tree, tree_ser);
+    EXPECT_TRUE(my_equal_array_8bit(data, tree_ser, data_len));
+
+    easy_asn1_free_tree(tree);
+    free(tree_ser);
+}
+
 TEST(test_asn1, sm2_test1)
 {
     std::string   filename = "./cer/sm2-x509.cer";

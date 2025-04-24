@@ -76,9 +76,10 @@ ENDECODE_API const char*    easy_asn1_tag_name(int tag);
 ENDECODE_API const uint8_t* easy_asn1_parse_tag(const uint8_t* data, uint8_t* tag);
 ENDECODE_API const uint8_t* easy_asn1_parse_length(const uint8_t* data, uint32_t* length);
 ENDECODE_API const uint8_t* easy_asn1_parse_string(const uint8_t* data, easy_asn1_string_st* str);
+ENDECODE_API void           easy_asn1_parse(const uint8_t* data, size_t len, int level, easy_asn1_tree_st** node);
 
-ENDECODE_API int  easy_get_byte_length(uint32_t value);
-ENDECODE_API void easy_asn1_parse(const uint8_t* data, size_t len, int level, easy_asn1_tree_st** node);
+ENDECODE_API size_t easy_asn1_encode_length(uint32_t length, uint8_t* out);
+ENDECODE_API size_t easy_asn1_serialize(easy_asn1_tree_st* node, uint8_t* buffer);
 
 #ifdef __cplusplus
 }

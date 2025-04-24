@@ -178,17 +178,6 @@ const uint8_t* easy_asn1_parse_string(const uint8_t* data, easy_asn1_string_st* 
     return data + str->length;
 }
 
-int easy_get_byte_length(uint32_t value)
-{
-    int byte_length = 0;
-    while (value > 0)
-    {
-        byte_length++;
-        value >>= 8;
-    }
-    return byte_length;
-}
-
 // 解析 ASN.1 数据
 void easy_asn1_parse(const uint8_t* data, size_t len, int level, easy_asn1_tree_st** node)
 {
@@ -253,4 +242,87 @@ void easy_asn1_parse(const uint8_t* data, size_t len, int level, easy_asn1_tree_
             (*node)->children_size++;
         }
     }
+}
+
+// 编码 ASN.1 的长度字段
+size_t easy_asn1_encode_length(uint32_t length, uint8_t* out)
+{
+    if (length < 128)
+    {
+        if (out)
+            out[0] = (uint8_t)length;
+        return 1;
+    }
+    else
+    {
+        int      num_bytes = 0;
+        uint32_t tmp       = length;
+        while (tmp)
+        {
+            tmp >>= 8;
+            num_bytes++;
+        }
+        if (out)
+        {
+            out[0] = 0x80 | num_bytes;
+            for (int i = 0; i < num_bytes; ++i)
+            {
+                out[num_bytes - i] = (length >> (i * 8)) & 0xFF;
+            }
+        }
+        return 1 + num_bytes;
+    }
+}
+
+size_t easy_asn1_serialize(easy_asn1_tree_st* node, uint8_t* buffer)
+{
+    if (!node)
+        return 0;
+
+    size_t offset = 0;
+
+    // 写 tag
+    if (buffer)
+        buffer[offset] = node->value.tag;
+    offset += 1;
+
+    uint8_t* content_buf = NULL;
+    size_t   content_len = 0;
+
+    if ((node->value.tag & 0x20) && node->children_size > 0)
+    {
+        // 构建结构类型（SEQUENCE/SET）内容部分：递归 children
+        for (uint32_t i = 0; i < node->children_size; ++i)
+        {
+            content_len += easy_asn1_serialize(node->children[i], NULL);
+        }
+
+        // 写入 Length
+        size_t len_len = easy_asn1_encode_length((uint32_t)content_len, buffer ? buffer + offset : NULL);
+        offset += len_len;
+
+        // 写入 children 内容
+        for (uint32_t i = 0; i < node->children_size; ++i)
+        {
+            offset += easy_asn1_serialize(node->children[i], buffer ? buffer + offset : NULL);
+        }
+    }
+    else
+    {
+        // 普通类型，直接使用 value
+        content_len = node->value.length;
+
+        // 写入 Length
+        size_t len_len = easy_asn1_encode_length((uint32_t)content_len, buffer ? buffer + offset : NULL);
+        offset += len_len;
+
+        // 写入 Value
+        if (buffer && node->value.value && content_len > 0)
+        {
+            memcpy(buffer + offset, node->value.value, content_len);
+        }
+        offset += content_len;
+    }
+
+    return offset;
 }
