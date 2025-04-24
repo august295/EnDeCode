@@ -79,7 +79,7 @@ SM2Certificate* sm2_cert_parse(const uint8_t* data, size_t len)
 {
     SM2Certificate*    cert = NULL;
     easy_asn1_tree_st* tree = NULL;
-    easy_asn1_parse(data, len, 0, &tree);
+    easy_asn1_parse(data, len, 0, 0, &tree);
 
     do
     {

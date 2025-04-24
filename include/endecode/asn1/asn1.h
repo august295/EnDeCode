@@ -43,15 +43,16 @@
 typedef struct easy_asn1_string_st
 {
     uint8_t  tag;
-    uint32_t length;
+    size_t   length;
     uint8_t* value;
 } easy_asn1_string_st;
 
 typedef struct easy_asn1_tree_st
 {
     struct easy_asn1_string_st value;
-    uint32_t                   level;
-    uint32_t                   children_size;
+    size_t                     offset;
+    size_t                     level;
+    size_t                     children_size;
     struct easy_asn1_tree_st** children;
 } easy_asn1_tree_st;
 
@@ -63,22 +64,22 @@ extern "C" {
 ENDECODE_API void easy_asn1_init_string(easy_asn1_string_st* str);
 ENDECODE_API void easy_asn1_init_tree(easy_asn1_tree_st* node);
 
-ENDECODE_API void easy_asn1_create_string(uint8_t tag, uint32_t length, uint8_t* value, easy_asn1_string_st* str);
+ENDECODE_API void easy_asn1_create_string(uint8_t tag, size_t length, uint8_t* value, easy_asn1_string_st* str);
 ENDECODE_API void easy_asn1_copy_string(easy_asn1_string_st* src, easy_asn1_string_st* dest);
 
 ENDECODE_API void easy_asn1_free_string(easy_asn1_string_st* str);
 ENDECODE_API void easy_asn1_free_tree(easy_asn1_tree_st* node);
 
-ENDECODE_API void easy_asn1_print_string(easy_asn1_string_st* str, int print_value);
+ENDECODE_API void easy_asn1_print_string(easy_asn1_string_st* str, size_t print_value);
 ENDECODE_API void easy_asn1_print_tree(easy_asn1_tree_st* node);
 
-ENDECODE_API const char*    easy_asn1_tag_name(int tag);
-ENDECODE_API const uint8_t* easy_asn1_parse_tag(const uint8_t* data, uint8_t* tag);
-ENDECODE_API const uint8_t* easy_asn1_parse_length(const uint8_t* data, uint32_t* length);
-ENDECODE_API const uint8_t* easy_asn1_parse_string(const uint8_t* data, easy_asn1_string_st* str);
-ENDECODE_API void           easy_asn1_parse(const uint8_t* data, size_t len, int level, easy_asn1_tree_st** node);
+ENDECODE_API char*  easy_asn1_tag_name(uint8_t tag);
+ENDECODE_API size_t easy_asn1_parse_tag(const uint8_t* data, uint8_t* tag);
+ENDECODE_API size_t easy_asn1_parse_length(const uint8_t* data, size_t* length);
+ENDECODE_API size_t easy_asn1_parse_string(const uint8_t* data, easy_asn1_string_st* str);
+ENDECODE_API void   easy_asn1_parse(const uint8_t* data, size_t len, size_t offset, size_t level, easy_asn1_tree_st** node);
 
-ENDECODE_API size_t easy_asn1_encode_length(uint32_t length, uint8_t* out);
+ENDECODE_API size_t easy_asn1_encode_length(size_t length, uint8_t* out);
 ENDECODE_API size_t easy_asn1_serialize(easy_asn1_tree_st* node, uint8_t* buffer);
 
 #ifdef __cplusplus

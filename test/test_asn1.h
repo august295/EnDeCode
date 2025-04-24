@@ -37,14 +37,16 @@ TEST(test_asn1, asn1_test2)
     };
     // clang-format on
     easy_asn1_tree_st* tree = NULL;
-    easy_asn1_parse(asn1_data, sizeof(asn1_data), 0, &tree);
-    // easy_asn1_print_tree(tree);
+    easy_asn1_parse(asn1_data, sizeof(asn1_data), 0, 0, &tree);
+#ifndef NDEBUG
+    easy_asn1_print_tree(tree);
+#endif
     easy_asn1_free_tree(tree);
 }
 
 TEST(test_asn1, x509_test1)
 {
-    std::string   filename = "./cer/github.cer";
+    std::string   filename = "./cer/sm2-x509.cer";
     std::ifstream in(filename);
 
     std::string str;
@@ -64,8 +66,10 @@ TEST(test_asn1, x509_test1)
     size_t   data_len = base64_decode(str.c_str(), str_size, (unsigned char*)data);
 
     easy_asn1_tree_st* tree = NULL;
-    easy_asn1_parse(data, data_len, 0, &tree);
-    // easy_asn1_print_tree(tree);
+    easy_asn1_parse(data, data_len, 0, 0, &tree);
+#ifndef NDEBUG
+    easy_asn1_print_tree(tree);
+#endif
     easy_asn1_free_tree(tree);
 }
 
@@ -92,7 +96,7 @@ TEST(test_asn1, asn1_serialize)
 
     // 解析
     easy_asn1_tree_st* tree = NULL;
-    easy_asn1_parse(data, data_len, 0, &tree);
+    easy_asn1_parse(data, data_len, 0, 0, &tree);
 
     // 序列化
     size_t   tree_size = easy_asn1_serialize(tree, NULL);
@@ -100,6 +104,9 @@ TEST(test_asn1, asn1_serialize)
     easy_asn1_serialize(tree, tree_ser);
     EXPECT_TRUE(my_equal_array_8bit(data, tree_ser, data_len));
 
+#ifndef NDEBUG
+    easy_asn1_print_tree(tree);
+#endif
     easy_asn1_free_tree(tree);
     free(tree_ser);
 }
@@ -146,6 +153,7 @@ TEST(test_asn1, sm2_test2)
     }
     in.close();
 
+#ifndef NDEBUG
     BSTR info = NULL;
     printf("Cert info:\n");
     info = SOF_GetCertInfo((BSTR)str.c_str(), SGD_CERT_VERSION);
@@ -164,4 +172,5 @@ TEST(test_asn1, sm2_test2)
     printf("SGD_CERT_DER_PUBLIC_KEY: %s\n", info);
     info = SOF_GetCertInfo((BSTR)str.c_str(), SGD_CERT_DER_EXTENSIONS);
     printf("SGD_CERT_DER_EXTENSIONS: %s\n", info);
+#endif
 }
