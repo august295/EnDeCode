@@ -184,6 +184,33 @@ size_t easy_asn1_parse_string(const uint8_t* data, easy_asn1_string_st* str)
     return offset + str->length;
 }
 
+size_t easy_asn1_parse_primit(uint8_t tag)
+{
+    size_t PrimitiveTaLen = sizeof(PrimitiveTags);
+    for (size_t i = 0; i < PrimitiveTaLen; i++)
+    {
+        if (tag == PrimitiveTags[i])
+        {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+size_t easy_asn1_parse_predict(const uint8_t* data, size_t start, size_t length)
+{
+    size_t  offset = start;
+    uint8_t tag    = 0;
+    size_t  len    = 0;
+    offset += easy_asn1_parse_tag(data + offset, &tag);
+    offset += easy_asn1_parse_length(data + offset, &length);
+    if (easy_asn1_parse_primit(tag) || len > length)
+    {
+        return 1;
+    }
+    return 0;
+}
+
 // 解析 ASN.1 数据
 void easy_asn1_parse(const uint8_t* data, size_t len, size_t offset, size_t level, easy_asn1_tree_st** node)
 {
@@ -282,19 +309,19 @@ void easy_asn1_parse(const uint8_t* data, size_t len, size_t offset, size_t leve
             temp_offset += tag_len + len_len + length;
         }
     }
-    else if (tag == 0x03 || tag == 0x04)
+    else if (tag == EASY_ASN1_BIT_STRING || tag == EASY_ASN1_OCTET_STRING)
     {
         // 对于 BIT STRING，第一个字节是未使用的比特数
-        size_t         content_offset = (tag == 0x03) ? 1 : 0;
+        size_t         content_offset = (tag == EASY_ASN1_BIT_STRING) ? 1 : 0;
         const uint8_t* content_data   = (*node)->value.value + content_offset;
         size_t         content_len    = (*node)->value.length - content_offset;
 
         // 检查内容是否看起来像 ASN.1 结构（以有效的标签开头）
-        if (content_len > 0 && (*content_data & 0xC0) == 0)
+        if (0 == easy_asn1_parse_predict(content_data, 0, content_len))
         {
             // 计算嵌套内容的原始偏移量
             size_t nested_offset = offset + consumed - (*node)->value.length + content_offset;
-            
+
             // 尝试解析嵌套内容，使用正确的原始偏移量
             easy_asn1_tree_st* child = NULL;
             easy_asn1_parse(data, len, nested_offset, level + 1, &child);

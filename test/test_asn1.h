@@ -46,7 +46,7 @@ TEST(test_asn1, asn1_test2)
 
 TEST(test_asn1, x509_test1)
 {
-    std::string   filename = "./cer/sm2-x509.cer";
+    std::string   filename = "./cer/github.cer";
     std::ifstream in(filename);
 
     std::string str;
