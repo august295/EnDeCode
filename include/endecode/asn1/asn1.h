@@ -15,7 +15,7 @@
 #define EASY_ASN1_EXTERNAL          0x8
 #define EASY_ASN1_REAL              0x9
 #define EASY_ASN1_ENUMERATED        0xA
-#define EASY_ASN1_EMBEDDED_DV       0xB
+#define EASY_ASN1_EMBEDDED_PDV      0xB
 #define EASY_ASN1_UTF8STRING        0xC
 #define EASY_ASN1_RELATIVE_OID      0xD
 #define EASY_ASN1_TIME              0xE
@@ -49,15 +49,43 @@
 #define ESAY_X509_CONTEXT2          0xA2 // IMPLICIT Subject UniqueIdentifier OPTIONAL
 #define ESAY_X509_CONTEXT3          0xA3 // EXPLICIT Extensions OPTIONAL
 
-// clang-format off
-// a list of primitive tags. Source: http://en.wikipedia.org/wiki/Distinguished_Encoding_Rules#DER_encoding
-static uint8_t PrimitiveTags[] = {
-    EASY_ASN1_EOC,            EASY_ASN1_BOOLEAN,         EASY_ASN1_INTEGER,          EASY_ASN1_NULL,            EASY_ASN1_OBJECT,          EASY_ASN1_REAL,
-    EASY_ASN1_ENUMERATED,     EASY_ASN1_UTF8STRING,      EASY_ASN1_RELATIVE_OID,     EASY_ASN1_NUMERICSTRING,   EASY_ASN1_PRINTABLESTRING, EASY_ASN1_T61STRING,
-    EASY_ASN1_VIDEOTEXSTRING, EASY_ASN1_IA5STRING,       EASY_ASN1_UTCTIME,          EASY_ASN1_GENERALIZEDTIME, EASY_ASN1_GRAPHICSTRING,   EASY_ASN1_GRAPHICSTRING,
-    EASY_ASN1_GENERALSTRING,  EASY_ASN1_UNIVERSALSTRING, EASY_ASN1_CHARACTER_STRING, EASY_ASN1_BMPSTRING
+enum Asn1TagClass
+{
+    UNIVERSAL        = 0,   // 0x00
+    CONSTRUCTED      = 32,  // 0x20
+    APPLICATION      = 64,  // 0x40
+    CONTEXT_SPECIFIC = 128, // 0x80
+    PRIVATE          = 192, // 0xc0
 };
-// clang-format on
+
+// a list of construct tags. Source: http://en.wikipedia.org/wiki/Distinguished_Encoding_Rules#DER_encoding
+static uint8_t ConstructTags[] = {
+    EASY_ASN1_BIT_STRING,
+    EASY_ASN1_OCTET_STRING,
+    EASY_ASN1_OBJECT_DESCRIPTOR,
+    EASY_ASN1_EXTERNAL,
+    EASY_ASN1_EMBEDDED_PDV,
+    EASY_ASN1_UTF8STRING,
+    EASY_ASN1_SEQUENCE,
+    EASY_ASN1_SET,
+    EASY_ASN1_NUMERICSTRING,
+    EASY_ASN1_PRINTABLESTRING,
+    EASY_ASN1_T61STRING,
+    EASY_ASN1_TELETEXSTRING,
+    EASY_ASN1_VIDEOTEXSTRING,
+    EASY_ASN1_IA5STRING,
+    EASY_ASN1_UTCTIME,
+    EASY_ASN1_GENERALIZEDTIME,
+    EASY_ASN1_GRAPHICSTRING,
+    EASY_ASN1_ISO64STRING,
+    EASY_ASN1_VISIBLESTRING,
+    EASY_ASN1_GENERALSTRING,
+    EASY_ASN1_UNIVERSALSTRING,
+    EASY_ASN1_CHARACTER_STRING,
+    EASY_ASN1_BMPSTRING,
+    EASY_ASN1_SEQUENCE | CONSTRUCTED,
+    EASY_ASN1_SET | CONSTRUCTED,
+};
 
 typedef struct easy_asn1_string_st
 {
@@ -96,7 +124,7 @@ ENDECODE_API char*  easy_asn1_tag_name(uint8_t tag);
 ENDECODE_API size_t easy_asn1_parse_tag(const uint8_t* data, uint8_t* tag);
 ENDECODE_API size_t easy_asn1_parse_length(const uint8_t* data, size_t* length);
 ENDECODE_API size_t easy_asn1_parse_string(const uint8_t* data, easy_asn1_string_st* str);
-ENDECODE_API size_t easy_asn1_parse_primit(uint8_t tag);
+ENDECODE_API size_t easy_asn1_parse_construct(uint8_t tag);
 ENDECODE_API size_t easy_asn1_parse_predict(const uint8_t* data, size_t start, size_t length);
 ENDECODE_API void   easy_asn1_parse(const uint8_t* data, size_t len, size_t offset, size_t level, easy_asn1_tree_st** node);
 

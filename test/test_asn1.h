@@ -19,7 +19,9 @@ TEST(test_asn1, asn1_test1)
 
     easy_asn1_string_st str;
     easy_asn1_parse_string(dataPtr, &str);
-    // easy_asn1_print_string(&str, 0);
+#ifndef NDEBUG
+    easy_asn1_print_string(&str, 0);
+#endif
     easy_asn1_free_string(&str);
 }
 

@@ -184,12 +184,12 @@ size_t easy_asn1_parse_string(const uint8_t* data, easy_asn1_string_st* str)
     return offset + str->length;
 }
 
-size_t easy_asn1_parse_primit(uint8_t tag)
+size_t easy_asn1_parse_construct(uint8_t tag)
 {
-    size_t PrimitiveTaLen = sizeof(PrimitiveTags);
-    for (size_t i = 0; i < PrimitiveTaLen; i++)
+    size_t ConstructTagLen = sizeof(ConstructTags);
+    for (size_t i = 0; i < ConstructTagLen; i++)
     {
-        if (tag == PrimitiveTags[i])
+        if (tag == ConstructTags[i])
         {
             return 1;
         }
@@ -203,12 +203,12 @@ size_t easy_asn1_parse_predict(const uint8_t* data, size_t start, size_t length)
     uint8_t tag    = 0;
     size_t  len    = 0;
     offset += easy_asn1_parse_tag(data + offset, &tag);
-    offset += easy_asn1_parse_length(data + offset, &length);
-    if (easy_asn1_parse_primit(tag) || len > length)
+    offset += easy_asn1_parse_length(data + offset, &len);
+    if (easy_asn1_parse_construct(tag) == 0 || len > length)
     {
-        return 1;
+        return 0;
     }
-    return 0;
+    return offset + len;
 }
 
 // 解析 ASN.1 数据
@@ -244,7 +244,7 @@ void easy_asn1_parse(const uint8_t* data, size_t len, size_t offset, size_t leve
 
     uint8_t tag = (*node)->value.tag;
     // 如果是构造类型（如 SEQUENCE/SET），递归解析子节点
-    if (tag & 0x20)
+    if (tag & CONSTRUCTED)
     {
         size_t children_offset = offset + (consumed - (*node)->value.length);
         size_t end_offset      = children_offset + (*node)->value.length;
@@ -309,7 +309,7 @@ void easy_asn1_parse(const uint8_t* data, size_t len, size_t offset, size_t leve
             temp_offset += tag_len + len_len + length;
         }
     }
-    else if (tag == EASY_ASN1_BIT_STRING || tag == EASY_ASN1_OCTET_STRING)
+    else
     {
         // 对于 BIT STRING，第一个字节是未使用的比特数
         size_t         content_offset = (tag == EASY_ASN1_BIT_STRING) ? 1 : 0;
@@ -317,7 +317,8 @@ void easy_asn1_parse(const uint8_t* data, size_t len, size_t offset, size_t leve
         size_t         content_len    = (*node)->value.length - content_offset;
 
         // 检查内容是否看起来像 ASN.1 结构（以有效的标签开头）
-        if (0 == easy_asn1_parse_predict(content_data, 0, content_len))
+        size_t predict_len = easy_asn1_parse_predict(content_data, 0, content_len);
+        if (predict_len == content_len)
         {
             // 计算嵌套内容的原始偏移量
             size_t nested_offset = offset + consumed - (*node)->value.length + content_offset;
@@ -389,7 +390,7 @@ size_t easy_asn1_serialize(easy_asn1_tree_st* node, uint8_t* buffer)
     uint8_t* content_buf = NULL;
     size_t   content_len = 0;
 
-    if ((node->value.tag & 0x20) && node->children_size > 0)
+    if ((node->value.tag & CONSTRUCTED) && node->children_size > 0)
     {
         // 构建结构类型（SEQUENCE/SET）内容部分：递归 children
         for (uint32_t i = 0; i < node->children_size; ++i)
