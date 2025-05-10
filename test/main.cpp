@@ -1,3 +1,7 @@
+#if defined(_WIN32) || defined(_WIN64)
+    #include <windows.h>
+#endif
+
 #include <gtest/gtest.h>
 
 #include "test_a5_1.h"
@@ -51,6 +55,11 @@ void printf_oid()
 
 int main(int argc, char** argv)
 {
+#if defined(_WIN32) || defined(_WIN64)
+    SetConsoleOutputCP(CP_UTF8);
+    SetConsoleCP(CP_UTF8);
+#endif
+
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }

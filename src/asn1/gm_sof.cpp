@@ -5,6 +5,7 @@
 #include <stdio.h>
 
 #include "endecode/base64/base64.h"
+#include "endecode/asn1/asn1_helper.h"
 #include "endecode/asn1/gm_sof.h"
 
 BSTR SOF_GetCertInfo(BSTR Base64Cert, SHORT Type)

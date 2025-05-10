@@ -11,6 +11,7 @@ set(CMAKE_CXX_STANDARD 11)
 # 条件编译
 if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
     add_compile_options("/utf-8")
+    add_compile_definitions(OLE2ANSI)
 elseif()
 endif()
 

@@ -47,38 +47,6 @@ void easy_asn1_copy_string(easy_asn1_string_st* src, easy_asn1_string_st* dest)
     memcpy(dest->value, src->value, src->length);
 }
 
-void easy_asn1_print_string(easy_asn1_string_st* str, size_t print_value)
-{
-    printf("Tag: %02X, Length: %llu", str->tag, str->length);
-    if (print_value == 0)
-    {
-        printf(", Value: ");
-        for (size_t i = 0; i < str->length; i++)
-        {
-            printf("%02X ", str->value[i]);
-        }
-    }
-    printf("\n");
-}
-
-void easy_asn1_print_tree(easy_asn1_tree_st* node)
-{
-    if (node)
-    {
-        for (uint32_t i = 0; i < node->level; i++)
-        {
-            printf("    ");
-        }
-        printf("Offset: %llu, ", node->offset);
-        easy_asn1_print_string(&node->value, node->children_size);
-
-        for (uint32_t i = 0; i < node->children_size; i++)
-        {
-            easy_asn1_print_tree(node->children[i]);
-        }
-    }
-}
-
 void easy_asn1_free_string(easy_asn1_string_st* str)
 {
     if (str)

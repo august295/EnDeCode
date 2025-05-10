@@ -117,9 +117,6 @@ ENDECODE_API void easy_asn1_copy_string(easy_asn1_string_st* src, easy_asn1_stri
 ENDECODE_API void easy_asn1_free_string(easy_asn1_string_st* str);
 ENDECODE_API void easy_asn1_free_tree(easy_asn1_tree_st* node);
 
-ENDECODE_API void easy_asn1_print_string(easy_asn1_string_st* str, size_t print_value);
-ENDECODE_API void easy_asn1_print_tree(easy_asn1_tree_st* node);
-
 ENDECODE_API char*  easy_asn1_tag_name(uint8_t tag);
 ENDECODE_API size_t easy_asn1_parse_tag(const uint8_t* data, uint8_t* tag);
 ENDECODE_API size_t easy_asn1_parse_length(const uint8_t* data, size_t* length);

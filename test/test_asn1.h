@@ -5,6 +5,7 @@
 
 #include "endecode/base64/base64.h"
 #include "endecode/asn1/asn1.h"
+#include "endecode/asn1/asn1_helper.h"
 #include "endecode/asn1/x509.h"
 #include "endecode/asn1/cert_sm2.h"
 #include "endecode/asn1/gm_sof.h"
@@ -40,6 +41,21 @@ TEST(test_asn1, asn1_test2)
     // clang-format on
     easy_asn1_tree_st* tree = NULL;
     easy_asn1_parse(asn1_data, sizeof(asn1_data), 0, 0, &tree);
+#ifndef NDEBUG
+    easy_asn1_print_tree(tree);
+#endif
+    easy_asn1_free_tree(tree);
+}
+
+TEST(test_asn1, asn1_test3)
+{
+    std::ifstream      file("./asn1/seal.gb38540", std::ios::binary);
+    std::ostringstream oss;
+    oss << file.rdbuf(); // 读取整个文件内容到流中
+    std::string        content = oss.str();
+
+    easy_asn1_tree_st* tree = NULL;
+    easy_asn1_parse((const uint8_t*)content.c_str(), content.size(), 0, 0, &tree);
 #ifndef NDEBUG
     easy_asn1_print_tree(tree);
 #endif

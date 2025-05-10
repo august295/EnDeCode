@@ -274,39 +274,6 @@ static const SM_OID_MAPPING sm_oid_mapping_x500[] = {
 extern "C" {
 #endif
 
-/**
- * @brief   商用密码 OID 转换为字符串
- * @param   oid_bytes               [IN]        二进制 OID
- * @param   oid_len                 [IN]        二进制 OID 长度
- * @param   oid_str                 [IN/OUT]    字符串 OID
- */
-ENDECODE_API void oid_to_string(const uint8_t* oid_bytes, size_t oid_len, char* oid_str);
-
-/**
- * @brief   商用密码字符串转换为 OID
- * @param   oid_str                 [IN]        字符串 OID
- * @param   oid_bytes               [IN/OUT]    二进制 OID
- * @param   oid_len                 [IN/OUT]    二进制 OID 长度
- * @return  0                                   成功
- *          其他                                失败
- */
-ENDECODE_API int string_to_oid(const char* oid_str, uint8_t* oid_bytes, size_t* oid_len);
-
-/**
- * @brief   UTCTime时间格式转换为标准时间格式
- * @param   utcTime                 [IN]        utc 时间格式
- * @param   utcOffset               [IN]        utc 时区偏移
- * @param   standardTime            [IN/OUT]    标准时间格式
- */
-ENDECODE_API void convertUTCTimeToStandard(const char* utcTime, size_t utcOffset, char* standardTime);
-
-/**
- * @brief   GeneralizedTime时间格式转换为标准时间格式
- * @param   generalizedTime         [IN]        GeneralizedTime 时间格式
- * @param   standardTime            [IN/OUT]    标准时间格式
- */
-ENDECODE_API void convertGeneralizedTimeToStandard(const char* generalizedTime, size_t utcOffset, char* standardTime);
-
 #ifdef __cplusplus
 }
 #endif

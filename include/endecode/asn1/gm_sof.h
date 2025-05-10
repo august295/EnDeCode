@@ -5,12 +5,7 @@
 #include <map>
 
 #include "endecode/asn1/cert_sm2.h"
-
-#define MAX_OID 64
-
-typedef char*   BSTR;
-typedef int32_t LONG;
-typedef int16_t SHORT;
+#include "endecode/asn1/gm_type.h"
 
 #include "endecode/common/endecode_export.hpp"
 #ifdef __cplusplus
