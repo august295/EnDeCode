@@ -9,6 +9,7 @@
 #include "endecode/asn1/x509.h"
 #include "endecode/asn1/cert_sm2.h"
 #include "endecode/asn1/gm_sof.h"
+#include "endecode/asn1/gm_sef.h"
 
 #include "test_util.h"
 
@@ -52,7 +53,7 @@ TEST(test_asn1, asn1_test3)
     std::ifstream      file("./asn1/seal.gb38540", std::ios::binary);
     std::ostringstream oss;
     oss << file.rdbuf(); // 读取整个文件内容到流中
-    std::string        content = oss.str();
+    std::string content = oss.str();
 
     easy_asn1_tree_st* tree = NULL;
     easy_asn1_parse((const uint8_t*)content.c_str(), content.size(), 0, 0, &tree);
@@ -62,33 +63,21 @@ TEST(test_asn1, asn1_test3)
     easy_asn1_free_tree(tree);
 }
 
-TEST(test_asn1, x509_test1)
+TEST(test_asn1, asn1_test4)
 {
-    std::string   filename = "./cer/github.cer";
-    std::ifstream in(filename);
+    std::ifstream      file("./asn1/seal.gb38540", std::ios::in | std::ios::binary);
+    std::ostringstream oss;
+    oss << file.rdbuf(); // 读取整个文件内容到流中
+    std::string content = oss.str();
 
-    std::string str;
-    std::string line;
-    while (std::getline(in, line))
-    {
-        if (line == PEM_CERT_BEGIN || line == PEM_CERT_END || line.empty())
-        {
-            continue;
-        }
-        str += line;
-    }
-    in.close();
+    SEALINFO* seal = NULL;
+    SEF_ParseSeal((const uint8_t*)content.c_str(), content.size(), &seal);
 
-    size_t   str_size = str.size();
-    uint8_t* data     = (uint8_t*)malloc(BASE64_DECODE_OUT_SIZE(str_size));
-    size_t   data_len = base64_decode(str.c_str(), str_size, (unsigned char*)data);
-
-    easy_asn1_tree_st* tree = NULL;
-    easy_asn1_parse(data, data_len, 0, 0, &tree);
-#ifndef NDEBUG
-    easy_asn1_print_tree(tree);
-#endif
-    easy_asn1_free_tree(tree);
+    // 读取印章
+    char* type = seal->imageType;
+    std::string filenam = std::string("seal.") + type;
+    std::fstream outfile(filenam, std::ios::out | std::ios::binary);
+    outfile.write((char*)seal->imageData, seal->imageDataLen);
 }
 
 TEST(test_asn1, asn1_serialize)
@@ -127,6 +116,35 @@ TEST(test_asn1, asn1_serialize)
 #endif
     easy_asn1_free_tree(tree);
     free(tree_ser);
+}
+
+TEST(test_asn1, x509_test1)
+{
+    std::string   filename = "./cer/github.cer";
+    std::ifstream in(filename);
+
+    std::string str;
+    std::string line;
+    while (std::getline(in, line))
+    {
+        if (line == PEM_CERT_BEGIN || line == PEM_CERT_END || line.empty())
+        {
+            continue;
+        }
+        str += line;
+    }
+    in.close();
+
+    size_t   str_size = str.size();
+    uint8_t* data     = (uint8_t*)malloc(BASE64_DECODE_OUT_SIZE(str_size));
+    size_t   data_len = base64_decode(str.c_str(), str_size, (unsigned char*)data);
+
+    easy_asn1_tree_st* tree = NULL;
+    easy_asn1_parse(data, data_len, 0, 0, &tree);
+#ifndef NDEBUG
+    easy_asn1_print_tree(tree);
+#endif
+    easy_asn1_free_tree(tree);
 }
 
 TEST(test_asn1, sm2_test1)

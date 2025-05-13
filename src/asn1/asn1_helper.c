@@ -181,8 +181,16 @@ void convertGeneralizedTimeToStandard(const char* generalizedTime, size_t utcOff
     strftime(standardTime, 20, "%Y-%m-%d %H:%M:%S", &tm);
 }
 
-void easy_asn1_print_integer(const uint8_t* value, size_t len)
+char* easy_asn1_print_integer(const uint8_t* value, size_t len)
 {
+    if (len == 0)
+    {
+        // 长度为 0，返回 "0"
+        char* zero = (char*)malloc(2);
+        strcpy(zero, "0");
+        return zero;
+    }
+
     // 复制数据，避免修改原始数据
     uint8_t* buf = (uint8_t*)malloc(len + 1);
     memcpy(buf, value, len);
@@ -225,17 +233,21 @@ void easy_asn1_print_integer(const uint8_t* value, size_t len)
     // 如果是 0
     if (res_len == 0)
     {
-        putchar('0');
+        free(res);
+        char* zero = (char*)malloc(2);
+        strcpy(zero, "0");
+        return zero;
     }
-    else
-    {
-        // 反转结果输出
-        for (int i = res_len - 1; i >= 0; --i)
-            putchar(res[i]);
-    }
+
+    // 构造结果字符串（反转）
+    char* result = (char*)malloc(res_len + 1);
+    for (size_t i = 0; i < res_len; ++i)
+        result[i] = res[res_len - 1 - i];
+    result[res_len] = '\0';
 
     free(buf);
     free(res);
+    return result;
 }
 
 int easy_asn1_print_string_try(const uint8_t* value, size_t len)
@@ -261,9 +273,11 @@ void easy_asn1_print_string(easy_asn1_string_st* str, size_t print_value)
         case EASY_ASN1_BOOLEAN:
             printf("%s", str->value[0] == 0 ? "FALSE" : "TRUE");
             break;
-        case EASY_ASN1_INTEGER:
-            easy_asn1_print_integer(str->value, str->length);
-            break;
+        case EASY_ASN1_INTEGER: {
+            char* temp = easy_asn1_print_integer(str->value, str->length);
+            printf("%s", temp);
+        }
+        break;
         case EASY_ASN1_NULL:
             printf("%s", "NULL");
             break;

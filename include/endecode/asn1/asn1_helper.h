@@ -43,9 +43,33 @@ ENDECODE_API void convertUTCTimeToStandard(const char* utcTime, size_t utcOffset
  */
 ENDECODE_API void convertGeneralizedTimeToStandard(const char* generalizedTime, size_t utcOffset, char* standardTime);
 
-ENDECODE_API void easy_asn1_print_integer(const uint8_t* value, size_t len);
-ENDECODE_API int  easy_asn1_print_string_try(const uint8_t* value, size_t len);
+/**
+ * @brief   计算字符串转大数
+ * @param   value                   [IN]        数据
+ * @param   len                     [IN]        数据长度
+ * @return  char*                               字符串大数
+ */
+ENDECODE_API char* easy_asn1_print_integer(const uint8_t* value, size_t len);
+
+/**
+ * @brief   是否是可见字符串
+ * @param   value                   [IN]        数据
+ * @param   len                     [IN]        数据长度
+ * @return  int                                 0: 非可见字符串; 1: 可见字符串
+ */
+ENDECODE_API int easy_asn1_print_string_try(const uint8_t* value, size_t len);
+
+/**
+ * @brief   打印 ASN1 结构体
+ * @param   str                     [IN]        ASN1 结构体
+ * @param   print_value             [IN]        0: 打印值; 其他: 不打印
+ */
 ENDECODE_API void easy_asn1_print_string(easy_asn1_string_st* str, size_t print_value);
+
+/**
+ * @brief   打印 ASN1 树
+ * @param   node                    [IN]        树节点
+ */
 ENDECODE_API void easy_asn1_print_tree(easy_asn1_tree_st* node);
 
 #ifdef __cplusplus
