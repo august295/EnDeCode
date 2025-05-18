@@ -4,6 +4,8 @@
 #include <string.h>
 #include <time.h>
 
+#include <cJSON.h>
+
 #include "endecode/asn1/asn1_helper.h"
 
 void oid_to_string(const uint8_t* oid_bytes, size_t oid_len, char* oid_str)
@@ -135,6 +137,76 @@ int string_to_oid(const char* oid_str, uint8_t* oid_bytes, size_t* oid_len)
     free(str_copy);
     *oid_len = len;
     return 0;
+}
+
+ENDECODE_API void ReadOid(const char* filename, OID_MAPPING** oid_mapping, size_t* map_len)
+{
+    FILE* file = fopen(filename, "r");
+    if (file == NULL)
+    {
+        return;
+    }
+    // 到文件尾部取文件大小，然后回到文件头部
+    fseek(file, 0, SEEK_END);
+    int file_size = ftell(file);
+    fseek(file, 0, SEEK_SET);
+
+    char* buffer = (char*)calloc(sizeof(char), file_size);
+    if (-1 == fread(buffer, sizeof(char), file_size, file))
+    {
+        fclose(file);
+        return;
+    }
+    fclose(file);
+
+    cJSON* root = cJSON_Parse(buffer);
+    free(buffer);
+    if (!root)
+    {
+        cJSON_Delete(root);
+    }
+    else
+    {
+        // 计算个数
+        *map_len      = 0;
+        int root_size = cJSON_GetArraySize(root);
+        for (size_t i = 0; i < root_size; i++)
+        {
+            cJSON* type_node = cJSON_GetArrayItem(root, i);
+            *map_len += cJSON_GetArraySize(type_node);
+        }
+
+        // 保存数据结构
+        *oid_mapping = (OID_MAPPING*)calloc(*map_len, sizeof(OID_MAPPING));
+        int index    = 0;
+        for (size_t i = 0; i < root_size; i++)
+        {
+            cJSON* type_node      = cJSON_GetArrayItem(root, i);
+            int    type_node_size = cJSON_GetArraySize(type_node);
+            for (size_t j = 0; j < type_node_size; j++)
+            {
+                cJSON* oid_json   = cJSON_GetArrayItem(type_node, j);
+                char*  oid        = cJSON_GetObjectItem(oid_json, "oid")->valuestring;
+                char*  short_name = cJSON_GetObjectItem(oid_json, "short_name")->valuestring;
+
+                uint8_t oid_bytes[MAX_OID] = {0};
+                size_t  oid_len            = 0;
+                string_to_oid(oid, oid_bytes, &oid_len);
+
+                int oid_string_len               = strlen(oid);
+                (*oid_mapping)[index].oid_string = (char*)calloc(1, oid_string_len + 1);
+                memcpy((*oid_mapping)[index].oid_string, oid, oid_string_len);
+                (*oid_mapping)[index].oid_string[oid_string_len] = '\0';
+                easy_asn1_create_string(EASY_ASN1_OBJECT, oid_len, oid_bytes, &(*oid_mapping)[index].oid_object);
+                int short_name_len             = strlen(short_name);
+                (*oid_mapping)[index].oid_name = (char*)calloc(1, short_name_len + 1);
+                memcpy((*oid_mapping)[index].oid_name, short_name, short_name_len);
+                (*oid_mapping)[index].oid_name[short_name_len] = '\0';
+                index++;
+            }
+        }
+    }
+    cJSON_Delete(root);
 }
 
 void convertUTCTimeToStandard(const char* utcTime, size_t utcOffset, char* standardTime)

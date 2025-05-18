@@ -50,13 +50,15 @@ if(BUILD_VCPKG)
     add_compile_definitions(ENABLE_GMP)
 endif(BUILD_VCPKG)
 
+# 三方库
+add_subdirectory(3rdparty)
+
 # 算法库
 include(${ROOT_DIR}/cmake/module.cmake)
 add_subdirectory(src)
 
 # 测试程序
 if(BUILD_TEST)
-    include(${ROOT_DIR}/cmake/module_gtest.cmake)
     add_subdirectory(test)
 endif()
 

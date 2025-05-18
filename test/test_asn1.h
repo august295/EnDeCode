@@ -6,7 +6,6 @@
 #include "endecode/base64/base64.h"
 #include "endecode/asn1/asn1.h"
 #include "endecode/asn1/asn1_helper.h"
-#include "endecode/asn1/x509.h"
 #include "endecode/asn1/cert_sm2.h"
 #include "endecode/asn1/gm_sof.h"
 #include "endecode/asn1/gm_sef.h"
@@ -74,10 +73,19 @@ TEST(test_asn1, asn1_test4)
     SEF_ParseSeal((const uint8_t*)content.c_str(), content.size(), &seal);
 
     // 读取印章
-    char* type = seal->imageType;
-    std::string filenam = std::string("seal.") + type;
+    char*        type    = seal->imageType;
+    std::string  filenam = std::string("seal.") + type;
     std::fstream outfile(filenam, std::ios::out | std::ios::binary);
     outfile.write((char*)seal->imageData, seal->imageDataLen);
+}
+
+TEST(test_asn1, asn1_oid)
+{
+    std::string filename = "./oid.json";
+
+    OID_MAPPING* oid_mapping     = NULL;
+    size_t       oid_mapping_len = 0;
+    ReadOid(filename.c_str(), &oid_mapping, &oid_mapping_len);
 }
 
 TEST(test_asn1, asn1_serialize)

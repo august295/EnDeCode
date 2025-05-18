@@ -1,4 +1,7 @@
-﻿set(ProjectName "test")
+﻿include_directories(${ROOT_DIR}/3rdparty/googletest/googletest/include)
+include_directories(${ROOT_DIR}/3rdparty/googletest/googlemock/include)
+
+set(ProjectName "test")
 CreateTarget(${ProjectName} "Exe" "test")
 target_link_libraries(${ProjectName} gtest gtest_main)
 

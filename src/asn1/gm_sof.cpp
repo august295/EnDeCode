@@ -194,7 +194,7 @@ BSTR SOF_GetCertInfo(BSTR Base64Cert, SHORT Type)
 
 struct GMSOF::GMSOFImpl
 {
-    std::map<std::string, SM_OID_MAPPING> m_x500Map;
+    std::map<std::string, OID_MAPPING> m_x500Map;
 };
 
 GMSOF::GMSOF()
@@ -210,9 +210,13 @@ GMSOF::~GMSOF()
 
 void GMSOF::InitX500Map()
 {
-    for (size_t i = 0; i < sizeof(sm_oid_mapping_x500) / sizeof(SM_OID_MAPPING); i++)
+    std::string  filename        = "./oid.json";
+    OID_MAPPING* oid_mapping     = NULL;
+    size_t       oid_mapping_len = 0;
+    ReadOid(filename.c_str(), &oid_mapping, &oid_mapping_len);
+    for (size_t i = 0; i < oid_mapping_len; i++)
     {
-        m_impl->m_x500Map[sm_oid_mapping_x500[i].oid_string] = sm_oid_mapping_x500[i];
+        m_impl->m_x500Map[oid_mapping[i].oid_string] = oid_mapping[i];
     }
 }
 

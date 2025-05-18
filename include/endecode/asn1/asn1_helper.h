@@ -3,7 +3,17 @@
 
 #include "endecode/asn1/asn1.h"
 
-#define MAX_OID 64
+#define MAX_OID 64 // OID 字符串最大长度
+
+/**
+ * @brief   OID 映射结构体
+ */
+typedef struct OID_MAPPING
+{
+    char*               oid_string; // OID 字符串
+    easy_asn1_string_st oid_object; // OID 对象
+    char*               oid_name;   // OID 名称
+} OID_MAPPING;
 
 #include "endecode/common/endecode_export.hpp"
 #ifdef __cplusplus
@@ -27,6 +37,14 @@ ENDECODE_API void oid_to_string(const uint8_t* oid_bytes, size_t oid_len, char* 
  *          其他                                失败
  */
 ENDECODE_API int string_to_oid(const char* oid_str, uint8_t* oid_bytes, size_t* oid_len);
+
+/**
+ * @brief   根据配置文件获取 oid 信息
+ * @param   filename                [IN]        文件名称
+ * @param   oid_mapping             [IN/OUT]    oid 结构体
+ * @param   map_len                 [IN/OUT]    oid 结构体个数
+ */
+ENDECODE_API void ReadOid(const char* filename, OID_MAPPING** oid_mapping, size_t* map_len);
 
 /**
  * @brief   UTCTime时间格式转换为标准时间格式
