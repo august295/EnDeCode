@@ -1,34 +1,14 @@
-﻿
-if(BUILD_SINGLE_LIBRARY)
-    add_compile_definitions(ENDECODE_EXPORT)
-    CreateTarget(${UseProjectName} "Dll" "")
-else()
-    # unknown
-    add_subdirectory(base64)
-    add_subdirectory(crc)
+﻿# 依赖三方库
+set(LibraryList "googletest" "cJSON")
+AddLibrary("${LibraryList}")
 
-    # digest
-    add_subdirectory(md5)
-    add_subdirectory(sha1)
-    add_subdirectory(sha2)
-    add_subdirectory(sha3)
-    add_subdirectory(sm3)
+set(ProjectName "endecode")
+add_compile_definitions(ENDECODE_EXPORT)
+CreateTarget(${ProjectName} "Dll" "core")
 
-    # symmetric_key
-    add_subdirectory(a5_1)
-    add_subdirectory(rc4)
-    add_subdirectory(snow_3g)
-    add_subdirectory(zuc)
-    add_subdirectory(sm4)
-    add_subdirectory(des)
-    add_subdirectory(aes)
+target_link_libraries(${ProjectName} "gtest")
+target_link_libraries(${ProjectName} "cjson")
 
-    # asymmetric_key
-    if(BUILD_VCPKG)
-        add_subdirectory(rsa)
-        add_subdirectory(ecc)
-    endif(BUILD_VCPKG)
-
-    # certification
-    add_subdirectory(asn1)
+if(BUILD_VCPKG)
+    target_link_libraries(${ProjectName} PkgConfig::gmp)
 endif()

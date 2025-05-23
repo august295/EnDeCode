@@ -28,35 +28,25 @@ git clone --recursive https://github.com/august295/EnDeCode.git
 
 对于**非对称密码算法**通常需要使用大数计算，所以采用 `gmp` 三方库进行大数计算。
 
-### 2.1. Windows
+### 2.1. 编译参数
 
-在 `Windows` 上使用 `vcpkg + cmake` 导入 `gmp`。
-
-#### 2.1.1. Visual Studio 2022
-
-生成单个动态库
-
-```cmd
--D"BUILD_SINGLE_LIBRARY=ON"
 ```
-
-使用 vcpkg
-
-```cmd
+# 使用 vcpkg (default=OFF)
 -D"BUILD_VCPKG=ON"
-```
-
-生成测试工程
-
-```cmd
+# 生成测试工程 (default=OFF)
 -D"BUILD_TEST=ON"
 ```
 
+### 2.2. Windows
+
+在 `Windows` 上使用 `vcpkg + cmake` 导入 `gmp`。
+
+#### 2.2.1. Visual Studio 2022
+
 ```cmd
 cmake -B"build" -G"Visual Studio 17 2022" -D"BUILD_TEST=ON"
-
-cmake -B"build_single" -G"Visual Studio 17 2022" -D"BUILD_SINGLE_LIBRARY=ON" -D"BUILD_TEST=ON"
 ```
+
 
 
 ## 3. 分类
@@ -93,7 +83,7 @@ cmake -B"build_single" -G"Visual Studio 17 2022" -D"BUILD_SINGLE_LIBRARY=ON" -D"
 - [x] BASE64
 - [x] CRC
 
-### 3.2. 证书
+### 3.2. ASN1
 
 - [x] ASN1
 - [ ] X509

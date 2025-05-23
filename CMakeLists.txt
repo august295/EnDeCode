@@ -40,7 +40,9 @@ set(CMAKE_MINSIZEREL_POSTFIX "m")
 set(CMAKE_RELWITHDEBINFO_POSTFIX "rd")
 
 # 选项
-option(BUILD_SINGLE_LIBRARY "Build as a single shared library" OFF)
+if(POLICY CMP0077)
+    cmake_policy(SET CMP0077 NEW)
+endif()
 option(BUILD_VCPKG "Build use vcpkg" OFF)
 option(BUILD_TEST "Build test executable" OFF)
 
