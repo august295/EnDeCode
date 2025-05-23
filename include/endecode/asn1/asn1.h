@@ -126,6 +126,7 @@ ENDECODE_API size_t easy_asn1_parse_predict(const uint8_t* data, size_t start, s
 ENDECODE_API void   easy_asn1_parse(const uint8_t* data, size_t len, size_t offset, size_t level, easy_asn1_tree_st** node);
 
 ENDECODE_API size_t easy_asn1_encode_length(size_t length, uint8_t* out);
+ENDECODE_API size_t easy_asn1_serialize_string(easy_asn1_string_st* str, uint8_t* buffer);
 ENDECODE_API size_t easy_asn1_serialize(easy_asn1_tree_st* node, uint8_t* buffer);
 
 #ifdef __cplusplus

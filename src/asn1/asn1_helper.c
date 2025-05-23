@@ -139,7 +139,7 @@ int string_to_oid(const char* oid_str, uint8_t* oid_bytes, size_t* oid_len)
     return 0;
 }
 
-ENDECODE_API void ReadOid(const char* filename, OID_MAPPING** oid_mapping, size_t* map_len)
+void ReadOid(const char* filename, OID_MAPPING** oid_mapping, size_t* map_len)
 {
     FILE* file = fopen(filename, "r");
     if (file == NULL)

@@ -6,14 +6,33 @@
 /**
  * @brief   常量定义
  */
-#define BUF_SIZE      256  // 通用字节长度
-#define MAX_CERT_SIZE 5120 // 数字证书最大长度
+#define BUF_SIZE          256   // 通用字节长度
+#define MAX_CERT_SIZE     5120  // 数字证书最大长度
+#define MAX_SEALDATA_SIZE 51200 // 印章数据最大长度
 
 enum CertListType
 {
-    CLT_CERT      = 1,
-    CLT_CERT_HASH = 2,
+    CLT_CERT      = 1, // 证书
+    CLT_CERT_HASH = 2, // 证书杂凑值
 };
+
+// B.5 签章信息数据结构
+typedef struct SEF_SIGNEDVALUEINFO
+{
+    int            version;                     // 签章数据版本
+    unsigned char  sealData[MAX_SEALDATA_SIZE]; // DER 编码的电子印章数据
+    int            sealDataLen;                 // 电子印章数据长度
+    char           signDateTime[BUF_SIZE];      // 签章时间，GeneralizedTime 时间格式
+    unsigned char  dataHash[32];                // 原文杂凑值二进制数据
+    int            dataHashLen;                 // 原文杂凑数据长度
+    unsigned char  signerCert[MAX_CERT_SIZE];   // DER 编码的签章人证书，如果签名使用 SM2 算法，应符合 GB/T 20518 的规定
+    int            signerCertLen;               // 签章人证书数据长度
+    char           signatureAlgOID[32];         // 签名算法 OID，应符合 GB/T 33560 的规定
+    unsigned char* propertyInfo;                // UTF-8 编码原文属性信息，如果存在，应解析
+    int            propertyInfoLen;             // 原文属性信息长度
+    unsigned char* timeStamp;                   // DER 编码的时间戳，应符合 GB/T 20520 的规定
+    int            timeStampLen;                // 时间戳数据长度
+} SIGNEDVALUEINFO, *PSIGNEDVALUEINFO;
 
 // B.6 印章信息数据结构
 typedef struct SEF_SEALINFO
@@ -44,7 +63,21 @@ typedef struct SEF_SEALINFO
 extern "C" {
 #endif
 
-ENDECODE_API void SEF_ParseSeal(const uint8_t* data, size_t len, SEALINFO** seal);
+/**
+ * @brief   解析印章
+ * @param   data                    [IN]        二进制数据
+ * @param   len                     [IN]        二进制数据长度
+ * @param   seal                    [IN/OUT]    印章结构体
+ */
+ENDECODE_API void SEF_ParseSeal(const easy_asn1_tree_st* tree, SEALINFO** seal);
+
+/**
+ * @brief   解析签章
+ * @param   data                    [IN]        二进制数据
+ * @param   len                     [IN]        二进制数据长度
+ * @param   seal                    [IN/OUT]    签章结构体
+ */
+ENDECODE_API void SEF_ParseSignatures(const easy_asn1_tree_st* tree, SIGNEDVALUEINFO** signatures);
 
 #ifdef __cplusplus
 }

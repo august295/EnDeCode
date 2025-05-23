@@ -23,17 +23,19 @@ void copy_time(easy_asn1_string_st str, char* time)
     }
 }
 
-ENDECODE_API void SEF_ParseSeal(const uint8_t* data, size_t len, SEALINFO** seal)
+void SEF_ParseSeal(const easy_asn1_tree_st* tree, SEALINFO** seal)
 {
+    if (tree == NULL)
+    {
+        return;
+    }
+
     // 创建新节点
     *seal = (SEALINFO*)calloc(1, sizeof(SEALINFO));
     if (!*seal)
     {
         return;
     }
-
-    easy_asn1_tree_st* tree = NULL;
-    easy_asn1_parse(data, len, 0, 0, &tree);
 
     // SESeal = eSealInfo + cert + signAlgID + signedValue
     easy_asn1_tree_st* eSealInfoTree = tree->children[0];
@@ -104,6 +106,7 @@ ENDECODE_API void SEF_ParseSeal(const uint8_t* data, size_t len, SEALINFO** seal
         signAlgIDTree   = tree->children[1]->children[1];
         signedValueTree = tree->children[1]->children[2];
     }
+
     if (certTree)
     {
         (*seal)->makerCertLen = certTree->children[0]->value.length;
@@ -112,5 +115,79 @@ ENDECODE_API void SEF_ParseSeal(const uint8_t* data, size_t len, SEALINFO** seal
     if (signAlgIDTree)
     {
         oid_to_string(signAlgIDTree->value.value, signAlgIDTree->value.length, (*seal)->signatureAlgOID);
+    }
+    if (signedValueTree)
+    {
+    }
+}
+
+void SEF_ParseSignatures(const easy_asn1_tree_st* tree, SIGNEDVALUEINFO** signatures)
+{
+    if (tree == NULL)
+    {
+        return;
+    }
+
+    // 创建新节点
+    *signatures = (SIGNEDVALUEINFO*)calloc(1, sizeof(SIGNEDVALUEINFO));
+    if (!*signatures)
+    {
+        return;
+    }
+
+    // TBS_Sign = version + eseal + timeInnfo + dataHash + propertyInfo + [cert + signatureAlgorithm]
+    easy_asn1_tree_st* TBS_Sign = tree->children[0];
+    char*              version  = easy_asn1_print_integer(TBS_Sign->children[0]->value.value, TBS_Sign->children[0]->value.length);
+    (*signatures)->version      = atoi(version);
+    free(version);
+    (*signatures)->sealDataLen = TBS_Sign->children[1]->value.length;
+    easy_asn1_serialize_string(&TBS_Sign->children[1]->value, (*signatures)->sealData);
+    copy_time(TBS_Sign->children[2]->value, (*signatures)->signDateTime);
+    (*signatures)->dataHashLen = TBS_Sign->children[3]->value.length;
+    memcpy((*signatures)->dataHash, TBS_Sign->children[3]->value.value, (*signatures)->dataHashLen);
+    (*signatures)->propertyInfoLen = TBS_Sign->children[4]->value.length;
+    (*signatures)->propertyInfo    = (unsigned char*)calloc(1, (*signatures)->propertyInfoLen);
+    memcpy((*signatures)->propertyInfo, TBS_Sign->children[4]->value.value, TBS_Sign->children[4]->value.length);
+
+    // cert + signatureAlgorithm + signature + <timeStamp>
+    easy_asn1_tree_st* secondNode             = tree->children[1];
+    easy_asn1_tree_st* certNode               = NULL;
+    easy_asn1_tree_st* signatureAlgorithmNode = NULL;
+    easy_asn1_tree_st* signatureNode          = NULL;
+    if (secondNode->value.tag == EASY_ASN1_OCTET_STRING && tree->children_size > 2)
+    {
+        certNode               = secondNode;
+        signatureAlgorithmNode = tree->children[2];
+        signatureNode          = tree->children[3];
+
+        // 自定义数据
+        if (TBS_Sign->children_size > 5)
+        {
+            easy_asn1_tree_st* extDatasNode = tree->children[5];
+        }
+        // 签名值时间戳
+        if (tree->children_size > 4)
+        {
+            easy_asn1_tree_st* timeStampNode = tree->children[3];
+        }
+    }
+    else if (secondNode->value.tag == EASY_ASN1_BIT_STRING && tree->children_size == 2)
+    {
+        certNode               = TBS_Sign->children[5];
+        signatureAlgorithmNode = TBS_Sign->children[6];
+        signatureNode          = secondNode;
+    }
+
+    if (certNode)
+    {
+        (*signatures)->signerCertLen = certNode->value.length;
+        memcpy((*signatures)->signerCert, certNode->value.value, certNode->value.length);
+    }
+    if (signatureAlgorithmNode)
+    {
+        oid_to_string(signatureAlgorithmNode->value.value, signatureAlgorithmNode->value.length, (*signatures)->signatureAlgOID);
+    }
+    if (signatureNode)
+    {
     }
 }

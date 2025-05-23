@@ -49,9 +49,10 @@ TEST(test_asn1, asn1_test2)
 
 TEST(test_asn1, asn1_test3)
 {
+    // 读取整个文件内容到流中
     std::ifstream      file("./asn1/seal.gb38540", std::ios::binary);
     std::ostringstream oss;
-    oss << file.rdbuf(); // 读取整个文件内容到流中
+    oss << file.rdbuf();
     std::string content = oss.str();
 
     easy_asn1_tree_st* tree = NULL;
@@ -66,17 +67,48 @@ TEST(test_asn1, asn1_test4)
 {
     std::ifstream      file("./asn1/seal.gb38540", std::ios::in | std::ios::binary);
     std::ostringstream oss;
-    oss << file.rdbuf(); // 读取整个文件内容到流中
+    oss << file.rdbuf();
     std::string content = oss.str();
 
+    easy_asn1_tree_st* tree = NULL;
+    easy_asn1_parse((const uint8_t*)content.c_str(), content.size(), 0, 0, &tree);
     SEALINFO* seal = NULL;
-    SEF_ParseSeal((const uint8_t*)content.c_str(), content.size(), &seal);
+    SEF_ParseSeal(tree, &seal);
 
     // 读取印章
     char*        type    = seal->imageType;
     std::string  filenam = std::string("seal.") + type;
     std::fstream outfile(filenam, std::ios::out | std::ios::binary);
     outfile.write((char*)seal->imageData, seal->imageDataLen);
+    outfile.close();
+
+    easy_asn1_free_tree(tree);
+}
+
+TEST(test_asn1, asn1_test5)
+{
+    std::ifstream      file("./asn1/signatures.gb38540", std::ios::in | std::ios::binary);
+    std::ostringstream oss;
+    oss << file.rdbuf();
+    std::string content = oss.str();
+
+    easy_asn1_tree_st* tree = NULL;
+    easy_asn1_parse((const uint8_t*)content.c_str(), content.size(), 0, 0, &tree);
+    SIGNEDVALUEINFO* signatures = NULL;
+    SEF_ParseSignatures(tree, &signatures);
+
+    // 读取印章
+    easy_asn1_tree_st* seal_tree = NULL;
+    easy_asn1_parse((const uint8_t*)signatures->sealData, signatures->sealDataLen, 0, 0, &seal_tree);
+    SEALINFO* seal = NULL;
+    SEF_ParseSeal(seal_tree, &seal);
+    char*        type    = seal->imageType;
+    std::string  filenam = std::string("signatures_seal.") + type;
+    std::fstream outfile(filenam, std::ios::out | std::ios::binary);
+    outfile.write((char*)seal->imageData, seal->imageDataLen);
+    outfile.close();
+
+    easy_asn1_free_tree(tree);
 }
 
 TEST(test_asn1, asn1_oid)
