@@ -23,7 +23,7 @@ void easy_asn1_create_string(uint8_t tag, size_t length, uint8_t* value, easy_as
 {
     str->tag    = tag;
     str->length = length;
-    str->value  = (uint8_t*)calloc(1, length + 1);
+    str->value  = (uint8_t*)malloc(length);
     if (str->value == NULL)
     {
         str->tag    = 0;
@@ -37,7 +37,7 @@ void easy_asn1_copy_string(easy_asn1_string_st* src, easy_asn1_string_st* dest)
 {
     dest->tag    = src->tag;
     dest->length = src->length;
-    dest->value  = (uint8_t*)calloc(1, src->length + 1);
+    dest->value  = (uint8_t*)malloc(src->length);
     if (dest->value == NULL)
     {
         dest->tag    = 0;
@@ -144,7 +144,7 @@ size_t easy_asn1_parse_string(const uint8_t* data, easy_asn1_string_st* str)
     size_t offset = 0;
     offset += easy_asn1_parse_tag(data + offset, &str->tag);
     offset += easy_asn1_parse_length(data + offset, &str->length);
-    str->value = (uint8_t*)malloc(sizeof(uint8_t) * str->length);
+    str->value = (uint8_t*)calloc(1, sizeof(uint8_t) * str->length);
     if (str->value)
     {
         memcpy(str->value, data + offset, str->length);
@@ -189,7 +189,7 @@ void easy_asn1_parse(const uint8_t* data, size_t len, size_t offset, size_t leve
     }
 
     // 创建新节点
-    *node = (easy_asn1_tree_st*)calloc(1, sizeof(easy_asn1_tree_st));
+    *node = (easy_asn1_tree_st*)malloc(sizeof(easy_asn1_tree_st));
     if (!*node)
     {
         return;
@@ -238,7 +238,7 @@ void easy_asn1_parse(const uint8_t* data, size_t len, size_t offset, size_t leve
 
         // 分配子节点数组
         (*node)->children_size = child_count;
-        (*node)->children      = (easy_asn1_tree_st**)calloc(child_count, sizeof(easy_asn1_tree_st*));
+        (*node)->children      = (easy_asn1_tree_st**)malloc(child_count * sizeof(easy_asn1_tree_st*));
         if (!(*node)->children)
         {
             free((*node)->value.value);
@@ -302,7 +302,7 @@ void easy_asn1_parse(const uint8_t* data, size_t len, size_t offset, size_t leve
             if (child)
             {
                 (*node)->children_size = 1;
-                (*node)->children      = (easy_asn1_tree_st**)calloc(1, sizeof(easy_asn1_tree_st*));
+                (*node)->children      = (easy_asn1_tree_st**)malloc(sizeof(easy_asn1_tree_st*));
                 if ((*node)->children)
                 {
                     (*node)->children[0] = child;

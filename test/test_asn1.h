@@ -2,6 +2,7 @@
 #include <string>
 
 #include <gtest/gtest.h>
+#include <benchmark/benchmark.h>
 
 #include "endecode/base64/base64.h"
 #include "endecode/asn1/asn1.h"
@@ -12,6 +13,9 @@
 
 #include "test_util.h"
 
+/**
+ * @brief   功能测试
+ */
 TEST(test_asn1, asn1_test1)
 {
     uint8_t        asn1_data[] = {0x04, 0x05, 'h', 'e', 'l', 'l', 'o'};
@@ -54,6 +58,7 @@ TEST(test_asn1, asn1_test3)
     std::ostringstream oss;
     oss << file.rdbuf();
     std::string content = oss.str();
+    file.close();
 
     easy_asn1_tree_st* tree = NULL;
     easy_asn1_parse((const uint8_t*)content.c_str(), content.size(), 0, 0, &tree);
@@ -69,6 +74,7 @@ TEST(test_asn1, asn1_test4)
     std::ostringstream oss;
     oss << file.rdbuf();
     std::string content = oss.str();
+    file.close();
 
     easy_asn1_tree_st* tree = NULL;
     easy_asn1_parse((const uint8_t*)content.c_str(), content.size(), 0, 0, &tree);
@@ -91,6 +97,7 @@ TEST(test_asn1, asn1_test5)
     std::ostringstream oss;
     oss << file.rdbuf();
     std::string content = oss.str();
+    file.close();
 
     easy_asn1_tree_st* tree = NULL;
     easy_asn1_parse((const uint8_t*)content.c_str(), content.size(), 0, 0, &tree);
@@ -250,3 +257,66 @@ TEST(test_asn1, sm2_test2)
     printf("SGD_CERT_DER_EXTENSIONS: %s\n", info);
 #endif
 }
+
+/**
+ * @brief   性能测试
+ */
+static void bench_sef_parse_seal(benchmark::State& state, const std::string& filename)
+{
+    while (state.KeepRunning())
+    {
+        try
+        {
+            state.PauseTiming();
+            std::ifstream      file(filename, std::ios::in | std::ios::binary);
+            std::ostringstream oss;
+            oss << file.rdbuf();
+            std::string content = oss.str();
+            file.close();
+            state.ResumeTiming();
+
+            easy_asn1_tree_st* tree = NULL;
+            easy_asn1_parse((const uint8_t*)content.c_str(), content.size(), 0, 0, &tree);
+            SEALINFO* seal = NULL;
+            SEF_ParseSeal(tree, &seal);
+
+            state.PauseTiming();
+            easy_asn1_free_tree(tree);
+            state.ResumeTiming();
+        }
+        catch (const std::exception&)
+        {
+        }
+    }
+}
+BENCHMARK_CAPTURE(bench_sef_parse_seal, 15KB, "asn1/seal.gb38540");
+
+static void bench_sef_parse_signatures(benchmark::State& state, const std::string& filename)
+{
+    while (state.KeepRunning())
+    {
+        try
+        {
+            state.PauseTiming();
+            std::ifstream      file(filename, std::ios::in | std::ios::binary);
+            std::ostringstream oss;
+            oss << file.rdbuf();
+            std::string content = oss.str();
+            file.close();
+            state.ResumeTiming();
+
+            easy_asn1_tree_st* tree = NULL;
+            easy_asn1_parse((const uint8_t*)content.data(), content.size(), 0, 0, &tree);
+            SIGNEDVALUEINFO* signatures = NULL;
+            SEF_ParseSignatures(tree, &signatures);
+
+            state.PauseTiming();
+            easy_asn1_free_tree(tree);
+            state.ResumeTiming();
+        }
+        catch (const std::exception&)
+        {
+        }
+    }
+}
+BENCHMARK_CAPTURE(bench_sef_parse_signatures, 16KB, "asn1/signatures.gb38540");

@@ -1,6 +1,9 @@
 [submodule "3rdparty/googletest"]
 	path = 3rdparty/googletest
-	url = https://github.com/google/googletest.git
+	url = git@github.com:google/googletest.git
+[submodule "3rdparty/benchmark"]
+	path = 3rdparty/benchmark
+	url = git@github.com:google/benchmark.git
 [submodule "3rdparty/cJSON"]
 	path = 3rdparty/cJSON
 	url = git@github.com:DaveGamble/cJSON.git

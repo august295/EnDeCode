@@ -1,8 +1,11 @@
+#define NOMINMAX
+
 #if defined(_WIN32) || defined(_WIN64)
     #include <windows.h>
 #endif
 
 #include <gtest/gtest.h>
+#include <benchmark/benchmark.h>
 
 #include "test_a5_1.h"
 #include "test_aes.h"
@@ -35,6 +38,20 @@ int main(int argc, char** argv)
     SetConsoleCP(CP_UTF8);
 #endif
 
-    testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+    // 初始化 Google Test
+    ::testing::InitGoogleTest(&argc, argv);
+    
+    // 初始化 Google Benchmark
+    ::benchmark::Initialize(&argc, argv);
+    
+    // 运行 Google Test
+    int gtest_result = RUN_ALL_TESTS();
+    
+    if (gtest_result != 0) {
+        return gtest_result;
+    }
+    
+    // 运行 Google Benchmark
+    ::benchmark::RunSpecifiedBenchmarks();
+    return 0;
 }
