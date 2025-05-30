@@ -33,6 +33,7 @@ void sm2_cert_init(SM2Certificate* cert)
 void sm2_cert_free(SM2Certificate* cert)
 {
     // tbsCertificate
+    easy_asn1_free_string(&cert->tbsCertificate.version);
     easy_asn1_free_string(&cert->tbsCertificate.serialNumber);
     easy_asn1_free_string(&cert->tbsCertificate.signature.algorithm);
     easy_asn1_free_string(&cert->tbsCertificate.signature.parameters);
@@ -44,8 +45,11 @@ void sm2_cert_free(SM2Certificate* cert)
             easy_asn1_free_string(&cert->tbsCertificate.issuer.names[i].rdn[j].value);
         }
         cert->tbsCertificate.issuer.names[i].count = 0;
+        free(cert->tbsCertificate.issuer.names[i].rdn);
+        cert->tbsCertificate.issuer.names[i].rdn = NULL;
     }
     cert->tbsCertificate.issuer.count = 0;
+    free(cert->tbsCertificate.issuer.names);
     cert->tbsCertificate.issuer.names = NULL;
     easy_asn1_free_string(&cert->tbsCertificate.validity.notBefore);
     easy_asn1_free_string(&cert->tbsCertificate.validity.notAfter);
@@ -57,8 +61,11 @@ void sm2_cert_free(SM2Certificate* cert)
             easy_asn1_free_string(&cert->tbsCertificate.subject.names[i].rdn[j].value);
         }
         cert->tbsCertificate.subject.names[i].count = 0;
+        free(cert->tbsCertificate.subject.names[i].rdn);
+        cert->tbsCertificate.subject.names[i].rdn = NULL;
     }
     cert->tbsCertificate.subject.count = 0;
+    free(cert->tbsCertificate.subject.names);
     cert->tbsCertificate.subject.names = NULL;
     easy_asn1_free_string(&cert->tbsCertificate.subjectPublicKeyInfo.algorithm.algorithm);
     easy_asn1_free_string(&cert->tbsCertificate.subjectPublicKeyInfo.algorithm.parameters);
@@ -73,6 +80,9 @@ void sm2_cert_free(SM2Certificate* cert)
 
     // signatureValue
     easy_asn1_free_string(&cert->signatureValue);
+
+    free(cert);
+    cert = NULL;
 }
 
 SM2Certificate* sm2_cert_parse(const uint8_t* data, size_t len)
@@ -83,11 +93,13 @@ SM2Certificate* sm2_cert_parse(const uint8_t* data, size_t len)
 
     do
     {
-        cert = (SM2Certificate*)calloc(1, sizeof(SM2Certificate));
+        cert = (SM2Certificate*)malloc(sizeof(SM2Certificate));
         if (cert == NULL)
         {
             break;
         }
+        sm2_cert_init(cert);
+
         if (tree)
         {
             // 解析证书主体
@@ -127,7 +139,7 @@ SM2Certificate* sm2_cert_parse(const uint8_t* data, size_t len)
                 {
                     easy_asn1_tree_st* issuerNode     = tbs->children[3];
                     cert->tbsCertificate.issuer.count = issuerNode->children_size;
-                    cert->tbsCertificate.issuer.names = (RelativeDistinguishedName*)calloc(1, sizeof(RelativeDistinguishedName) * issuerNode->children_size);
+                    cert->tbsCertificate.issuer.names = (RelativeDistinguishedName*)malloc(sizeof(RelativeDistinguishedName) * issuerNode->children_size);
                     if (cert->tbsCertificate.issuer.names == NULL)
                     {
                         break;
@@ -136,7 +148,7 @@ SM2Certificate* sm2_cert_parse(const uint8_t* data, size_t len)
                     {
                         easy_asn1_tree_st* dnNode                  = issuerNode->children[i];
                         cert->tbsCertificate.issuer.names[i].count = dnNode->children_size;
-                        cert->tbsCertificate.issuer.names[i].rdn   = (AttributeTypeAndValue*)calloc(1, sizeof(AttributeTypeAndValue) * dnNode->children_size);
+                        cert->tbsCertificate.issuer.names[i].rdn   = (AttributeTypeAndValue*)malloc(sizeof(AttributeTypeAndValue) * dnNode->children_size);
                         if (cert->tbsCertificate.issuer.names[i].rdn == NULL)
                         {
                             break;
@@ -164,7 +176,7 @@ SM2Certificate* sm2_cert_parse(const uint8_t* data, size_t len)
                 {
                     easy_asn1_tree_st* subjectNode     = tbs->children[5];
                     cert->tbsCertificate.subject.count = subjectNode->children_size;
-                    cert->tbsCertificate.subject.names = (RelativeDistinguishedName*)calloc(1, sizeof(RelativeDistinguishedName) * subjectNode->children_size);
+                    cert->tbsCertificate.subject.names = (RelativeDistinguishedName*)malloc(sizeof(RelativeDistinguishedName) * subjectNode->children_size);
                     if (cert->tbsCertificate.subject.names == NULL)
                     {
                         break;
@@ -173,7 +185,7 @@ SM2Certificate* sm2_cert_parse(const uint8_t* data, size_t len)
                     {
                         easy_asn1_tree_st* dnNode                   = subjectNode->children[i];
                         cert->tbsCertificate.subject.names[i].count = dnNode->children_size;
-                        cert->tbsCertificate.subject.names[i].rdn   = (AttributeTypeAndValue*)calloc(1, sizeof(AttributeTypeAndValue) * dnNode->children_size);
+                        cert->tbsCertificate.subject.names[i].rdn   = (AttributeTypeAndValue*)malloc(sizeof(AttributeTypeAndValue) * dnNode->children_size);
                         if (cert->tbsCertificate.subject.names[i].rdn == NULL)
                         {
                             break;

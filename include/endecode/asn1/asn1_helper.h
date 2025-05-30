@@ -45,6 +45,7 @@ ENDECODE_API int string_to_oid(const char* oid_str, uint8_t* oid_bytes, size_t* 
  * @param   map_len                 [IN/OUT]    oid 结构体个数
  */
 ENDECODE_API void ReadOid(const char* filename, OID_MAPPING** oid_mapping, size_t* map_len);
+ENDECODE_API void FreeOid(OID_MAPPING* oid_mapping, size_t map_len);
 
 /**
  * @brief   UTCTime时间格式转换为标准时间格式
@@ -52,14 +53,14 @@ ENDECODE_API void ReadOid(const char* filename, OID_MAPPING** oid_mapping, size_
  * @param   utcOffset               [IN]        utc 时区偏移
  * @param   standardTime            [IN/OUT]    标准时间格式
  */
-ENDECODE_API void convertUTCTimeToStandard(const char* utcTime, size_t utcOffset, char* standardTime);
+ENDECODE_API void convertUTCTimeToStandard(const char* utcTime, size_t length, size_t utcOffset, char* standardTime);
 
 /**
  * @brief   GeneralizedTime时间格式转换为标准时间格式
  * @param   generalizedTime         [IN]        GeneralizedTime 时间格式
  * @param   standardTime            [IN/OUT]    标准时间格式
  */
-ENDECODE_API void convertGeneralizedTimeToStandard(const char* generalizedTime, size_t utcOffset, char* standardTime);
+ENDECODE_API void convertGeneralizedTimeToStandard(const char* generalizedTime, size_t length, size_t utcOffset, char* standardTime);
 
 /**
  * @brief   计算字符串转大数

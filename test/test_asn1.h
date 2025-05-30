@@ -13,18 +13,43 @@
 
 #include "test_util.h"
 
+std::string ReadCertFile(const std::string& filename)
+{
+    std::ifstream      file(filename, std::ios::in);
+    std::ostringstream oss;
+    oss << file.rdbuf();
+    std::string content = oss.str();
+    file.close();
+
+    size_t begin_pos = content.find(PEM_CERT_BEGIN);
+    size_t end_pos   = content.find(PEM_CERT_END);
+    if (begin_pos == std::string::npos || end_pos == std::string::npos || begin_pos > end_pos)
+    {
+        return "";
+    }
+    begin_pos += strlen(PEM_CERT_BEGIN);
+    std::string base64 = content.substr(begin_pos, end_pos - begin_pos);
+    // 清除空格和换行
+    std::string cleaned;
+    for (char c : base64)
+    {
+        if (c != '\r' && c != '\n' && c != ' ')
+            cleaned += c;
+    }
+    return cleaned;
+}
+
 /**
  * @brief   功能测试
  */
 TEST(test_asn1, asn1_test1)
 {
-    uint8_t        asn1_data[] = {0x04, 0x05, 'h', 'e', 'l', 'l', 'o'};
-    const uint8_t* dataPtr     = asn1_data;
-    size_t         dataLen     = sizeof(asn1_data);
+    uint8_t asn1_data[] = {0x04, 0x05, 'h', 'e', 'l', 'l', 'o'};
+    size_t  dataLen     = sizeof(asn1_data);
 
     easy_asn1_string_st str;
-    easy_asn1_parse_string(dataPtr, &str);
-#ifndef NDEBUG
+    easy_asn1_parse_string(asn1_data, dataLen, &str);
+#ifdef CONSOLE_PRINT
     easy_asn1_print_string(&str, 0);
 #endif
     easy_asn1_free_string(&str);
@@ -45,7 +70,7 @@ TEST(test_asn1, asn1_test2)
     // clang-format on
     easy_asn1_tree_st* tree = NULL;
     easy_asn1_parse(asn1_data, sizeof(asn1_data), 0, 0, &tree);
-#ifndef NDEBUG
+#ifdef CONSOLE_PRINT
     easy_asn1_print_tree(tree);
 #endif
     easy_asn1_free_tree(tree);
@@ -62,7 +87,7 @@ TEST(test_asn1, asn1_test3)
 
     easy_asn1_tree_st* tree = NULL;
     easy_asn1_parse((const uint8_t*)content.c_str(), content.size(), 0, 0, &tree);
-#ifndef NDEBUG
+#ifdef CONSOLE_PRINT
     easy_asn1_print_tree(tree);
 #endif
     easy_asn1_free_tree(tree);
@@ -88,6 +113,8 @@ TEST(test_asn1, asn1_test4)
     outfile.write((char*)seal->imageData, seal->imageDataLen);
     outfile.close();
 
+    // 释放
+    SEF_FreeSeal(seal);
     easy_asn1_free_tree(tree);
 }
 
@@ -115,6 +142,10 @@ TEST(test_asn1, asn1_test5)
     outfile.write((char*)seal->imageData, seal->imageDataLen);
     outfile.close();
 
+    // 释放
+    SEF_FreeSeal(seal);
+    SEF_FreeSignatures(signatures);
+    easy_asn1_free_tree(seal_tree);
     easy_asn1_free_tree(tree);
 }
 
@@ -125,24 +156,15 @@ TEST(test_asn1, asn1_oid)
     OID_MAPPING* oid_mapping     = NULL;
     size_t       oid_mapping_len = 0;
     ReadOid(filename.c_str(), &oid_mapping, &oid_mapping_len);
+
+    // 释放
+    FreeOid(oid_mapping, oid_mapping_len);
 }
 
 TEST(test_asn1, asn1_serialize)
 {
-    std::string   filename = "./cer/github.cer";
-    std::ifstream in(filename);
-
-    std::string str;
-    std::string line;
-    while (std::getline(in, line))
-    {
-        if (line == PEM_CERT_BEGIN || line == PEM_CERT_END || line.empty())
-        {
-            continue;
-        }
-        str += line;
-    }
-    in.close();
+    std::string str = ReadCertFile("./cer/github.cer");
+    EXPECT_TRUE(!str.empty());
 
     size_t   str_size = str.size();
     uint8_t* data     = (uint8_t*)malloc(BASE64_DECODE_OUT_SIZE(str_size));
@@ -158,29 +180,20 @@ TEST(test_asn1, asn1_serialize)
     easy_asn1_serialize(tree, tree_ser);
     EXPECT_TRUE(my_equal_array_8bit(data, tree_ser, data_len));
 
-#ifndef NDEBUG
+#ifdef CONSOLE_PRINT
     easy_asn1_print_tree(tree);
 #endif
+
+    // 释放
+    free(data);
     easy_asn1_free_tree(tree);
     free(tree_ser);
 }
 
 TEST(test_asn1, x509_test1)
 {
-    std::string   filename = "./cer/github.cer";
-    std::ifstream in(filename);
-
-    std::string str;
-    std::string line;
-    while (std::getline(in, line))
-    {
-        if (line == PEM_CERT_BEGIN || line == PEM_CERT_END || line.empty())
-        {
-            continue;
-        }
-        str += line;
-    }
-    in.close();
+    std::string str = ReadCertFile("./cer/github.cer");
+    EXPECT_TRUE(!str.empty());
 
     size_t   str_size = str.size();
     uint8_t* data     = (uint8_t*)malloc(BASE64_DECODE_OUT_SIZE(str_size));
@@ -188,73 +201,63 @@ TEST(test_asn1, x509_test1)
 
     easy_asn1_tree_st* tree = NULL;
     easy_asn1_parse(data, data_len, 0, 0, &tree);
-#ifndef NDEBUG
+#ifdef CONSOLE_PRINT
     easy_asn1_print_tree(tree);
 #endif
+
+    // 释放
+    free(data);
     easy_asn1_free_tree(tree);
 }
 
 TEST(test_asn1, sm2_test1)
 {
-    std::string   filename = "./cer/sm2-x509.cer";
-    std::ifstream in(filename);
-
-    std::string str;
-    std::string line;
-    while (std::getline(in, line))
-    {
-        if (line == PEM_CERT_BEGIN || line == PEM_CERT_END || line.empty())
-        {
-            continue;
-        }
-        str += line;
-    }
-    in.close();
+    std::string str = ReadCertFile("./cer/sm2-x509.cer");
+    EXPECT_TRUE(!str.empty());
 
     size_t   str_size = str.size();
     uint8_t* data     = (uint8_t*)malloc(BASE64_DECODE_OUT_SIZE(str_size));
     size_t   data_len = base64_decode(str.c_str(), str_size, (unsigned char*)data);
 
     SM2Certificate* cert = sm2_cert_parse(data, data_len);
+
+    // 释放
+    free(data);
     sm2_cert_free(cert);
 }
 
 TEST(test_asn1, sm2_test2)
 {
-    std::string   filename = "./cer/sm2-x509.cer";
-    std::ifstream in(filename);
+    std::string str = ReadCertFile("./cer/sm2-x509.cer");
+    EXPECT_TRUE(!str.empty());
 
-    std::string str;
-    std::string line;
-    while (std::getline(in, line))
-    {
-        if (line == PEM_CERT_BEGIN || line == PEM_CERT_END || line.empty())
-        {
-            continue;
-        }
-        str += line;
-    }
-    in.close();
-
-#ifndef NDEBUG
+#ifdef CONSOLE_PRINT
     BSTR info = NULL;
     printf("Cert info:\n");
     info = SOF_GetCertInfo((BSTR)str.c_str(), SGD_CERT_VERSION);
     printf("SGD_CERT_VERSION: %s\n", info);
+    free(info);
     info = SOF_GetCertInfo((BSTR)str.c_str(), SGD_CERT_SERIAL);
     printf("SGD_CERT_SERIAL: %s\n", info);
+    free(info);
     info = SOF_GetCertInfo((BSTR)str.c_str(), SGD_CERT_SIGNATURE_ALGORITHM);
     printf("SGD_CERT_SIGNATURE_ALGORITHM: %s\n", info);
+    free(info);
     info = SOF_GetCertInfo((BSTR)str.c_str(), SGD_CERT_ISSUER);
     printf("SGD_CERT_ISSUER: %s\n", info);
+    free(info);
     info = SOF_GetCertInfo((BSTR)str.c_str(), SGD_CERT_VALID_TIME);
     printf("SGD_CERT_VALID_TIME: %s\n", info);
+    free(info);
     info = SOF_GetCertInfo((BSTR)str.c_str(), SGD_CERT_SUBJECT);
     printf("SGD_CERT_SUBJECT: %s\n", info);
+    free(info);
     info = SOF_GetCertInfo((BSTR)str.c_str(), SGD_CERT_DER_PUBLIC_KEY);
     printf("SGD_CERT_DER_PUBLIC_KEY: %s\n", info);
+    free(info);
     info = SOF_GetCertInfo((BSTR)str.c_str(), SGD_CERT_DER_EXTENSIONS);
     printf("SGD_CERT_DER_EXTENSIONS: %s\n", info);
+    free(info);
 #endif
 }
 
@@ -281,6 +284,7 @@ static void bench_sef_parse_seal(benchmark::State& state, const std::string& fil
             SEF_ParseSeal(tree, &seal);
 
             state.PauseTiming();
+            SEF_FreeSeal(seal);
             easy_asn1_free_tree(tree);
             state.ResumeTiming();
         }
@@ -311,6 +315,7 @@ static void bench_sef_parse_signatures(benchmark::State& state, const std::strin
             SEF_ParseSignatures(tree, &signatures);
 
             state.PauseTiming();
+            SEF_FreeSignatures(signatures);
             easy_asn1_free_tree(tree);
             state.ResumeTiming();
         }

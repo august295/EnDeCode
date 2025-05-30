@@ -20,6 +20,9 @@ TEST(test_base64, str_ascii)
 
     EXPECT_EQ(std::string(plaintext, plaintext_len), std::string(result, result_len));
     EXPECT_EQ(plaintext_len, result_len);
+
+    free(ciphertext);
+    free(result);
 }
 
 TEST(test_base64, str_gbk)
@@ -37,4 +40,7 @@ TEST(test_base64, str_gbk)
 
     EXPECT_EQ(std::string(plaintext, plaintext_len), std::string(result, result_len));
     EXPECT_EQ(plaintext_len, result_len);
+
+    free(ciphertext);
+    free(result);
 }

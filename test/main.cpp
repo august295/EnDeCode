@@ -40,17 +40,17 @@ int main(int argc, char** argv)
 
     // 初始化 Google Test
     ::testing::InitGoogleTest(&argc, argv);
-    
+
     // 初始化 Google Benchmark
     ::benchmark::Initialize(&argc, argv);
-    
+
     // 运行 Google Test
     int gtest_result = RUN_ALL_TESTS();
-    
-    if (gtest_result != 0) {
+    if (gtest_result != 0)
+    {
         return gtest_result;
     }
-    
+
     // 运行 Google Benchmark
     ::benchmark::RunSpecifiedBenchmarks();
     return 0;

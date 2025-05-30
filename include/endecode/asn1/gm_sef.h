@@ -63,6 +63,12 @@ typedef struct SEF_SEALINFO
 extern "C" {
 #endif
 
+ENDECODE_API void SEF_InitSeal(SEALINFO* seal);
+ENDECODE_API void SEF_FreeSeal(SEALINFO* seal);
+ENDECODE_API void SEF_InitSignatures(SIGNEDVALUEINFO* signatures);
+ENDECODE_API void SEF_FreeSignatures(SIGNEDVALUEINFO* signatures);
+
+
 /**
  * @brief   解析印章
  * @param   data                    [IN]        二进制数据

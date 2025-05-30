@@ -6,6 +6,7 @@
 #if defined(_WIN32) || defined(_WIN64)
     #include <windows.h>
 #else
+// SKF
 typedef int8_t   INT8;
 typedef int16_t  INT16;
 typedef int32_t  INT32;
@@ -25,6 +26,8 @@ typedef UINT16 WORD;
 typedef UINT32 DWORD;
 typedef UINT32 FLAGS;
 typedef CHAR*  LPSTR;
+// SOF
+typedef CHAR* BSTR;
 #endif
 
 #endif

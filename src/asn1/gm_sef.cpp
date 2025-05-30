@@ -6,6 +6,32 @@
 #include "endecode/asn1/asn1_helper.h"
 #include "endecode/asn1/gm_sef.h"
 
+void SEF_InitSeal(SEALINFO* seal)
+{
+    seal->certListInfo = NULL;
+    seal->imageData    = NULL;
+}
+
+void SEF_FreeSeal(SEALINFO* seal)
+{
+    free(seal->certListInfo);
+    free(seal->imageData);
+    free(seal);
+}
+
+void SEF_InitSignatures(SIGNEDVALUEINFO* signatures)
+{
+    signatures->propertyInfo = NULL;
+    signatures->timeStamp    = NULL;
+}
+
+void SEF_FreeSignatures(SIGNEDVALUEINFO* signatures)
+{
+    free(signatures->propertyInfo);
+    free(signatures->timeStamp);
+    free(signatures);
+}
+
 void copy_string(easy_asn1_string_st str, char* dest)
 {
     snprintf(dest, str.length + 1, "%.*s", (int)str.length, str.value);
@@ -15,11 +41,11 @@ void copy_time(easy_asn1_string_st str, char* time)
 {
     if (str.tag == EASY_ASN1_UTCTIME)
     {
-        convertUTCTimeToStandard((char*)str.value, 8, time);
+        convertUTCTimeToStandard((char*)str.value, str.length, 8, time);
     }
     else if (str.tag == EASY_ASN1_GENERALIZEDTIME)
     {
-        convertGeneralizedTimeToStandard((char*)str.value, 8, time);
+        convertGeneralizedTimeToStandard((char*)str.value, str.length, 8, time);
     }
 }
 
@@ -31,11 +57,12 @@ void SEF_ParseSeal(const easy_asn1_tree_st* tree, SEALINFO** seal)
     }
 
     // 创建新节点
-    *seal = (SEALINFO*)calloc(1, sizeof(SEALINFO));
+    *seal = (SEALINFO*)malloc(sizeof(SEALINFO));
     if (!*seal)
     {
         return;
     }
+    SEF_InitSeal(*seal);
 
     // SESeal = eSealInfo + cert + signAlgID + signedValue
     easy_asn1_tree_st* eSealInfoTree = tree->children[0];
@@ -129,24 +156,28 @@ void SEF_ParseSignatures(const easy_asn1_tree_st* tree, SIGNEDVALUEINFO** signat
     }
 
     // 创建新节点
-    *signatures = (SIGNEDVALUEINFO*)calloc(1, sizeof(SIGNEDVALUEINFO));
+    *signatures = (SIGNEDVALUEINFO*)malloc(sizeof(SIGNEDVALUEINFO));
     if (!*signatures)
     {
         return;
     }
+    SEF_InitSignatures(*signatures);
 
     // TBS_Sign = version + eseal + timeInnfo + dataHash + propertyInfo + [cert + signatureAlgorithm]
     easy_asn1_tree_st* TBS_Sign = tree->children[0];
     char*              version  = easy_asn1_print_integer(TBS_Sign->children[0]->value.value, TBS_Sign->children[0]->value.length);
     (*signatures)->version      = atoi(version);
     free(version);
-    (*signatures)->sealDataLen = TBS_Sign->children[1]->value.length;
-    easy_asn1_serialize_string(&TBS_Sign->children[1]->value, (*signatures)->sealData);
+    /**
+     * 如果包含 TLV 完整数据可以直接赋值
+     * 如果不包含 TLV 完整数据，则需要重新序列化
+     */
+    (*signatures)->sealDataLen = easy_asn1_serialize_string(&TBS_Sign->children[1]->value, (*signatures)->sealData);
     copy_time(TBS_Sign->children[2]->value, (*signatures)->signDateTime);
     (*signatures)->dataHashLen = TBS_Sign->children[3]->value.length;
     memcpy((*signatures)->dataHash, TBS_Sign->children[3]->value.value, (*signatures)->dataHashLen);
     (*signatures)->propertyInfoLen = TBS_Sign->children[4]->value.length;
-    (*signatures)->propertyInfo    = (unsigned char*)calloc(1, (*signatures)->propertyInfoLen);
+    (*signatures)->propertyInfo    = (unsigned char*)malloc((*signatures)->propertyInfoLen);
     memcpy((*signatures)->propertyInfo, TBS_Sign->children[4]->value.value, TBS_Sign->children[4]->value.length);
 
     // cert + signatureAlgorithm + signature + <timeStamp>

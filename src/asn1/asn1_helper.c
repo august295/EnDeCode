@@ -1,6 +1,7 @@
 #include <memory.h>
 #include <malloc.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
@@ -151,15 +152,16 @@ void ReadOid(const char* filename, OID_MAPPING** oid_mapping, size_t* map_len)
     int file_size = ftell(file);
     fseek(file, 0, SEEK_SET);
 
-    char* buffer = (char*)calloc(sizeof(char), file_size);
+    char* buffer = (char*)malloc(sizeof(char) * file_size);
     if (-1 == fread(buffer, sizeof(char), file_size, file))
     {
+        free(buffer);
         fclose(file);
         return;
     }
     fclose(file);
 
-    cJSON* root = cJSON_Parse(buffer);
+    cJSON* root = cJSON_ParseWithLength(buffer, file_size);
     free(buffer);
     if (!root)
     {
@@ -194,12 +196,12 @@ void ReadOid(const char* filename, OID_MAPPING** oid_mapping, size_t* map_len)
                 string_to_oid(oid, oid_bytes, &oid_len);
 
                 int oid_string_len               = strlen(oid);
-                (*oid_mapping)[index].oid_string = (char*)calloc(1, oid_string_len + 1);
+                (*oid_mapping)[index].oid_string = (char*)malloc(oid_string_len + 1);
                 memcpy((*oid_mapping)[index].oid_string, oid, oid_string_len);
                 (*oid_mapping)[index].oid_string[oid_string_len] = '\0';
                 easy_asn1_create_string(EASY_ASN1_OBJECT, oid_len, oid_bytes, &(*oid_mapping)[index].oid_object);
                 int short_name_len             = strlen(short_name);
-                (*oid_mapping)[index].oid_name = (char*)calloc(1, short_name_len + 1);
+                (*oid_mapping)[index].oid_name = (char*)malloc(short_name_len + 1);
                 memcpy((*oid_mapping)[index].oid_name, short_name, short_name_len);
                 (*oid_mapping)[index].oid_name[short_name_len] = '\0';
                 index++;
@@ -209,23 +211,53 @@ void ReadOid(const char* filename, OID_MAPPING** oid_mapping, size_t* map_len)
     cJSON_Delete(root);
 }
 
-void convertUTCTimeToStandard(const char* utcTime, size_t utcOffset, char* standardTime)
+void FreeOid(OID_MAPPING* oid_mapping, size_t map_len)
 {
-    struct tm tm;
-    memset(&tm, 0, sizeof(struct tm));
+    if (oid_mapping)
+    {
+        for (size_t i = 0; i < map_len; i++)
+        {
+            free(oid_mapping[i].oid_string);
+            easy_asn1_free_string(&oid_mapping[i].oid_object);
+            free(oid_mapping[i].oid_name);
+        }
+    }
+    free(oid_mapping);
+    oid_mapping = NULL;
+}
 
-    // 解析UTCTime
-    if (sscanf(utcTime, "%2d%2d%2d%2d%2d%2dZ", &tm.tm_year, &tm.tm_mon, &tm.tm_mday, &tm.tm_hour, &tm.tm_min, &tm.tm_sec) != 6)
+void convertUTCTimeToStandard(const char* utcTime, size_t length, size_t utcOffset, char* standardTime)
+{
+    // 格式必须至少包含 YYMMDDhhmmssZ 共13字节
+    if (length < 13)
     {
         return;
     }
 
+    char      buf[5] = {0};
+    struct tm tm;
+    memset(&tm, 0, sizeof(struct tm));
+    memcpy(buf, utcTime, 2);
+    tm.tm_year = atoi(buf);
     if (tm.tm_year < 50)
     {
         tm.tm_year += 100;
     }
-
-    tm.tm_mon -= 1;
+    memcpy(buf, utcTime + 2, 2);
+    tm.tm_mon = atoi(buf) - 1;
+    memcpy(buf, utcTime + 4, 2);
+    tm.tm_mday = atoi(buf);
+    memcpy(buf, utcTime + 6, 2);
+    tm.tm_hour = atoi(buf);
+    memcpy(buf, utcTime + 8, 2);
+    tm.tm_min = atoi(buf);
+    memcpy(buf, utcTime + 10, 2);
+    tm.tm_sec = atoi(buf);
+    // 检查末尾是否是 'Z'
+    if (utcTime[12] != 'Z')
+    {
+        return;
+    }
     tm.tm_hour += utcOffset;
     mktime(&tm);
 
@@ -233,19 +265,34 @@ void convertUTCTimeToStandard(const char* utcTime, size_t utcOffset, char* stand
     strftime(standardTime, 20, "%Y-%m-%d %H:%M:%S", &tm);
 }
 
-void convertGeneralizedTimeToStandard(const char* generalizedTime, size_t utcOffset, char* standardTime)
+void convertGeneralizedTimeToStandard(const char* generalizedTime, size_t length, size_t utcOffset, char* standardTime)
 {
-    struct tm tm;
-    memset(&tm, 0, sizeof(struct tm));
-
-    // 解析GeneralizedTime
-    if (sscanf(generalizedTime, "%4d%2d%2d%2d%2d%2dZ", &tm.tm_year, &tm.tm_mon, &tm.tm_mday, &tm.tm_hour, &tm.tm_min, &tm.tm_sec) != 6)
+    // 格式必须至少包含 YYYYMMDDhhmmssZ 共15字节
+    if (length < 15)
     {
         return;
     }
 
-    tm.tm_year -= 1900;
-    tm.tm_mon -= 1;
+    char      buf[5] = {0};
+    struct tm tm;
+    memset(&tm, 0, sizeof(struct tm));
+    memcpy(buf, generalizedTime, 4);
+    tm.tm_year = atoi(buf) - 1900;
+    memcpy(buf, generalizedTime + 4, 2);
+    tm.tm_mon = atoi(buf) - 1;
+    memcpy(buf, generalizedTime + 6, 2);
+    tm.tm_mday = atoi(buf);
+    memcpy(buf, generalizedTime + 8, 2);
+    tm.tm_hour = atoi(buf);
+    memcpy(buf, generalizedTime + 10, 2);
+    tm.tm_min = atoi(buf);
+    memcpy(buf, generalizedTime + 12, 2);
+    tm.tm_sec = atoi(buf);
+    // 末尾必须是 'Z'
+    if (generalizedTime[14] != 'Z')
+    {
+        return;
+    }
     tm.tm_hour += utcOffset;
     mktime(&tm);
 
@@ -336,7 +383,7 @@ int easy_asn1_print_string_try(const uint8_t* value, size_t len)
 
 void easy_asn1_print_string(easy_asn1_string_st* str, size_t print_value)
 {
-    printf("Tag: %02X, Length: %llu", str->tag, str->length);
+    printf("Tag: %02X, Length: %zu", str->tag, str->length);
     if (print_value == 0)
     {
         printf(", Value: ");
@@ -348,6 +395,7 @@ void easy_asn1_print_string(easy_asn1_string_st* str, size_t print_value)
         case EASY_ASN1_INTEGER: {
             char* temp = easy_asn1_print_integer(str->value, str->length);
             printf("%s", temp);
+            free(temp);
         }
         break;
         case EASY_ASN1_NULL:
@@ -369,13 +417,13 @@ void easy_asn1_print_string(easy_asn1_string_st* str, size_t print_value)
             break;
         case EASY_ASN1_UTCTIME: {
             char time[21] = {0};
-            convertUTCTimeToStandard(str->value, 8, time);
+            convertUTCTimeToStandard(str->value, str->length, 8, time);
             printf("%s", time);
         }
         break;
         case EASY_ASN1_GENERALIZEDTIME: {
             char time[21] = {0};
-            convertGeneralizedTimeToStandard(str->value, 8, time);
+            convertGeneralizedTimeToStandard(str->value, str->length, 8, time);
             printf("%s", time);
         }
         break;
@@ -405,7 +453,7 @@ void easy_asn1_print_tree(easy_asn1_tree_st* node)
         {
             printf("    ");
         }
-        printf("Offset: %llu, ", node->offset);
+        printf("Offset: %zu, ", node->offset);
         easy_asn1_print_string(&node->value, node->children_size);
 
         for (uint32_t i = 0; i < node->children_size; i++)

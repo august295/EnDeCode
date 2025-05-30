@@ -1,6 +1,7 @@
 #ifndef BASE64_H
 #define BASE64_H
 
+#include <stddef.h>
 #include <stdint.h>
 
 #define BASE64_ENCODE_OUT_SIZE(s) ((size_t)((((s) + 2) / 3) * 4 + 1))

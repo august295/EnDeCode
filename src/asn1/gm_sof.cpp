@@ -83,21 +83,21 @@ BSTR SOF_GetCertInfo(BSTR Base64Cert, SHORT Type)
         std::string info_str;
         if (time.notBefore.tag == EASY_ASN1_UTCTIME)
         {
-            convertUTCTimeToStandard((char*)time.notBefore.value, utcOffset, notBefore);
+            convertUTCTimeToStandard((char*)time.notBefore.value, time.notBefore.length, utcOffset, notBefore);
         }
         else if (time.notBefore.tag == EASY_ASN1_GENERALIZEDTIME)
         {
-            convertGeneralizedTimeToStandard((char*)time.notBefore.value, utcOffset, notBefore);
+            convertGeneralizedTimeToStandard((char*)time.notBefore.value, time.notBefore.length, utcOffset, notBefore);
         }
         info_str += notBefore;
         info_str += ";";
         if (time.notAfter.tag == EASY_ASN1_UTCTIME)
         {
-            convertUTCTimeToStandard((char*)time.notAfter.value, utcOffset, notAfter);
+            convertUTCTimeToStandard((char*)time.notAfter.value, time.notAfter.length, utcOffset, notAfter);
         }
         else if (time.notAfter.tag == EASY_ASN1_GENERALIZEDTIME)
         {
-            convertGeneralizedTimeToStandard((char*)time.notAfter.value, utcOffset, notAfter);
+            convertGeneralizedTimeToStandard((char*)time.notAfter.value, time.notAfter.length, utcOffset, notAfter);
         }
         info_str += notAfter;
 
@@ -184,16 +184,22 @@ BSTR SOF_GetCertInfo(BSTR Base64Cert, SHORT Type)
         memcpy(info, cert->tbsCertificate.extensions.value, infoLen);
     }
 
-    sm2_cert_free(cert);
-
     size_t infoBase64Len = BASE64_ENCODE_OUT_SIZE(infoLen);
     char*  infoBase64    = (char*)calloc(1, infoBase64Len + 1);
     base64_encode((uint8_t*)info, infoLen, infoBase64);
+
+    // 释放
+    free(BinCert);
+    free(info);
+    sm2_cert_free(cert);
+
     return (BSTR)infoBase64;
 }
 
 struct GMSOF::GMSOFImpl
 {
+    OID_MAPPING*                       oid_mapping;
+    size_t                             oid_mapping_len;
     std::map<std::string, OID_MAPPING> m_x500Map;
 };
 
@@ -205,18 +211,20 @@ GMSOF::GMSOF()
 
 GMSOF::~GMSOF()
 {
+    FreeOid(m_impl->oid_mapping, m_impl->oid_mapping_len);
     m_impl->m_x500Map.clear();
+    delete m_impl;
 }
 
 void GMSOF::InitX500Map()
 {
-    std::string  filename        = "./oid.json";
-    OID_MAPPING* oid_mapping     = NULL;
-    size_t       oid_mapping_len = 0;
-    ReadOid(filename.c_str(), &oid_mapping, &oid_mapping_len);
-    for (size_t i = 0; i < oid_mapping_len; i++)
+    std::string filename    = "./oid.json";
+    m_impl->oid_mapping     = NULL;
+    m_impl->oid_mapping_len = 0;
+    ReadOid(filename.c_str(), &m_impl->oid_mapping, &m_impl->oid_mapping_len);
+    for (size_t i = 0; i < m_impl->oid_mapping_len; i++)
     {
-        m_impl->m_x500Map[oid_mapping[i].oid_string] = oid_mapping[i];
+        m_impl->m_x500Map[m_impl->oid_mapping[i].oid_string] = m_impl->oid_mapping[i];
     }
 }
 
