@@ -15,28 +15,37 @@
 
 std::string ReadCertFile(const std::string& filename)
 {
-    std::ifstream      file(filename, std::ios::in);
+    std::ifstream      file(filename, std::ios::in | std::ios::binary);
     std::ostringstream oss;
     oss << file.rdbuf();
     std::string content = oss.str();
     file.close();
 
-    size_t begin_pos = content.find(PEM_CERT_BEGIN);
-    size_t end_pos   = content.find(PEM_CERT_END);
-    if (begin_pos == std::string::npos || end_pos == std::string::npos || begin_pos > end_pos)
+    // 如果是 DER 编码的证书，直接返回
+    // 如果是 PEM 编码的证书，则提取出 base64 内容
+    if (content[0] == 0x30)
     {
-        return "";
+        return content;
     }
-    begin_pos += strlen(PEM_CERT_BEGIN);
-    std::string base64 = content.substr(begin_pos, end_pos - begin_pos);
-    // 清除空格和换行
-    std::string cleaned;
-    for (char c : base64)
+    else
     {
-        if (c != '\r' && c != '\n' && c != ' ')
-            cleaned += c;
+        size_t begin_pos = content.find(PEM_CERT_BEGIN);
+        size_t end_pos   = content.find(PEM_CERT_END);
+        if (begin_pos == std::string::npos || end_pos == std::string::npos || begin_pos > end_pos)
+        {
+            return "";
+        }
+        begin_pos += strlen(PEM_CERT_BEGIN);
+        std::string base64 = content.substr(begin_pos, end_pos - begin_pos);
+        // 清除空格和换行
+        std::string cleaned;
+        for (char c : base64)
+        {
+            if (c != '\r' && c != '\n' && c != ' ')
+                cleaned += c;
+        }
+        return cleaned;
     }
-    return cleaned;
 }
 
 /**

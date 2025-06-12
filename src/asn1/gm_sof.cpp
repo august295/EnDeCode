@@ -230,7 +230,13 @@ void GMSOF::InitX500Map()
 
 std::string GMSOF::GetX500Name(const std::string& name)
 {
-    return m_impl->m_x500Map[name].oid_name;
+    auto it = m_impl->m_x500Map.find(name);
+    if (it == m_impl->m_x500Map.end())
+    {
+        // 如果没有找到对应的名称，则返回原始名称
+        return name;
+    }
+    return it->second.oid_name;
 }
 
 std::string GMSOF::Capture(const std::string& str, const std::string& flag)

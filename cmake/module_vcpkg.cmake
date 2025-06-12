@@ -6,32 +6,33 @@ if(CMAKE_SYSTEM_NAME MATCHES "Windows")
             set(VCPKG_ROOT "$ENV{VCPKG_ROOT}")
         else()
             set(VCPKG_ROOT "C:/dev/vcpkg")
-            message(STATUS "Using default VCPKG_ROOT: ${VCPKG_ROOT}")
         endif()
     endif()
 
     # 设置工具链文件
-    set(CMAKE_TOOLCHAIN_FILE "${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "")
+    set(CMAKE_TOOLCHAIN_FILE "${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
 
     # 架构判断
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-        set(VCPKG_TRIPLET "x64-windows-static")
+        set(VCPKG_TARGET_TRIPLET "x64-windows-static")
     else()
-        set(VCPKG_TRIPLET "x86-windows-static")
+        set(VCPKG_TARGET_TRIPLET "x86-windows-static")
     endif()
 
-    # 设置 pkgconf 路径和 pkgconfig 路径
-    set(ENV{PKG_CONFIG} "${VCPKG_ROOT}/installed/${VCPKG_TRIPLET}/tools/pkgconf/pkgconf.exe")
-    set(ENV{PKG_CONFIG_PATH} "${VCPKG_ROOT}/installed/${VCPKG_TRIPLET}/lib/pkgconfig")
-    message(STATUS "Using PKG_CONFIG: $ENV{PKG_CONFIG}")
-    message(STATUS "Using PKG_CONFIG_PATH: $ENV{PKG_CONFIG_PATH}")
+    # 路径输出
+    message(STATUS "VCPKG_ROOT: ${VCPKG_ROOT}")
+    message(STATUS "CMAKE_TOOLCHAIN_FILE: ${CMAKE_TOOLCHAIN_FILE}")
+    message(STATUS "VCPKG_TARGET_TRIPLET: ${VCPKG_TARGET_TRIPLET}")
+
+    # 加载工具链
+    include(${CMAKE_TOOLCHAIN_FILE})
 endif()
 
 ################################################################################
 # gmp
+#   vcpkg install gmp:x64-windows-static
 ################################################################################
 if(BUILD_VCPKG)
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(gmp REQUIRED IMPORTED_TARGET gmp)
-    include_directories(${gmp_INCLUDE_DIRS})
 endif()
