@@ -1,0 +1,8 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+@GTEST_DEPENDENCY_CODE@
+@BENCHMARK_DEPENDENCY_CODE@
+find_dependency(cjson REQUIRED)
+
+include("${CMAKE_CURRENT_LIST_DIR}/endecodeTargets.cmake")

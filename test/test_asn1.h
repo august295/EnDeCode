@@ -273,6 +273,73 @@ TEST(test_asn1, sm2_test2)
 /**
  * @brief   性能测试
  */
+static void bench_sof_parse_cert(benchmark::State& state, const std::string& filename)
+{
+    while (state.KeepRunning())
+    {
+        try
+        {
+            state.PauseTiming();
+            std::string str  = ReadCertFile(filename);
+            BSTR        info = NULL;
+            state.ResumeTiming();
+
+            size_t          str_size = str.size();
+            uint8_t*        data     = (uint8_t*)malloc(BASE64_DECODE_OUT_SIZE(str_size));
+            size_t          data_len = base64_decode(str.c_str(), str_size, (unsigned char*)data);
+            SM2Certificate* cert     = sm2_cert_parse(data, data_len);
+
+            state.PauseTiming();
+            free(data);
+            sm2_cert_free(cert);
+            state.ResumeTiming();
+        }
+        catch (const std::exception&)
+        {
+        }
+    }
+}
+BENCHMARK_CAPTURE(bench_sof_parse_cert, 1KB, "cer/sm2-x509.cer");
+
+static void bench_sof_get_cert_info(benchmark::State& state, const std::string& filename)
+{
+    while (state.KeepRunning())
+    {
+        try
+        {
+            state.PauseTiming();
+            std::string str  = ReadCertFile(filename);
+            BSTR        info = NULL;
+            state.ResumeTiming();
+
+            info = SOF_GetCertInfo((BSTR)str.c_str(), SGD_CERT_VERSION);
+            free(info);
+            info = SOF_GetCertInfo((BSTR)str.c_str(), SGD_CERT_SERIAL);
+            free(info);
+            info = SOF_GetCertInfo((BSTR)str.c_str(), SGD_CERT_SIGNATURE_ALGORITHM);
+            free(info);
+            info = SOF_GetCertInfo((BSTR)str.c_str(), SGD_CERT_ISSUER);
+            free(info);
+            info = SOF_GetCertInfo((BSTR)str.c_str(), SGD_CERT_VALID_TIME);
+            free(info);
+            info = SOF_GetCertInfo((BSTR)str.c_str(), SGD_CERT_SUBJECT);
+            free(info);
+            info = SOF_GetCertInfo((BSTR)str.c_str(), SGD_CERT_DER_PUBLIC_KEY);
+            free(info);
+            info = SOF_GetCertInfo((BSTR)str.c_str(), SGD_CERT_DER_EXTENSIONS);
+            free(info);
+
+            state.PauseTiming();
+            info = NULL;
+            state.ResumeTiming();
+        }
+        catch (const std::exception&)
+        {
+        }
+    }
+}
+BENCHMARK_CAPTURE(bench_sof_get_cert_info, 1KB, "cer/sm2-x509.cer");
+
 static void bench_sef_parse_seal(benchmark::State& state, const std::string& filename)
 {
     while (state.KeepRunning())

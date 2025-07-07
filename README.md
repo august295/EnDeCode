@@ -44,7 +44,13 @@ git clone --recursive https://github.com/august295/EnDeCode.git
 #### 2.2.1. Visual Studio 2022
 
 ```cmd
+# Release
 cmake -B"build" -G"Visual Studio 17 2022" -D"BUILD_TEST=ON"
+cmake --build .\build\ --config Release
+
+# Debug
+cmake -B"build_debug" -G"Visual Studio 17 2022" -D"BUILD_TEST=ON" -D"CMAKE_BUILD_TYPE=Debug"
+cmake --build .\build_debug\ --config Debug
 ```
 
 
