@@ -47,13 +47,13 @@ set(CMAKE_DEBUG_POSTFIX "d")
 set(CMAKE_MINSIZEREL_POSTFIX "m")
 set(CMAKE_RELWITHDEBINFO_POSTFIX "rd")
 
+# option 不覆盖已定义的普通变量，除非显式指定 FORCE
+cmake_policy(SET CMP0077 NEW)
 # 选项
-if(POLICY CMP0077)
-    cmake_policy(SET CMP0077 NEW)
-endif()
 option(BUILD_VCPKG "Build use vcpkg" OFF)
 option(BUILD_TEST "Build test executable" OFF)
-option(BUILD_SHARED_LIBS "Build shared libraries" ON)
+option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
+option(ENDECODE_ENABLE_INSTALL "Enable installation" ON)
 
 # vcpkg
 if(BUILD_VCPKG)
@@ -82,44 +82,46 @@ add_custom_target(
 set_property(TARGET "CopyTask" PROPERTY FOLDER "CMakePredefinedTargets")
 
 # 安装
-# 头文件
-install(DIRECTORY ${ROOT_DIR}/include/${UseProjectName} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-# 库文件
-install(TARGETS ${UseProjectName}
-    EXPORT ${UseProjectName}Targets
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-)
-# 导出文件
-install(EXPORT ${UseProjectName}Targets
-    FILE ${UseProjectName}Targets.cmake
-    NAMESPACE ${UseProjectName}::
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${UseProjectName}
-)
-# 配置文件
-if(BUILD_TEST)
-    set(GTEST_DEPENDENCY_CODE "find_dependency(GTest REQUIRED)")
-    set(BENCHMARK_DEPENDENCY_CODE "find_dependency(benchmark REQUIRED)")
-else()
-    set(GTEST_DEPENDENCY_CODE "")
-    set(BENCHMARK_DEPENDENCY_CODE "")
+if(ENDECODE_ENABLE_INSTALL)
+    # 头文件
+    install(DIRECTORY ${ROOT_DIR}/include/${UseProjectName} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+    # 库文件
+    install(TARGETS ${UseProjectName}
+        EXPORT ${UseProjectName}Targets
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    )
+    # 导出文件
+    install(EXPORT ${UseProjectName}Targets
+        FILE ${UseProjectName}Targets.cmake
+        NAMESPACE ${UseProjectName}::
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${UseProjectName}
+    )
+    # 配置文件
+    if(BUILD_TEST)
+        set(GTEST_DEPENDENCY_CODE "find_dependency(GTest REQUIRED)")
+        set(BENCHMARK_DEPENDENCY_CODE "find_dependency(benchmark REQUIRED)")
+    else()
+        set(GTEST_DEPENDENCY_CODE "")
+        set(BENCHMARK_DEPENDENCY_CODE "")
+    endif()
+    include(CMakePackageConfigHelpers)
+    configure_package_config_file(
+        ${ROOT_DIR}/cmake/${UseProjectName}Config.cmake.in
+        ${BUILD_DIR}/${UseProjectName}Config.cmake
+        INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${UseProjectName}
+    )
+    write_basic_package_version_file(
+        ${BUILD_DIR}/${UseProjectName}ConfigVersion.cmake
+        VERSION ${PROJECT_VERSION}
+        COMPATIBILITY SameMajorVersion
+    )
+    install(
+        FILES
+        ${BUILD_DIR}/${UseProjectName}Config.cmake
+        ${BUILD_DIR}/${UseProjectName}ConfigVersion.cmake
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${UseProjectName}
+    )
 endif()
-include(CMakePackageConfigHelpers)
-configure_package_config_file(
-    ${ROOT_DIR}/cmake/${UseProjectName}Config.cmake.in
-    ${BUILD_DIR}/${UseProjectName}Config.cmake
-    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${UseProjectName}
-)
-write_basic_package_version_file(
-    ${BUILD_DIR}/${UseProjectName}ConfigVersion.cmake
-    VERSION ${PROJECT_VERSION}
-    COMPATIBILITY SameMajorVersion
-)
-install(
-    FILES
-    ${BUILD_DIR}/${UseProjectName}Config.cmake
-    ${BUILD_DIR}/${UseProjectName}ConfigVersion.cmake
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${UseProjectName}
-)

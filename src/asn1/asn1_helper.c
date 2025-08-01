@@ -5,7 +5,7 @@
 #include <string.h>
 #include <time.h>
 
-#include <cJSON.h>
+#include "cJSON.h"
 
 #include "endecode/asn1/asn1_helper.h"
 

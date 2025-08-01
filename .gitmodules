@@ -4,6 +4,3 @@
 [submodule "3rdparty/benchmark"]
 	path = 3rdparty/benchmark
 	url = git@github.com:google/benchmark.git
-[submodule "3rdparty/cJSON"]
-	path = 3rdparty/cJSON
-	url = git@github.com:DaveGamble/cJSON.git
