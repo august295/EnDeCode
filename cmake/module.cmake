@@ -13,11 +13,7 @@ macro(CreateTarget ProjectName Type Group)
     set(SOURCE_FILES "")
 
     # 搜集源文件
-    if(NOT ${Type} STREQUAL "Exe")
-        file(GLOB_RECURSE HEADER_FILES "${ROOT_DIR}/include/${UseProjectName}/*.h" "${ROOT_DIR}/include/${UseProjectName}/*.hpp")
-    else()
-        file(GLOB_RECURSE HEADER_FILES "${CURRENT_PATH}/*.h" "${CURRENT_PATH}/*.hpp")
-    endif()
+    file(GLOB_RECURSE HEADER_FILES "${CURRENT_PATH}/*.h" "${CURRENT_PATH}/*.hpp")
     file(GLOB_RECURSE SOURCE_FILES "${CURRENT_PATH}/*.c" "${CURRENT_PATH}/*.cpp")
 
     # 过滤文件
@@ -28,11 +24,7 @@ macro(CreateTarget ProjectName Type Group)
 
     # 文件分类
     if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-        if(NOT ${Type} STREQUAL "Exe")
-            source_group(TREE ${ROOT_DIR}/include/${UseProjectName}/ PREFIX "Header Files" FILES ${HEADER_FILES})
-        else()
-            source_group(TREE ${CURRENT_PATH} PREFIX "Header Files" FILES ${HEADER_FILES})
-        endif()
+        source_group(TREE ${CURRENT_PATH} PREFIX "Header Files" FILES ${HEADER_FILES})
         source_group(TREE ${CURRENT_PATH} PREFIX "Source Files" FILES ${SOURCE_FILES})
     elseif()
         source_group("Header Files" FILES ${HEADER_FILES})
