@@ -5,12 +5,6 @@ if(BUILD_SHARED_LIBS)
 else()
     CreateTarget(${ProjectName} "Lib" "core")
     target_compile_definitions(${ProjectName} PUBLIC -DENDECODE_STATIC)
-    if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-        target_link_libraries(${ProjectName} PUBLIC
-            $<$<CONFIG:Debug>:msvcrtd>
-            $<$<CONFIG:Release>:msvcrt>
-        )
-    endif()
 endif()
 
 if(BUILD_VCPKG)

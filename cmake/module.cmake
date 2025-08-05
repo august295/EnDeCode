@@ -56,12 +56,3 @@ macro(CreateTarget ProjectName Type Group)
     # 项目分组
     set_property(TARGET ${ProjectName} PROPERTY FOLDER ${Group})
 endmacro()
-
-# 添加头文件和链接库路径
-macro(AddLibrary LibraryList)
-    foreach(library ${LibraryList})
-        # 添加 include
-        include_directories(${ROOT_DIR}/3rdparty/${library})
-        include_directories(${ROOT_DIR}/3rdparty/${library}/include)
-    endforeach()
-endmacro()
