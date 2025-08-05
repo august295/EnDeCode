@@ -14,9 +14,13 @@ void easy_asn1_init_string(easy_asn1_string_st* str)
 void easy_asn1_init_tree(easy_asn1_tree_st* node)
 {
     easy_asn1_init_string(&node->value);
+    node->offset        = 0;
     node->level         = 0;
     node->children_size = 0;
-    node->children      = NULL;
+    node->first_child   = NULL;
+    node->parent        = NULL;
+    node->prev_sibling  = NULL;
+    node->next_sibling  = NULL;
 }
 
 void easy_asn1_create_string(uint8_t tag, size_t length, uint8_t* value, easy_asn1_string_st* str)
@@ -58,21 +62,17 @@ void easy_asn1_free_string(easy_asn1_string_st* str)
 
 void easy_asn1_free_tree(easy_asn1_tree_st* node)
 {
-    if (node)
+    easy_asn1_tree_st* next = NULL;
+    while (node != NULL)
     {
-        easy_asn1_free_string(&node->value);
-        node->offset = 0;
-        node->level  = 0;
-        for (uint32_t i = 0; i < node->children_size; i++)
+        next = node->next_sibling;
+        if (node->first_child != NULL)
         {
-            easy_asn1_free_tree(node->children[i]);
-            node->children[i] = NULL;
+            easy_asn1_free_tree(node->first_child);
         }
-        node->children_size = 0;
-        free(node->children);
-        node->children = NULL;
+        easy_asn1_init_tree(node);
         free(node);
-        node = NULL;
+        node = next;
     }
 }
 
@@ -207,31 +207,24 @@ size_t easy_asn1_parse_predict(const uint8_t* data, size_t data_len)
 void easy_asn1_parse(const uint8_t* data, size_t data_len, size_t offset, size_t level, easy_asn1_tree_st** node)
 {
     // 检查边界条件和无效指针
-    if (offset >= data_len || !node)
+    if (offset >= data_len)
     {
         return;
     }
 
     // 创建新节点
-    *node = (easy_asn1_tree_st*)malloc(sizeof(easy_asn1_tree_st));
-    if (!*node)
-    {
-        return;
-    }
     easy_asn1_init_tree(*node);
 
     // 设置节点基本信息
-    (*node)->offset        = offset;
-    (*node)->level         = level;
-    (*node)->children_size = 0;
-    (*node)->children      = NULL;
+    (*node)->offset = offset;
+    (*node)->level  = level;
 
     // 解析当前节点的值
     size_t consumed = easy_asn1_parse_string(data + offset, data_len - offset, &(*node)->value);
     if (consumed == 0)
     {
         easy_asn1_free_tree(*node);
-        *node = NULL;
+        (*node) = NULL;
         return;
     }
 
@@ -263,43 +256,35 @@ void easy_asn1_parse(const uint8_t* data, size_t data_len, size_t offset, size_t
 
         // 分配子节点数组
         (*node)->children_size = child_count;
-        (*node)->children      = (easy_asn1_tree_st**)malloc(child_count * sizeof(easy_asn1_tree_st*));
-        if (!(*node)->children)
-        {
-            free((*node)->value.value);
-            free(*node);
-            *node = NULL;
-            return;
-        }
 
         // 第二次遍历：递归解析每个子节点
         temp_offset = children_offset;
-        for (size_t i = 0; i < child_count; i++)
+        if (child_count > 0)
         {
-            easy_asn1_parse(data, data_len, temp_offset, level + 1, &(*node)->children[i]);
-            if (!(*node)->children[i])
+            easy_asn1_tree_st* next_child = (easy_asn1_tree_st*)malloc(sizeof(easy_asn1_tree_st));
+            (*node)->first_child          = next_child;
+            for (size_t i = 0; i < child_count; i++)
             {
-                // 解析失败，清理已分配的资源
-                for (size_t j = 0; j < i; j++)
+                easy_asn1_parse(data, data_len, temp_offset, level + 1, &next_child);
+                if (next_child == NULL)
                 {
-                    if ((*node)->children[j])
-                    {
-                        free((*node)->children[j]->value.value);
-                        free((*node)->children[j]);
-                    }
+                    // 解析失败，清理已分配的资源
+                    easy_asn1_free_tree(*node);
+                    *node = NULL;
+                    return;
                 }
-                free((*node)->children);
-                free((*node)->value.value);
-                free(*node);
-                *node = NULL;
-                return;
+                // 更新下一个子节点的偏移量
+                uint8_t tag;
+                size_t  length;
+                size_t  tag_len = easy_asn1_parse_tag(data + temp_offset, &tag);
+                size_t  len_len = easy_asn1_parse_length(data + temp_offset + tag_len, end_offset - temp_offset - tag_len, &length);
+                temp_offset += tag_len + len_len + length;
+                if (i < child_count - 1)
+                {
+                    next_child->next_sibling = (easy_asn1_tree_st*)malloc(sizeof(easy_asn1_tree_st));
+                    next_child               = next_child->next_sibling;
+                }
             }
-            // 更新下一个子节点的偏移量
-            uint8_t tag;
-            size_t  length;
-            size_t  tag_len = easy_asn1_parse_tag(data + temp_offset, &tag);
-            size_t  len_len = easy_asn1_parse_length(data + temp_offset + tag_len, end_offset - temp_offset - tag_len, &length);
-            temp_offset += tag_len + len_len + length;
         }
     }
     else
@@ -321,22 +306,18 @@ void easy_asn1_parse(const uint8_t* data, size_t data_len, size_t offset, size_t
             size_t nested_offset = offset + consumed - (*node)->value.length + content_offset;
 
             // 尝试解析嵌套内容，使用正确的原始偏移量
-            easy_asn1_tree_st* child = NULL;
+            easy_asn1_tree_st* child = (easy_asn1_tree_st*)malloc(sizeof(easy_asn1_tree_st));
             easy_asn1_parse(data, data_len, nested_offset, level + 1, &child);
 
             if (child)
             {
                 (*node)->children_size = 1;
-                (*node)->children      = (easy_asn1_tree_st**)malloc(sizeof(easy_asn1_tree_st*));
-                if ((*node)->children)
-                {
-                    (*node)->children[0] = child;
-                }
-                else
-                {
-                    (*node)->children_size = 0;
-                    easy_asn1_free_tree(child);
-                }
+                (*node)->first_child   = child;
+            }
+            else
+            {
+                free(child);
+                child = NULL;
             }
         }
     }
@@ -422,9 +403,11 @@ size_t easy_asn1_serialize(easy_asn1_tree_st* node, uint8_t* buffer)
         }
 
         // 构建结构类型（SEQUENCE/SET）内容部分：递归 children
-        for (uint32_t i = 0; i < node->children_size; ++i)
+        struct easy_asn1_tree_st* next = node->first_child;
+        while (next != NULL)
         {
-            content_len += easy_asn1_serialize(node->children[i], NULL);
+            content_len += easy_asn1_serialize(next, NULL);
+            next = next->next_sibling;
         }
 
         // 写入 Length
@@ -441,9 +424,11 @@ size_t easy_asn1_serialize(easy_asn1_tree_st* node, uint8_t* buffer)
         }
 
         // 写入 children 内容
-        for (uint32_t i = 0; i < node->children_size; ++i)
+        struct easy_asn1_tree_st* next2 = node->first_child;
+        while (next2 != NULL)
         {
-            offset += easy_asn1_serialize(node->children[i], buffer ? buffer + offset : NULL);
+            offset += easy_asn1_serialize(next2, buffer ? buffer + offset : NULL);
+            next2 = next2->next_sibling;
         }
     }
     else
@@ -453,4 +438,20 @@ size_t easy_asn1_serialize(easy_asn1_tree_st* node, uint8_t* buffer)
     }
 
     return offset;
+}
+
+easy_asn1_tree_st* easy_asn1_get_tree_item(const easy_asn1_tree_st* node, size_t index)
+{
+    if (node == NULL)
+    {
+        return NULL;
+    }
+
+    easy_asn1_tree_st* child = node->first_child;
+    for (; child && (index > 0);)
+    {
+        index--;
+        child = child->next_sibling;
+    }
+    return child;
 }
