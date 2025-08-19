@@ -144,10 +144,14 @@ ENDECODE_API void easy_asn1_create_string(uint8_t tag, size_t length, uint8_t* v
 ENDECODE_API void easy_asn1_create_node(uint8_t tag, size_t length, uint8_t* value, easy_asn1_tree_st* node);
 ENDECODE_API void easy_asn1_push_back_child(easy_asn1_tree_st* node, uint8_t tag, size_t length, uint8_t* value);
 ENDECODE_API void easy_asn1_push_back_string_child(easy_asn1_tree_st* node, easy_asn1_string_st* str);
+ENDECODE_API void easy_asn1_push_back_tree_child(easy_asn1_tree_st* node, easy_asn1_tree_st* node_child);
 ENDECODE_API void easy_asn1_insert_child(easy_asn1_tree_st* node, size_t index, uint8_t tag, size_t length, uint8_t* value);
 ENDECODE_API void easy_asn1_insert_string_child(easy_asn1_tree_st* node, size_t index, easy_asn1_string_st* str);
+ENDECODE_API void easy_asn1_insert_tree_child(easy_asn1_tree_st* node, size_t index, easy_asn1_tree_st* node_child);
 ENDECODE_API void easy_asn1_update_length(easy_asn1_tree_st* node, int length);
 ENDECODE_API void easy_asn1_update_offset(easy_asn1_tree_st* node, int offset);
+ENDECODE_API void easy_asn1_update_offset_child(easy_asn1_tree_st* node, int offset);
+ENDECODE_API void easy_asn1_update_level_child(easy_asn1_tree_st* node);
 
 /******************************************************************************
  * @brief   ASN1 序列化

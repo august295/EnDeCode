@@ -363,9 +363,10 @@ void easy_asn1_create_node(uint8_t tag, size_t length, uint8_t* value, easy_asn1
 
 void easy_asn1_push_back_child(easy_asn1_tree_st* node, uint8_t tag, size_t length, uint8_t* value)
 {
-    easy_asn1_string_st* str = (easy_asn1_string_st*)malloc(sizeof(easy_asn1_string_st));
-    easy_asn1_create_string(tag, length, value, str);
-    easy_asn1_push_back_string_child(node, str);
+    easy_asn1_string_st str;
+    easy_asn1_create_string(tag, length, value, &str);
+    easy_asn1_push_back_string_child(node, &str);
+    easy_asn1_free_string(&str);
 }
 
 void easy_asn1_push_back_string_child(easy_asn1_tree_st* node, easy_asn1_string_st* str)
@@ -401,11 +402,43 @@ void easy_asn1_push_back_string_child(easy_asn1_tree_st* node, easy_asn1_string_
     easy_asn1_update_offset(new_child, length);
 }
 
+void easy_asn1_push_back_tree_child(easy_asn1_tree_st* node, easy_asn1_tree_st* node_child)
+{
+    size_t length = easy_asn1_serialize(node_child, NULL);
+
+    easy_asn1_tree_st* child  = node->first_child;
+    size_t             offset = node->offset;
+    if (child == NULL)
+    {
+        node->first_child = node_child;
+    }
+    else
+    {
+        // 找到最后一个子节点
+        while (child->next_sibling != NULL)
+        {
+            child = child->next_sibling;
+        }
+        child->next_sibling = node_child;
+        offset              = child->offset + child->value.length;
+    }
+    node->children_size++;
+    node_child->offset = offset + (length - node_child->value.length);
+    node_child->level  = node->level + 1;
+    node_child->parent = node;
+
+    easy_asn1_update_length(node_child, length);
+    easy_asn1_update_offset(node_child, length);
+    easy_asn1_update_offset_child(node_child, node_child->offset);
+    easy_asn1_update_level_child(node_child);
+}
+
 void easy_asn1_insert_child(easy_asn1_tree_st* node, size_t index, uint8_t tag, size_t length, uint8_t* value)
 {
-    easy_asn1_string_st* str = (easy_asn1_string_st*)malloc(sizeof(easy_asn1_string_st));
-    easy_asn1_create_string(tag, length, value, str);
-    easy_asn1_insert_string_child(node, index, str);
+    easy_asn1_string_st str;
+    easy_asn1_create_string(tag, length, value, &str);
+    easy_asn1_insert_string_child(node, index, &str);
+    easy_asn1_free_string(&str);
 }
 
 void easy_asn1_insert_string_child(easy_asn1_tree_st* node, size_t index, easy_asn1_string_st* str)
@@ -448,6 +481,45 @@ void easy_asn1_insert_string_child(easy_asn1_tree_st* node, size_t index, easy_a
     easy_asn1_update_offset(new_child, length);
 }
 
+void easy_asn1_insert_tree_child(easy_asn1_tree_st* node, size_t index, easy_asn1_tree_st* node_child)
+{
+    // 超出范围
+    if (index > node->children_size)
+    {
+        return;
+    }
+
+    size_t length = easy_asn1_serialize(node_child, NULL);
+
+    size_t offset = node->offset;
+    // 插入节点
+    if (index == 0)
+    {
+        node_child->next_sibling = node->first_child;
+        node->first_child        = node_child;
+    }
+    else
+    {
+        easy_asn1_tree_st* child = node->first_child;
+        for (; index > 0; index--)
+        {
+            child = child->next_sibling;
+        }
+        node_child->next_sibling = child->next_sibling;
+        child->next_sibling      = node_child;
+        offset                   = child->offset + child->value.length;
+    }
+    node->children_size++;
+    node_child->offset = offset + (length - node_child->value.length);
+    node_child->level  = node->level + 1;
+    node_child->parent = node;
+
+    easy_asn1_update_length(node_child, length);
+    easy_asn1_update_offset(node_child, length);
+    easy_asn1_update_offset_child(node_child, node_child->offset);
+    easy_asn1_update_level_child(node_child);
+}
+
 void easy_asn1_update_length(easy_asn1_tree_st* node, int length)
 {
     if (node->parent != NULL)
@@ -476,6 +548,28 @@ void easy_asn1_update_offset(easy_asn1_tree_st* node, int offset)
     {
         easy_asn1_tree_st* parent = node->parent;
         easy_asn1_update_offset(parent, offset);
+    }
+}
+
+void easy_asn1_update_offset_child(easy_asn1_tree_st* node, int offset)
+{
+    easy_asn1_tree_st* child = node->first_child;
+    while (child != NULL)
+    {
+        child->offset += offset;
+        easy_asn1_update_offset_child(child, offset);
+        child = child->next_sibling;
+    }
+}
+
+void easy_asn1_update_level_child(easy_asn1_tree_st* node)
+{
+    easy_asn1_tree_st* child = node->first_child;
+    while (child != NULL)
+    {
+        child->level = node->level + 1;
+        easy_asn1_update_level_child(child);
+        child = child->next_sibling;
     }
 }
 
