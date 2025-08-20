@@ -100,7 +100,10 @@ typedef struct easy_asn1_tree_st
     size_t                     offset;
     size_t                     level;
     size_t                     children_size;
-    struct easy_asn1_tree_st** children;
+    struct easy_asn1_tree_st*  first_child;
+    struct easy_asn1_tree_st*  parent;
+    struct easy_asn1_tree_st*  prev_sibling;
+    struct easy_asn1_tree_st*  next_sibling;
 } easy_asn1_tree_st;
 
 #include "endecode/common/endecode_export.hpp"
@@ -108,15 +111,24 @@ typedef struct easy_asn1_tree_st
 extern "C" {
 #endif
 
+/******************************************************************************
+ * @brief   ASN1 初始化和释放
+ *****************************************************************************/
 ENDECODE_API void easy_asn1_init_string(easy_asn1_string_st* str);
 ENDECODE_API void easy_asn1_init_tree(easy_asn1_tree_st* node);
-
-ENDECODE_API void easy_asn1_create_string(uint8_t tag, size_t length, uint8_t* value, easy_asn1_string_st* str);
-ENDECODE_API void easy_asn1_copy_string(easy_asn1_string_st* src, easy_asn1_string_st* dest);
-
 ENDECODE_API void easy_asn1_free_string(easy_asn1_string_st* str);
 ENDECODE_API void easy_asn1_free_tree(easy_asn1_tree_st* node);
 
+/******************************************************************************
+ * @brief   ASN1 工具函数
+ *****************************************************************************/
+ENDECODE_API void easy_asn1_copy_string(easy_asn1_string_st* src, easy_asn1_string_st* dest);
+
+ENDECODE_API easy_asn1_tree_st* easy_asn1_get_tree_item(const easy_asn1_tree_st* node, size_t index);
+
+/******************************************************************************
+ * @brief   ASN1 解析
+ *****************************************************************************/
 ENDECODE_API char*  easy_asn1_tag_name(uint8_t tag);
 ENDECODE_API size_t easy_asn1_parse_tag(const uint8_t* data, uint8_t* tag);
 ENDECODE_API size_t easy_asn1_parse_length(const uint8_t* data, size_t data_len, size_t* length);
@@ -125,6 +137,25 @@ ENDECODE_API size_t easy_asn1_parse_construct(uint8_t tag);
 ENDECODE_API size_t easy_asn1_parse_predict(const uint8_t* data, size_t data_len);
 ENDECODE_API void   easy_asn1_parse(const uint8_t* data, size_t data_len, size_t offset, size_t level, easy_asn1_tree_st** node);
 
+/******************************************************************************
+ * @brief   ASN1 创建
+ *****************************************************************************/
+ENDECODE_API void easy_asn1_create_string(uint8_t tag, size_t length, uint8_t* value, easy_asn1_string_st* str);
+ENDECODE_API void easy_asn1_create_node(uint8_t tag, size_t length, uint8_t* value, easy_asn1_tree_st* node);
+ENDECODE_API void easy_asn1_push_back_child(easy_asn1_tree_st* node, uint8_t tag, size_t length, uint8_t* value);
+ENDECODE_API void easy_asn1_push_back_string_child(easy_asn1_tree_st* node, easy_asn1_string_st* str);
+ENDECODE_API void easy_asn1_push_back_tree_child(easy_asn1_tree_st* node, easy_asn1_tree_st* node_child);
+ENDECODE_API void easy_asn1_insert_child(easy_asn1_tree_st* node, size_t index, uint8_t tag, size_t length, uint8_t* value);
+ENDECODE_API void easy_asn1_insert_string_child(easy_asn1_tree_st* node, size_t index, easy_asn1_string_st* str);
+ENDECODE_API void easy_asn1_insert_tree_child(easy_asn1_tree_st* node, size_t index, easy_asn1_tree_st* node_child);
+ENDECODE_API void easy_asn1_update_length(easy_asn1_tree_st* node, int length);
+ENDECODE_API void easy_asn1_update_offset(easy_asn1_tree_st* node, int offset);
+ENDECODE_API void easy_asn1_update_offset_child(easy_asn1_tree_st* node, int offset);
+ENDECODE_API void easy_asn1_update_level_child(easy_asn1_tree_st* node);
+
+/******************************************************************************
+ * @brief   ASN1 序列化
+ *****************************************************************************/
 ENDECODE_API size_t easy_asn1_encode_length(size_t length, uint8_t* out);
 ENDECODE_API size_t easy_asn1_serialize_string(easy_asn1_string_st* str, uint8_t* buffer);
 ENDECODE_API size_t easy_asn1_serialize(easy_asn1_tree_st* node, uint8_t* buffer);

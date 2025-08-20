@@ -456,9 +456,11 @@ void easy_asn1_print_tree(easy_asn1_tree_st* node)
         printf("Offset: %zu, ", node->offset);
         easy_asn1_print_string(&node->value, node->children_size);
 
-        for (uint32_t i = 0; i < node->children_size; i++)
+        struct easy_asn1_tree_st* iter = node->first_child;
+        while (iter != NULL)
         {
-            easy_asn1_print_tree(node->children[i]);
+            easy_asn1_print_tree(iter);
+            iter = iter->next_sibling;
         }
     }
 }

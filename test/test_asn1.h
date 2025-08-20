@@ -77,7 +77,7 @@ TEST(test_asn1, asn1_test2)
        0x02, 0x01, 0x03     // INTEGER, length 1, value 3
     };
     // clang-format on
-    easy_asn1_tree_st* tree = NULL;
+    easy_asn1_tree_st* tree = (easy_asn1_tree_st*)malloc(sizeof(easy_asn1_tree_st));
     easy_asn1_parse(asn1_data, sizeof(asn1_data), 0, 0, &tree);
 #ifdef CONSOLE_PRINT
     easy_asn1_print_tree(tree);
@@ -94,7 +94,7 @@ TEST(test_asn1, asn1_test3)
     std::string content = oss.str();
     file.close();
 
-    easy_asn1_tree_st* tree = NULL;
+    easy_asn1_tree_st* tree = (easy_asn1_tree_st*)malloc(sizeof(easy_asn1_tree_st));
     easy_asn1_parse((const uint8_t*)content.c_str(), content.size(), 0, 0, &tree);
 #ifdef CONSOLE_PRINT
     easy_asn1_print_tree(tree);
@@ -110,7 +110,7 @@ TEST(test_asn1, asn1_test4)
     std::string content = oss.str();
     file.close();
 
-    easy_asn1_tree_st* tree = NULL;
+    easy_asn1_tree_st* tree = (easy_asn1_tree_st*)malloc(sizeof(easy_asn1_tree_st));
     easy_asn1_parse((const uint8_t*)content.c_str(), content.size(), 0, 0, &tree);
     SEALINFO* seal = NULL;
     SEF_ParseSeal(tree, &seal);
@@ -135,13 +135,13 @@ TEST(test_asn1, asn1_test5)
     std::string content = oss.str();
     file.close();
 
-    easy_asn1_tree_st* tree = NULL;
+    easy_asn1_tree_st* tree = (easy_asn1_tree_st*)malloc(sizeof(easy_asn1_tree_st));
     easy_asn1_parse((const uint8_t*)content.c_str(), content.size(), 0, 0, &tree);
     SIGNEDVALUEINFO* signatures = NULL;
     SEF_ParseSignatures(tree, &signatures);
 
     // 读取印章
-    easy_asn1_tree_st* seal_tree = NULL;
+    easy_asn1_tree_st* seal_tree = (easy_asn1_tree_st*)malloc(sizeof(easy_asn1_tree_st));
     easy_asn1_parse((const uint8_t*)signatures->sealData, signatures->sealDataLen, 0, 0, &seal_tree);
     SEALINFO* seal = NULL;
     SEF_ParseSeal(seal_tree, &seal);
@@ -180,7 +180,7 @@ TEST(test_asn1, asn1_serialize)
     size_t   data_len = base64_decode(str.c_str(), str_size, (unsigned char*)data);
 
     // 解析
-    easy_asn1_tree_st* tree = NULL;
+    easy_asn1_tree_st* tree = (easy_asn1_tree_st*)malloc(sizeof(easy_asn1_tree_st));
     easy_asn1_parse(data, data_len, 0, 0, &tree);
 
     // 序列化
@@ -199,6 +199,95 @@ TEST(test_asn1, asn1_serialize)
     free(tree_ser);
 }
 
+TEST(test_asn1, asn1_create1)
+{
+    // clang-format off
+    uint8_t asn1_data[] = {
+       0x30, 0x0F,          // SEQUENCE, length 15
+       0x30, 0x05,          // SEQUENCE, length 5
+       0x30, 0x03,          // SEQUENCE, length 3
+       0x02, 0x01, 0x01,    // INTEGER, length 1, value 1
+       0x30, 0x06,          // SEQUENCE, length 6
+       0x02, 0x01, 0x02,    // INTEGER, length 1, value 2
+       0x02, 0x01, 0x03     // INTEGER, length 1, value 3
+    };
+    // clang-format on
+    easy_asn1_tree_st* tree = (easy_asn1_tree_st*)malloc(sizeof(easy_asn1_tree_st));
+    easy_asn1_create_node(ESAY_X509_ASN1_SEQUENCE, 0, NULL, tree);
+    easy_asn1_push_back_child(tree, ESAY_X509_ASN1_SEQUENCE, 0, NULL);
+    easy_asn1_tree_st* child1 = easy_asn1_get_tree_item(tree, 0);
+    easy_asn1_push_back_child(child1, ESAY_X509_ASN1_SEQUENCE, 0, NULL);
+    easy_asn1_tree_st* child11 = easy_asn1_get_tree_item(child1, 0);
+    int                num     = 1;
+    easy_asn1_push_back_child(child11, EASY_ASN1_INTEGER, 1, (uint8_t*)&num);
+    easy_asn1_push_back_child(tree, ESAY_X509_ASN1_SEQUENCE, 0, NULL);
+    easy_asn1_tree_st* child2 = easy_asn1_get_tree_item(tree, 1);
+    int                num2   = 2;
+    easy_asn1_push_back_child(child2, EASY_ASN1_INTEGER, 1, (uint8_t*)&num2);
+    int num3 = 3;
+    easy_asn1_push_back_child(child2, EASY_ASN1_INTEGER, 1, (uint8_t*)&num3);
+#ifdef CONSOLE_PRINT
+    easy_asn1_print_tree(tree);
+#endif
+
+    // 序列化
+    size_t   tree_size    = easy_asn1_serialize(tree, NULL);
+    uint8_t* tree_ser     = (uint8_t*)malloc(tree_size);
+    size_t   tree_ser_len = easy_asn1_serialize(tree, tree_ser);
+    EXPECT_TRUE(my_equal_array_8bit(asn1_data, tree_ser, tree_ser_len));
+
+    // 释放
+    easy_asn1_free_tree(tree);
+    free(tree_ser);
+}
+
+TEST(test_asn1, asn1_create2)
+{
+    // clang-format off
+    uint8_t asn1_data[] = {
+       0x30, 0x0F,          // SEQUENCE, length 15
+       0x30, 0x05,          // SEQUENCE, length 5
+       0x30, 0x03,          // SEQUENCE, length 3
+       0x02, 0x01, 0x01,    // INTEGER, length 1, value 1
+       0x30, 0x06,          // SEQUENCE, length 6
+       0x02, 0x01, 0x02,    // INTEGER, length 1, value 2
+       0x02, 0x01, 0x03     // INTEGER, length 1, value 3
+    };
+    // clang-format on
+    easy_asn1_tree_st* tree = (easy_asn1_tree_st*)malloc(sizeof(easy_asn1_tree_st));
+    easy_asn1_create_node(ESAY_X509_ASN1_SEQUENCE, 0, NULL, tree);
+
+    easy_asn1_tree_st* node1 = (easy_asn1_tree_st*)malloc(sizeof(easy_asn1_tree_st));
+    easy_asn1_create_node(ESAY_X509_ASN1_SEQUENCE, 0, NULL, node1);
+    easy_asn1_push_back_child(node1, ESAY_X509_ASN1_SEQUENCE, 0, NULL);
+    easy_asn1_tree_st* child1 = easy_asn1_get_tree_item(node1, 0);
+    int                num    = 1;
+    easy_asn1_push_back_child(child1, EASY_ASN1_INTEGER, 1, (uint8_t*)&num);
+
+    easy_asn1_tree_st* node2 = (easy_asn1_tree_st*)malloc(sizeof(easy_asn1_tree_st));
+    easy_asn1_create_node(ESAY_X509_ASN1_SEQUENCE, 0, NULL, node2);
+    int num2 = 2;
+    int num3 = 3;
+    easy_asn1_push_back_child(node2, EASY_ASN1_INTEGER, 1, (uint8_t*)&num2);
+    easy_asn1_push_back_child(node2, EASY_ASN1_INTEGER, 1, (uint8_t*)&num3);
+
+    easy_asn1_push_back_tree_child(tree, node1);
+    easy_asn1_push_back_tree_child(tree, node2);
+#ifdef CONSOLE_PRINT
+    easy_asn1_print_tree(tree);
+#endif
+
+    // 序列化
+    size_t   tree_size    = easy_asn1_serialize(tree, NULL);
+    uint8_t* tree_ser     = (uint8_t*)malloc(tree_size);
+    size_t   tree_ser_len = easy_asn1_serialize(tree, tree_ser);
+    EXPECT_TRUE(my_equal_array_8bit(asn1_data, tree_ser, tree_ser_len));
+
+    // 释放
+    easy_asn1_free_tree(tree);
+    free(tree_ser);
+}
+
 TEST(test_asn1, x509_test1)
 {
     std::string str = ReadCertFile("./cer/github.cer");
@@ -208,7 +297,7 @@ TEST(test_asn1, x509_test1)
     uint8_t* data     = (uint8_t*)malloc(BASE64_DECODE_OUT_SIZE(str_size));
     size_t   data_len = base64_decode(str.c_str(), str_size, (unsigned char*)data);
 
-    easy_asn1_tree_st* tree = NULL;
+    easy_asn1_tree_st* tree = (easy_asn1_tree_st*)malloc(sizeof(easy_asn1_tree_st));
     easy_asn1_parse(data, data_len, 0, 0, &tree);
 #ifdef CONSOLE_PRINT
     easy_asn1_print_tree(tree);
@@ -354,7 +443,7 @@ static void bench_sef_parse_seal(benchmark::State& state, const std::string& fil
             file.close();
             state.ResumeTiming();
 
-            easy_asn1_tree_st* tree = NULL;
+            easy_asn1_tree_st* tree = (easy_asn1_tree_st*)malloc(sizeof(easy_asn1_tree_st));
             easy_asn1_parse((const uint8_t*)content.c_str(), content.size(), 0, 0, &tree);
             SEALINFO* seal = NULL;
             SEF_ParseSeal(tree, &seal);
@@ -385,7 +474,7 @@ static void bench_sef_parse_signatures(benchmark::State& state, const std::strin
             file.close();
             state.ResumeTiming();
 
-            easy_asn1_tree_st* tree = NULL;
+            easy_asn1_tree_st* tree = (easy_asn1_tree_st*)malloc(sizeof(easy_asn1_tree_st));
             easy_asn1_parse((const uint8_t*)content.data(), content.size(), 0, 0, &tree);
             SIGNEDVALUEINFO* signatures = NULL;
             SEF_ParseSignatures(tree, &signatures);

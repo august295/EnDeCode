@@ -58,38 +58,44 @@ void SEF_ParseSeal(const easy_asn1_tree_st* tree, SEALINFO** seal)
 
     // 创建新节点
     *seal = (SEALINFO*)malloc(sizeof(SEALINFO));
-    if (!*seal)
+    if (*seal == NULL)
     {
         return;
     }
     SEF_InitSeal(*seal);
 
     // SESeal = eSealInfo + cert + signAlgID + signedValue
-    easy_asn1_tree_st* eSealInfoTree = tree->children[0];
+    easy_asn1_tree_st* eSealInfoTree = easy_asn1_get_tree_item(tree, 0);
 
     // eSealInfo
-    easy_asn1_tree_st* headerTree   = eSealInfoTree->children[0];
-    easy_asn1_tree_st* propertyTree = eSealInfoTree->children[2];
-    easy_asn1_tree_st* pictureTree  = eSealInfoTree->children[3];
+    easy_asn1_tree_st* headerTree   = easy_asn1_get_tree_item(eSealInfoTree, 0);
+    easy_asn1_tree_st* propertyTree = easy_asn1_get_tree_item(eSealInfoTree, 2);
+    easy_asn1_tree_st* pictureTree  = easy_asn1_get_tree_item(eSealInfoTree, 3);
 
     // SES_Header = ID + version + Vid
-    copy_string(headerTree->children[0]->value, (*seal)->sealID);
-    char* version    = easy_asn1_print_integer(headerTree->children[1]->value.value, headerTree->children[1]->value.length);
-    (*seal)->version = atoi(version);
+    easy_asn1_tree_st* sealID = easy_asn1_get_tree_item(headerTree, 0);
+    copy_string(sealID->value, (*seal)->sealID);
+    easy_asn1_tree_st* versionNode = easy_asn1_get_tree_item(headerTree, 1);
+    char*              version     = easy_asn1_print_integer(versionNode->value.value, versionNode->value.length);
+    (*seal)->version               = atoi(version);
     free(version);
-    copy_string(headerTree->children[2]->value, (*seal)->verderID);
+    easy_asn1_tree_st* verderID = easy_asn1_get_tree_item(headerTree, 2);
+    copy_string(verderID->value, (*seal)->verderID);
 
     // SES_ESPropertyInfo = type + name + certListType + certList + createDate + validStart + validEnd
-    char* type    = easy_asn1_print_integer(propertyTree->children[0]->value.value, propertyTree->children[0]->value.length);
-    (*seal)->type = atoi(type);
+    easy_asn1_tree_st* typeNode = easy_asn1_get_tree_item(propertyTree, 0);
+    char*              type     = easy_asn1_print_integer(typeNode->value.value, typeNode->value.length);
+    (*seal)->type               = atoi(type);
     free(type);
-    copy_string(propertyTree->children[1]->value, (*seal)->name);
-    char* certListType    = easy_asn1_print_integer(propertyTree->children[2]->value.value, propertyTree->children[2]->value.length);
-    (*seal)->certListType = atoi(certListType);
+    easy_asn1_tree_st* name = easy_asn1_get_tree_item(propertyTree, 1);
+    copy_string(name->value, (*seal)->name);
+    easy_asn1_tree_st* certListTypeNode = easy_asn1_get_tree_item(propertyTree, 2);
+    char*              certListType     = easy_asn1_print_integer(certListTypeNode->value.value, certListTypeNode->value.length);
+    (*seal)->certListType               = atoi(certListType);
     free(certListType);
 
     // certList
-    easy_asn1_tree_st* certList = propertyTree->children[3];
+    easy_asn1_tree_st* certList = easy_asn1_get_tree_item(propertyTree, 3);
     if ((*seal)->certListType == CLT_CERT)
     {
         (*seal)->certListInfoLen = certList->value.length;
@@ -100,44 +106,52 @@ void SEF_ParseSeal(const easy_asn1_tree_st* tree, SEALINFO** seal)
     {
     }
 
-    copy_time(propertyTree->children[4]->value, (*seal)->createDate);
-    copy_time(propertyTree->children[5]->value, (*seal)->validStart);
-    copy_time(propertyTree->children[6]->value, (*seal)->validEnd);
+    easy_asn1_tree_st* createDate = easy_asn1_get_tree_item(propertyTree, 4);
+    copy_time(createDate->value, (*seal)->createDate);
+    easy_asn1_tree_st* validStart = easy_asn1_get_tree_item(propertyTree, 5);
+    copy_time(validStart->value, (*seal)->validStart);
+    easy_asn1_tree_st* validEnd = easy_asn1_get_tree_item(propertyTree, 6);
+    copy_time(validEnd->value, (*seal)->validEnd);
 
     // SES_ESPictureInfo = type + data + width + height
-    copy_string(pictureTree->children[0]->value, (*seal)->imageType);
-    (*seal)->imageDataLen = pictureTree->children[1]->value.length;
-    (*seal)->imageData    = (unsigned char*)malloc(sizeof(unsigned char) * (*seal)->imageDataLen);
-    memcpy((*seal)->imageData, pictureTree->children[1]->value.value, (*seal)->imageDataLen);
-    char* width         = easy_asn1_print_integer(pictureTree->children[2]->value.value, pictureTree->children[2]->value.length);
-    (*seal)->imageWidth = atoi(width);
+    easy_asn1_tree_st* imageType = easy_asn1_get_tree_item(pictureTree, 0);
+    copy_string(imageType->value, (*seal)->imageType);
+    easy_asn1_tree_st* imageData = easy_asn1_get_tree_item(pictureTree, 1);
+    (*seal)->imageDataLen        = imageData->value.length;
+    (*seal)->imageData           = (unsigned char*)malloc(sizeof(unsigned char) * (*seal)->imageDataLen);
+    memcpy((*seal)->imageData, imageData->value.value, (*seal)->imageDataLen);
+    easy_asn1_tree_st* widthNode = easy_asn1_get_tree_item(pictureTree, 2);
+    char*              width     = easy_asn1_print_integer(widthNode->value.value, widthNode->value.length);
+    (*seal)->imageWidth          = atoi(width);
     free(width);
-    char* height         = easy_asn1_print_integer(pictureTree->children[3]->value.value, pictureTree->children[3]->value.length);
-    (*seal)->imageHeight = atoi(height);
+    easy_asn1_tree_st* heightNode = easy_asn1_get_tree_item(pictureTree, 3);
+    char*              height     = easy_asn1_print_integer(heightNode->value.value, heightNode->value.length);
+    (*seal)->imageHeight          = atoi(height);
     free(height);
 
     easy_asn1_tree_st* certTree        = NULL;
     easy_asn1_tree_st* signAlgIDTree   = NULL;
     easy_asn1_tree_st* signedValueTree = NULL;
+    easy_asn1_tree_st* tagNode         = easy_asn1_get_tree_item(tree, 1);
     // GB/T 38540
-    if (tree->children_size > 2 && tree->children[1]->value.tag == EASY_ASN1_OCTET_STRING)
+    if (tree->children_size > 2 && tagNode->value.tag == EASY_ASN1_OCTET_STRING)
     {
-        certTree        = tree->children[1];
-        signAlgIDTree   = tree->children[2];
-        signedValueTree = tree->children[3];
+        certTree        = easy_asn1_get_tree_item(tree, 1);
+        signAlgIDTree   = easy_asn1_get_tree_item(tree, 2);
+        signedValueTree = easy_asn1_get_tree_item(tree, 3);
     }
     // GM/T 0031
-    else if (tree->children_size == 2 && (tree->children[1]->value.tag & CONSTRUCTED))
+    else if (tree->children_size == 2 && (tagNode->value.tag & CONSTRUCTED))
     {
-        certTree        = tree->children[1]->children[0];
-        signAlgIDTree   = tree->children[1]->children[1];
-        signedValueTree = tree->children[1]->children[2];
+        certTree        = easy_asn1_get_tree_item(tagNode, 0);
+        signAlgIDTree   = easy_asn1_get_tree_item(tagNode, 1);
+        signedValueTree = easy_asn1_get_tree_item(tagNode, 2);
     }
 
     if (certTree)
     {
-        (*seal)->makerCertLen = certTree->children[0]->value.length;
-        memcpy((*seal)->makerCert, pictureTree->children[1]->value.value, (*seal)->makerCertLen);
+        (*seal)->makerCertLen = easy_asn1_get_tree_item(certTree, 0)->value.length;
+        memcpy((*seal)->makerCert, easy_asn1_get_tree_item(pictureTree, 1)->value.value, (*seal)->makerCertLen);
     }
     if (signAlgIDTree)
     {
@@ -164,48 +178,54 @@ void SEF_ParseSignatures(const easy_asn1_tree_st* tree, SIGNEDVALUEINFO** signat
     SEF_InitSignatures(*signatures);
 
     // TBS_Sign = version + eseal + timeInnfo + dataHash + propertyInfo + [cert + signatureAlgorithm]
-    easy_asn1_tree_st* TBS_Sign = tree->children[0];
-    char*              version  = easy_asn1_print_integer(TBS_Sign->children[0]->value.value, TBS_Sign->children[0]->value.length);
-    (*signatures)->version      = atoi(version);
+    easy_asn1_tree_st* TBS_Sign = easy_asn1_get_tree_item(tree, 0);
+
+    easy_asn1_tree_st* versionNode = easy_asn1_get_tree_item(TBS_Sign, 0);
+    char*              version     = easy_asn1_print_integer(versionNode->value.value, versionNode->value.length);
+    (*signatures)->version         = atoi(version);
     free(version);
     /**
      * 如果包含 TLV 完整数据可以直接赋值
      * 如果不包含 TLV 完整数据，则需要重新序列化
      */
-    (*signatures)->sealDataLen = easy_asn1_serialize_string(&TBS_Sign->children[1]->value, (*signatures)->sealData);
-    copy_time(TBS_Sign->children[2]->value, (*signatures)->signDateTime);
-    (*signatures)->dataHashLen = TBS_Sign->children[3]->value.length;
-    memcpy((*signatures)->dataHash, TBS_Sign->children[3]->value.value, (*signatures)->dataHashLen);
-    (*signatures)->propertyInfoLen = TBS_Sign->children[4]->value.length;
-    (*signatures)->propertyInfo    = (unsigned char*)malloc((*signatures)->propertyInfoLen);
-    memcpy((*signatures)->propertyInfo, TBS_Sign->children[4]->value.value, TBS_Sign->children[4]->value.length);
+    easy_asn1_tree_st* sealDataLenNode  = easy_asn1_get_tree_item(TBS_Sign, 1);
+    (*signatures)->sealDataLen          = easy_asn1_serialize_string(&sealDataLenNode->value, (*signatures)->sealData);
+    easy_asn1_tree_st* signDateTimeNode = easy_asn1_get_tree_item(TBS_Sign, 2);
+    copy_time(signDateTimeNode->value, (*signatures)->signDateTime);
+    easy_asn1_tree_st* dataHashNode = easy_asn1_get_tree_item(TBS_Sign, 3);
+    (*signatures)->dataHashLen      = dataHashNode->value.length;
+    memcpy((*signatures)->dataHash, dataHashNode->value.value, (*signatures)->dataHashLen);
+    easy_asn1_tree_st* propertyInfoNode = easy_asn1_get_tree_item(TBS_Sign, 4);
+    (*signatures)->propertyInfoLen      = propertyInfoNode->value.length;
+    (*signatures)->propertyInfo         = (unsigned char*)malloc((*signatures)->propertyInfoLen);
+    memcpy((*signatures)->propertyInfo, propertyInfoNode->value.value, propertyInfoNode->value.length);
 
     // cert + signatureAlgorithm + signature + <timeStamp>
-    easy_asn1_tree_st* secondNode             = tree->children[1];
+    easy_asn1_tree_st* secondNode             = easy_asn1_get_tree_item(tree, 1);
     easy_asn1_tree_st* certNode               = NULL;
     easy_asn1_tree_st* signatureAlgorithmNode = NULL;
     easy_asn1_tree_st* signatureNode          = NULL;
     if (secondNode->value.tag == EASY_ASN1_OCTET_STRING && tree->children_size > 2)
     {
         certNode               = secondNode;
-        signatureAlgorithmNode = tree->children[2];
-        signatureNode          = tree->children[3];
+        signatureAlgorithmNode = easy_asn1_get_tree_item(tree, 2);
+        signatureNode          = easy_asn1_get_tree_item(tree, 3);
 
         // 自定义数据
         if (TBS_Sign->children_size > 5)
         {
-            easy_asn1_tree_st* extDatasNode = tree->children[5];
+            easy_asn1_tree_st* extDatasNode = easy_asn1_get_tree_item(tree, 5);
         }
         // 签名值时间戳
         if (tree->children_size > 4)
         {
-            easy_asn1_tree_st* timeStampNode = tree->children[3];
+            easy_asn1_tree_st* timeStampNode = easy_asn1_get_tree_item(tree, 4);
         }
     }
     else if (secondNode->value.tag == EASY_ASN1_BIT_STRING && tree->children_size == 2)
     {
-        certNode               = TBS_Sign->children[5];
-        signatureAlgorithmNode = TBS_Sign->children[6];
+        certNode               = easy_asn1_get_tree_item(TBS_Sign, 5);
+        signatureAlgorithmNode = easy_asn1_get_tree_item(TBS_Sign, 6);
         signatureNode          = secondNode;
     }
 
