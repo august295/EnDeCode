@@ -69,18 +69,21 @@ void SEF_ParseSeal(const easy_asn1_tree_st* tree, SEALINFO** seal)
 
     // eSealInfo
     easy_asn1_tree_st* headerTree   = easy_asn1_get_tree_item(eSealInfoTree, 0);
+    easy_asn1_tree_st* sealIDTree   = easy_asn1_get_tree_item(eSealInfoTree, 1);
     easy_asn1_tree_st* propertyTree = easy_asn1_get_tree_item(eSealInfoTree, 2);
     easy_asn1_tree_st* pictureTree  = easy_asn1_get_tree_item(eSealInfoTree, 3);
 
     // SES_Header = ID + version + Vid
-    easy_asn1_tree_st* sealID = easy_asn1_get_tree_item(headerTree, 0);
-    copy_string(sealID->value, (*seal)->sealID);
     easy_asn1_tree_st* versionNode = easy_asn1_get_tree_item(headerTree, 1);
     char*              version     = easy_asn1_print_integer(versionNode->value.value, versionNode->value.length);
     (*seal)->version               = atoi(version);
     free(version);
     easy_asn1_tree_st* verderID = easy_asn1_get_tree_item(headerTree, 2);
     copy_string(verderID->value, (*seal)->verderID);
+
+    // SES_esID
+    easy_asn1_tree_st* esID = sealIDTree;
+    copy_string(esID->value, (*seal)->sealID);
 
     // SES_ESPropertyInfo = type + name + certListType + certList + createDate + validStart + validEnd
     easy_asn1_tree_st* typeNode = easy_asn1_get_tree_item(propertyTree, 0);
