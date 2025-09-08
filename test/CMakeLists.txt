@@ -9,3 +9,11 @@ CreateTarget(${ProjectName} "Exe" "test")
 target_link_libraries(${ProjectName} "benchmark" "benchmark_main")
 target_link_libraries(${ProjectName} "gtest" "gtest_main")
 target_link_libraries(${ProjectName} "endecode")
+
+# 拷贝测试文件
+add_custom_target(
+    "${UseProjectName}TestCopyTask" ALL
+    COMMAND ${CMAKE_COMMAND} -E copy_directory "${ROOT_DIR}/test/resources" "${BUILD_DIR}/bin/"
+    COMMENT "Copying test resources"
+)
+set_property(TARGET "${UseProjectName}TestCopyTask" PROPERTY FOLDER "CMakePredefinedTargets")

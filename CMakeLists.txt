@@ -52,7 +52,7 @@ cmake_policy(SET CMP0077 NEW)
 # 选项
 option(BUILD_VCPKG "Build use vcpkg" OFF)
 option(BUILD_TEST "Build test executable" OFF)
-option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
+option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 option(ENDECODE_ENABLE_INSTALL "Enable installation" ON)
 
 # vcpkg
@@ -75,11 +75,11 @@ endif()
 
 # 拷贝资源文件
 add_custom_target(
-    "CopyTask" ALL
+    "${UseProjectName}CopyTask" ALL
     COMMAND ${CMAKE_COMMAND} -E copy_directory "${ROOT_DIR}/resources" "${BUILD_DIR}/bin/"
     COMMENT "Copying resources"
 )
-set_property(TARGET "CopyTask" PROPERTY FOLDER "CMakePredefinedTargets")
+set_property(TARGET "${UseProjectName}CopyTask" PROPERTY FOLDER "CMakePredefinedTargets")
 
 # 安装
 if(ENDECODE_ENABLE_INSTALL)
@@ -93,6 +93,9 @@ if(ENDECODE_ENABLE_INSTALL)
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     )
+    # 资源文件
+    install(DIRECTORY ${ROOT_DIR}/resources/
+        DESTINATION ${CMAKE_INSTALL_BINDIR}/)
     # 导出文件
     install(EXPORT ${UseProjectName}Targets
         FILE ${UseProjectName}Targets.cmake
