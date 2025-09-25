@@ -17,8 +17,7 @@ typedef struct sha1_context
 
 #include "endecode/common/endecode_export.hpp"
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
 /**
@@ -28,6 +27,16 @@ extern "C"
  * @param[out]    digest         20x8bit 哈希值
  */
 ENDECODE_API void SHA1(const uint8_t* data, uint64_t len, uint8_t* digest);
+
+/**
+ * @brief SHA1
+ * @param[in]     key           密钥
+ * @param[in]     key_len       密钥长度
+ * @param[in]     data          明文
+ * @param[in]     data_len      明文长度
+ * @param[out]    digest        20x8bit 哈希值
+ */
+ENDECODE_API void HMAC_SHA1(const uint8_t* key, size_t key_len, const uint8_t* data, size_t data_len, uint8_t* digest);
 
 #ifdef __cplusplus
 }

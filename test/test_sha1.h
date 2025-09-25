@@ -29,3 +29,18 @@ TEST(test_sha1, test2)
     hex_to_ascii((uint8_t*)hash, SHA1_DIGEST_LENGTH, 0, (uint8_t*)temp);
     EXPECT_STREQ(good_hash, temp);
 }
+
+TEST(test_sha1_hmac, test1)
+{
+    char   key[]                            = "key";
+    size_t key_len                          = strlen(key);
+    char   data[]                           = "The quick brown fox jumps over the lazy dog";
+    size_t data_len                         = strlen(data);
+    char   good_hash[]                      = "de7c9b85b8b78aa6bc8a7a36f70a90701c9db4d9";
+    char   hmac_digest[SHA1_DIGEST_LENGTH]  = {0};
+    char   temp[2 * SHA1_DIGEST_LENGTH + 1] = {0};
+
+    HMAC_SHA1((uint8_t*)key, key_len, (uint8_t*)data, data_len, (uint8_t*)hmac_digest);
+    hex_to_ascii((uint8_t*)hmac_digest, SHA1_DIGEST_LENGTH, 0, (uint8_t*)temp);
+    EXPECT_STREQ(good_hash, temp);
+}

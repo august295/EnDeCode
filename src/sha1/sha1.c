@@ -117,3 +117,52 @@ void SHA1(const uint8_t* data, uint64_t data_len, uint8_t* digest)
     SHA1Update(&ctx, data, data_len);
     SHA1Final(&ctx, digest);
 }
+
+void HMAC_SHA1(const uint8_t* key, size_t key_len, const uint8_t* data, size_t data_len, uint8_t* digest)
+{
+    uint8_t key_block[SHA1_BLOCK_SIZE];
+    uint8_t inner_digest[SHA1_DIGEST_LENGTH];
+    uint8_t o_key_pad[SHA1_BLOCK_SIZE];
+    uint8_t i_key_pad[SHA1_BLOCK_SIZE];
+    size_t  i;
+
+    // Step1: 如果 key 太长，先哈希再用
+    if (key_len > SHA1_BLOCK_SIZE)
+    {
+        sha1_context tctx;
+        SHA1Init(&tctx);
+        SHA1Update(&tctx, key, key_len);
+        SHA1Final(&tctx, key_block);
+        memset(key_block + SHA1_DIGEST_LENGTH, 0, SHA1_BLOCK_SIZE - SHA1_DIGEST_LENGTH);
+    }
+    else
+    {
+        memcpy(key_block, key, key_len);
+        memset(key_block + key_len, 0, SHA1_BLOCK_SIZE - key_len);
+    }
+
+    // Step2: 生成 i_key_pad 和 o_key_pad
+    for (i = 0; i < SHA1_BLOCK_SIZE; i++)
+    {
+        i_key_pad[i] = key_block[i] ^ 0x36;
+        o_key_pad[i] = key_block[i] ^ 0x5c;
+    }
+
+    // Step3: inner hash = SHA1(i_key_pad || msg)
+    {
+        sha1_context ictx;
+        SHA1Init(&ictx);
+        SHA1Update(&ictx, i_key_pad, SHA1_BLOCK_SIZE);
+        SHA1Update(&ictx, data, data_len);
+        SHA1Final(&ictx, inner_digest);
+    }
+
+    // Step4: outer hash = SHA1(o_key_pad || inner_digest)
+    {
+        sha1_context octx;
+        SHA1Init(&octx);
+        SHA1Update(&octx, o_key_pad, SHA1_BLOCK_SIZE);
+        SHA1Update(&octx, inner_digest, SHA1_DIGEST_LENGTH);
+        SHA1Final(&octx, digest);
+    }
+}
