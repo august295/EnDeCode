@@ -16,8 +16,7 @@ typedef struct
 
 #include "endecode/common/endecode_export.hpp"
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
 /**
@@ -29,6 +28,8 @@ extern "C"
 ENDECODE_API void sm3(const uint8_t* data, uint64_t data_len, uint8_t* digest);
 
 ENDECODE_API void sm3_hmac(const uint8_t* key, size_t key_len, const uint8_t* data, size_t data_len, uint8_t* hmac);
+
+ENDECODE_API void sm3_z(const uint8_t* id, size_t id_len, const uint8_t* key, size_t key_len, const uint8_t* data, size_t data_len, uint8_t* z_out);
 
 ENDECODE_API void sm3_x9_63_kdf(const uint8_t* z, size_t z_len, const uint8_t* shared_info, size_t shared_info_len, uint8_t* derived_key, size_t key_len);
 

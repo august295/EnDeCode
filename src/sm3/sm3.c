@@ -1,4 +1,5 @@
 #include "endecode/sm3/sm3.h"
+#include "endecode/sm2/sm2_define.hpp"
 
 #define ROTL(x, n)   (((x) << (n)) | ((x) >> (32 - (n))))
 #define P0(x)        ((x) ^ ROTL((x), 9) ^ ROTL((x), 17))
@@ -196,6 +197,37 @@ void sm3_hmac(const uint8_t* key, size_t key_len, const uint8_t* data, size_t da
     sm3_update(&ctx, k_opad, SM3_BLOCK_SIZE);
     sm3_update(&ctx, inner_hash, SM3_DIGEST_LENGTH);
     sm3_final(&ctx, hmac);
+}
+
+void sm3_z(const uint8_t* id, size_t id_len, const uint8_t* key, size_t key_len, const uint8_t* data, size_t data_len, uint8_t* z_out)
+{
+    // Z = SM3(ENTL || id || A || B || xG || yG || xA || yA || M)
+    // ENTL = id_len * 8 (bits)
+    uint8_t  entl[2];
+    uint16_t entl_bits = (uint16_t)(id_len * 8);
+    entl[0]            = (entl_bits >> 8) & 0xFF;
+    entl[1]            = (entl_bits >> 0) & 0xFF;
+
+    sm3_context ctx;
+    sm3_init(&ctx);
+    sm3_update(&ctx, entl, 2);
+    sm3_update(&ctx, (const uint8_t*)id, id_len);
+    sm3_update(&ctx, sm3_a, 32);
+    sm3_update(&ctx, sm3_b, 32);
+    sm3_update(&ctx, sm3_xG, 32);
+    sm3_update(&ctx, sm3_yG, 32);
+    sm3_update(&ctx, key, 32);
+    sm3_update(&ctx, key + 32, 32);
+    sm3_final(&ctx, z_out);
+
+    // e = SM3(Z || M)
+    if (data && data_len > 0)
+    {
+        sm3_init(&ctx);
+        sm3_update(&ctx, z_out, 32);
+        sm3_update(&ctx, data, data_len);
+        sm3_final(&ctx, z_out);
+    }
 }
 
 void sm3_x9_63_kdf(const uint8_t* z, size_t z_len, const uint8_t* shared_info, size_t shared_info_len, uint8_t* derived_key, size_t key_len)

@@ -48,3 +48,27 @@ TEST(test_sm3, sm3_hmac)
     array_bit8_to_bitn<uint32_t>(hash, temp, SM3_DIGEST_LENGTH / 4, 0);
     EXPECT_TRUE(my_equal_array_32bit(good_hash, temp, SM3_DIGEST_LENGTH / 4));
 }
+
+TEST(test_sm3, sm3_z)
+{
+    // clang-format off
+    uint8_t key[] = {
+        0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff,
+        0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff,
+        0xff, 0xee, 0xdd, 0xcc, 0xbb, 0xaa, 0x99, 0x88, 0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11, 0x00,
+        0xff, 0xee, 0xdd, 0xcc, 0xbb, 0xaa, 0x99, 0x88, 0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11, 0x00,
+    };
+    // clang-format on
+    int      key_len                          = 64;
+    char*    data                             = (char*)"12345678";
+    int      data_len                         = strlen(data);
+    char*    id                               = (char*)"1234567812345678";
+    int      id_len                           = strlen(id);
+    uint32_t good_hash[SM3_DIGEST_LENGTH / 4] = {0xd07cd106, 0xb71ecf43, 0xfc0e43fb, 0x711e31e3, 0x4e2a04d5, 0x4379b5f3, 0x60a02902, 0x0dbdf011};
+    uint8_t  hash[SM3_DIGEST_LENGTH]          = {0};
+    uint32_t temp[SM3_DIGEST_LENGTH / 4]      = {0};
+
+    sm3_z((uint8_t*)id, id_len, (uint8_t*)key, key_len, (uint8_t*)data, data_len, (uint8_t*)hash);
+    array_bit8_to_bitn<uint32_t>(hash, temp, SM3_DIGEST_LENGTH / 4, 0);
+    EXPECT_TRUE(my_equal_array_32bit(good_hash, temp, SM3_DIGEST_LENGTH / 4));
+}
