@@ -9,7 +9,7 @@ project(${UseProjectName}
 )
 
 # C++标准
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 20)
 
 # 条件编译
 if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
@@ -54,12 +54,18 @@ option(BUILD_VCPKG "Build use vcpkg" OFF)
 option(BUILD_TEST "Build test executable" OFF)
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 option(ENDECODE_ENABLE_INSTALL "Enable installation" ON)
+option(CONSOLE_PRINT "Console print" OFF)
 
 # vcpkg
 if(BUILD_VCPKG)
     include(${ROOT_DIR}/cmake/module_vcpkg.cmake)
     add_compile_definitions(ENABLE_GMP)
 endif(BUILD_VCPKG)
+# 控制台打印
+if(CONSOLE_PRINT)
+    add_compile_definitions(CONSOLE_PRINT)
+endif()
+
 
 # 三方库
 add_subdirectory(3rdparty)
@@ -83,6 +89,7 @@ set_property(TARGET "${UseProjectName}CopyTask" PROPERTY FOLDER "CMakePredefined
 
 # 安装
 if(ENDECODE_ENABLE_INSTALL)
+    include(GNUInstallDirs)
     # 头文件
     install(DIRECTORY ${ROOT_DIR}/include/${UseProjectName} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
     # 库文件

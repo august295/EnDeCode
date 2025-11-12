@@ -24,6 +24,7 @@
 #ifdef ENABLE_GMP
     #include "test_ecc.h"
     #include "test_rsa.h"
+    #include "test_sm2.h"
 #endif
 
 #include "test_base64.h"

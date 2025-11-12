@@ -5,41 +5,6 @@
 
 #include "endecode/ecc/ecc.h"
 
-// 预定义椭圆曲线参数
-typedef struct
-{
-    const char* name;
-    const char* p;
-    const char* a;
-    const char* b;
-    const char* Gx;
-    const char* Gy;
-    const char* n; // 曲线的阶
-    int         h; // 余因子
-} ECC_Curve_Params;
-
-static ECC_Curve_Params secp256k1_params = {
-    .name = "secp256k1",
-    .p    = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F",
-    .a    = "0",
-    .b    = "7",
-    .Gx   = "79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798",
-    .Gy   = "483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8",
-    .n    = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141",
-    .h    = 1,
-};
-
-static ECC_Curve_Params secp256r1_params = {
-    .name = "secp256r1",
-    .p    = "FFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFF",
-    .a    = "FFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFC",
-    .b    = "5AC635D8AA3A93E7B3EBBD55769886BC651D06B0CC53B0F63BCE3C3E27D2604B",
-    .Gx   = "6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296",
-    .Gy   = "4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5",
-    .n    = "FFFFFFFF00000000FFFFFFFFFFFFFFFFBCE6FAADA7179E84F3B9CAC2FC632551",
-    .h    = 1,
-};
-
 ECC_Curve_Params* ecc_get_curve_params(int nid)
 {
     switch (nid)
@@ -99,92 +64,189 @@ void ecc_point_clear(ECPoint* point)
     mpz_clear(point->y);
 }
 
+void ecc_point_set(ECPoint* R, ECPoint* A)
+{
+    if (A->infinity)
+    {
+        R->infinity = 1;
+        return;
+    }
+    mpz_set(R->x, A->x);
+    mpz_set(R->y, A->y);
+    R->infinity = 0;
+}
+
+// r = a mod m, but ensure r in [0, m-1]
+void mod_pos(mpz_t r, const mpz_t a, const mpz_t m)
+{
+    mpz_fdiv_r(r, a, m); // remainder
+    if (mpz_sgn(r) < 0)
+        mpz_add(r, r, m);
+}
+
+// compute inv = a^{-1} mod p, return 1 on success, 0 on failure
+int inv_mod(mpz_t inv, const mpz_t a, const mpz_t p)
+{
+    // mpz_invert returns nonzero on success
+    return mpz_invert(inv, a, p) != 0;
+}
+
 // 椭圆曲线点加法
-void ecc_point_add(ECPoint* result, ECPoint* P, ECPoint* Q, EllipticCurve* curve)
+void ecc_point_add(ECPoint* R, ECPoint* P, ECPoint* Q, EllipticCurve* curve)
 {
     if (P->infinity)
     {
-        mpz_set(result->x, Q->x);
-        mpz_set(result->y, Q->y);
-        result->infinity = Q->infinity;
+        mpz_set(R->x, Q->x);
+        mpz_set(R->y, Q->y);
+        R->infinity = Q->infinity;
         return;
     }
 
     if (Q->infinity)
     {
-        mpz_set(result->x, P->x);
-        mpz_set(result->y, P->y);
-        result->infinity = P->infinity;
+        mpz_set(R->x, P->x);
+        mpz_set(R->y, P->y);
+        R->infinity = P->infinity;
         return;
     }
 
-    mpz_t lambda, temp;
-    mpz_inits(lambda, temp, NULL);
-
-    if (mpz_cmp(P->x, Q->x) == 0 && mpz_cmp(P->y, Q->y) == 0)
+    // If P == Q -> doubling
+    if (mpz_cmp(P->x, Q->x) == 0)
     {
-        // 点倍加：lambda = (3 * x^2 + a) / (2 * y) mod p
-        mpz_mul(lambda, P->x, P->x);       // x^2
-        mpz_mul_ui(lambda, lambda, 3);     // 3 * x^2
-        mpz_add(lambda, lambda, curve->a); // 3 * x^2 + a
-        mpz_mul_ui(temp, P->y, 2);         // 2 * y
-        mpz_invert(temp, temp, curve->p);  // (2 * y)^(-1) mod p
-        mpz_mul(lambda, lambda, temp);     // lambda = (3 * x^2 + a) / (2 * y)
-    }
-    else
-    {
-        // 点加：lambda = (y2 - y1) / (x2 - x1) mod p
-        mpz_sub(lambda, Q->y, P->y);      // y2 - y1
-        mpz_sub(temp, Q->x, P->x);        // x2 - x1
-        mpz_invert(temp, temp, curve->p); // (x2 - x1)^(-1) mod p
-        mpz_mul(lambda, lambda, temp);    // lambda = (y2 - y1) / (x2 - x1)
+        if (mpz_cmp(P->y, Q->y) != 0 || mpz_sgn(P->y) == 0)
+        { // P == -Q or y == 0 => infinity
+            R->infinity = 1;
+            return;
+        }
+        // else handle doubling below by separate function, here fallthrough to doubling code
     }
 
-    mpz_mod(lambda, lambda, curve->p);
+    // If P != Q
+    if (mpz_cmp(P->x, Q->x) != 0)
+    {
+        mpz_t lambda, num, den, tmp;
+        mpz_inits(lambda, num, den, tmp, NULL);
 
-    // x3 = lambda^2 - x1 - x2 mod p
-    mpz_mul(result->x, lambda, lambda);  // lambda^2
-    mpz_sub(result->x, result->x, P->x); // lambda^2 - x1
-    mpz_sub(result->x, result->x, Q->x); // lambda^2 - x1 - x2
-    mpz_mod(result->x, result->x, curve->p);
+        // lambda = (y2 - y1) * (x2 - x1)^{-1} mod p
+        mpz_sub(num, Q->y, P->y);
+        mod_pos(num, num, curve->p);
+        mpz_sub(den, Q->x, P->x);
+        mod_pos(den, den, curve->p);
 
-    // y3 = lambda * (x1 - x3) - y1 mod p
-    mpz_sub(result->y, P->x, result->x);   // x1 - x3
-    mpz_mul(result->y, lambda, result->y); // lambda * (x1 - x3)
-    mpz_sub(result->y, result->y, P->y);   // lambda * (x1 - x3) - y1
-    mpz_mod(result->y, result->y, curve->p);
+        if (!inv_mod(den, den, curve->p))
+        { // no inverse => points add to infinity (shouldn't happen if p prime and x1!=x2)
+            R->infinity = 1;
+            mpz_clears(lambda, num, den, tmp, NULL);
+            return;
+        }
+        mpz_mul(lambda, num, den);
+        mod_pos(lambda, lambda, curve->p);
 
-    mpz_clears(lambda, temp, NULL);
+        // x3 = lambda^2 - x1 - x2 mod p
+        mpz_pow_ui(tmp, lambda, 2);
+        mod_pos(tmp, tmp, curve->p);
+        mpz_sub(tmp, tmp, P->x);
+        mpz_sub(tmp, tmp, Q->x);
+        mod_pos(R->x, tmp, curve->p);
+
+        // y3 = lambda*(x1 - x3) - y1 mod p
+        mpz_sub(tmp, P->x, R->x);
+        mpz_mul(tmp, lambda, tmp);
+        mpz_sub(tmp, tmp, P->y);
+        mod_pos(R->y, tmp, curve->p);
+
+        R->infinity = 0;
+        mpz_clears(lambda, num, den, tmp, NULL);
+        return;
+    }
+
+    // Here x1 == x2 and y1 == y2 -> doubling
+    // Use doubling formula
+    {
+        mpz_t lambda, num, den, tmp;
+        mpz_inits(lambda, num, den, tmp, NULL);
+
+        // lambda = (3*x1^2 + a) * (2*y1)^{-1} mod p
+        mpz_pow_ui(num, P->x, 2);    // x1^2
+        mpz_mul_ui(num, num, 3);     // 3*x1^2
+        mpz_add(num, num, curve->a); // 3*x1^2 + a
+        mod_pos(num, num, curve->p);
+
+        mpz_mul_ui(den, P->y, 2);    // 2*y1
+        mod_pos(den, den, curve->p);
+
+        if (mpz_sgn(den) == 0 || !inv_mod(den, den, curve->p))
+        {
+            // tangent is vertical -> infinity
+            R->infinity = 1;
+            mpz_clears(lambda, num, den, tmp, NULL);
+            return;
+        }
+
+        mpz_mul(lambda, num, den);
+        mod_pos(lambda, lambda, curve->p);
+
+        // x3 = lambda^2 - 2*x1
+        mpz_pow_ui(tmp, lambda, 2);
+        mod_pos(tmp, tmp, curve->p);
+        mpz_submul_ui(tmp, P->x, 2); // tmp = tmp - 2*x1
+        mod_pos(R->x, tmp, curve->p);
+
+        // y3 = lambda*(x1 - x3) - y1
+        mpz_sub(tmp, P->x, R->x);
+        mpz_mul(tmp, lambda, tmp);
+        mpz_sub(tmp, tmp, P->y);
+        mod_pos(R->y, tmp, curve->p);
+
+        R->infinity = 0;
+        mpz_clears(lambda, num, den, tmp, NULL);
+        return;
+    }
 }
 
 // 椭圆曲线点倍乘 (kP)
-void ecc_point_multiply(ECPoint* result, ECPoint* P, mpz_t k, EllipticCurve* curve)
+// Scalar multiplication R = k * P using left-to-right binary double-and-add
+void ecc_scalar_mul(ECPoint* R, ECPoint* P, mpz_t k, EllipticCurve* curve)
 {
-    ECPoint R;
-    ecc_point_init(&R);
-    R.infinity = 1;
-
     ECPoint Q;
     ecc_point_init(&Q);
-    mpz_set(Q.x, P->x);
-    mpz_set(Q.y, P->y);
+    Q.infinity = 1;
+    ECPoint tmp;
+    ecc_point_init(&tmp);
 
-    while (mpz_cmp_ui(k, 0) > 0)
+    mpz_t kk;
+    mpz_init_set(kk, k);
+
+    // If k == 0 -> infinity
+    if (mpz_sgn(kk) == 0)
     {
-        if (mpz_odd_p(k))
-        {
-            ecc_point_add(&R, &R, &Q, curve);
-        }
-        ecc_point_add(&Q, &Q, &Q, curve);
-        mpz_fdiv_q_2exp(k, k, 1);
+        R->infinity = 1;
+        goto done;
     }
 
-    mpz_set(result->x, R.x);
-    mpz_set(result->y, R.y);
-    result->infinity = R.infinity;
+    // find bit length
+    size_t nbits = mpz_sizeinbase(kk, 2);
 
-    ecc_point_clear(&R);
+    for (int64_t i = nbits - 1; i >= 0; --i)
+    {
+        // Q = 2*Q
+        ecc_point_add(&tmp, &Q, &Q, curve);
+        ecc_point_set(&Q, &tmp);
+
+        if (mpz_tstbit(kk, i))
+        {
+            // Q = Q + P
+            ecc_point_add(&tmp, &Q, (ECPoint*)P, curve);
+            ecc_point_set(&Q, &tmp);
+        }
+    }
+
+    ecc_point_set(R, &Q);
+
+done:
     ecc_point_clear(&Q);
+    ecc_point_clear(&tmp);
+    mpz_clear(kk);
 }
 
 // 生成密钥对
@@ -198,8 +260,8 @@ void ecc_generate_keypair(ecc_key_st* st, int nid)
     gmp_randinit_default(state);
     gmp_randseed_ui(state, time(NULL));
 
-    mpz_urandomm(st->private_key, state, st->curve.p);                        // 生成私钥
-    ecc_point_multiply(&st->public_key, &st->G, st->private_key, &st->curve); // 生成公钥
+    mpz_urandomm(st->private_key, state, st->curve.p);                    // 生成私钥
+    ecc_scalar_mul(&st->public_key, &st->G, st->private_key, &st->curve); // 生成公钥
 
     gmp_randclear(state);
 }
@@ -237,13 +299,13 @@ int ecc_public_encrypt(ECPoint* C1, ECPoint* C2, const uint8_t* input, uint32_t 
     gmp_randstate_t state;
     gmp_randinit_default(state);
     gmp_randseed_ui(state, time(NULL));
-    mpz_urandomm(k, state, st->curve.p);           // 生成随机数 k
-    ecc_point_multiply(C1, &st->G, k, &st->curve); // C1 = kG
+    mpz_urandomm(k, state, st->curve.p);       // 生成随机数 k
+    ecc_scalar_mul(C1, &st->G, k, &st->curve); // C1 = kG
 
     ECPoint temp;
     ecc_point_init(&temp);
-    ecc_point_multiply(&temp, &st->public_key, k, &st->curve); // temp = k * PublicKey
-    ecc_point_add(C2, &plaintext_point, &temp, &st->curve);    // C2 = P + temp
+    ecc_scalar_mul(&temp, &st->public_key, k, &st->curve);  // temp = k * PublicKey
+    ecc_point_add(C2, &plaintext_point, &temp, &st->curve); // C2 = P + temp
 
     ecc_point_clear(&temp);
     mpz_clear(k);
@@ -261,8 +323,8 @@ int ecc_private_decrypt(uint8_t* output, ECPoint* C1, ECPoint* C2, ecc_key_st* s
     ECPoint decrypted_point;
     ecc_point_init(&decrypted_point);
 
-    ecc_point_multiply(&temp, C1, st->private_key, &st->curve); // temp = d * C1
-    mpz_neg(temp.y, temp.y);                                    // 求负 temp.y = -temp.y
+    ecc_scalar_mul(&temp, C1, st->private_key, &st->curve); // temp = d * C1
+    mpz_neg(temp.y, temp.y);                                // 求负 temp.y = -temp.y
     mpz_mod(temp.y, temp.y, st->curve.p);
     ecc_point_add(&decrypted_point, C2, &temp, &st->curve); // M = C2 + (-temp)
     ecc_point_clear(&temp);

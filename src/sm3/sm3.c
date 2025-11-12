@@ -93,6 +93,7 @@ void sm3_init(sm3_context* ctx)
     ctx->state[5] = 0x163138AA;
     ctx->state[6] = 0xE38DEE4D;
     ctx->state[7] = 0xB0FB0E4E;
+    memset(ctx->buffer, 0, SM3_BLOCK_SIZE);
 }
 
 void sm3_update(sm3_context* ctx, const uint8_t* data, size_t len)
@@ -211,11 +212,11 @@ void sm3_z(const uint8_t* id, size_t id_len, const uint8_t* key, size_t key_len,
     sm3_context ctx;
     sm3_init(&ctx);
     sm3_update(&ctx, entl, 2);
-    sm3_update(&ctx, (const uint8_t*)id, id_len);
-    sm3_update(&ctx, sm3_a, 32);
-    sm3_update(&ctx, sm3_b, 32);
-    sm3_update(&ctx, sm3_xG, 32);
-    sm3_update(&ctx, sm3_yG, 32);
+    sm3_update(&ctx, id, id_len);
+    sm3_update(&ctx, sm2_a, 32);
+    sm3_update(&ctx, sm2_b, 32);
+    sm3_update(&ctx, sm2_xG, 32);
+    sm3_update(&ctx, sm2_yG, 32);
     sm3_update(&ctx, key, 32);
     sm3_update(&ctx, key + 32, 32);
     sm3_final(&ctx, z_out);
