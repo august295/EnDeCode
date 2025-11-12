@@ -1,6 +1,22 @@
 ﻿# 要求最低Cmake版本
 cmake_minimum_required(VERSION 3.15.0)
 
+# option 不覆盖已定义的普通变量，除非显式指定 FORCE
+cmake_policy(SET CMP0077 NEW)
+# 选项
+option(BUILD_VCPKG "Build use vcpkg" OFF)
+option(BUILD_TEST "Build test executable" OFF)
+option(BUILD_SHARED_LIBS "Build shared libraries" ON)
+option(ENDECODE_ENABLE_INSTALL "Enable installation" ON)
+option(CONSOLE_PRINT "Console print" OFF)
+
+# vcpkg
+if(BUILD_VCPKG)
+    # CMAKE_TOOLCHAIN_FILE 设置需要在 project() 之前
+    include(cmake/module_vcpkg.cmake)
+    add_compile_definitions(ENABLE_GMP)
+endif(BUILD_VCPKG)
+
 # 项目名称
 set(UseProjectName "endecode")
 project(${UseProjectName}
@@ -47,28 +63,14 @@ set(CMAKE_DEBUG_POSTFIX "d")
 set(CMAKE_MINSIZEREL_POSTFIX "m")
 set(CMAKE_RELWITHDEBINFO_POSTFIX "rd")
 
-# option 不覆盖已定义的普通变量，除非显式指定 FORCE
-cmake_policy(SET CMP0077 NEW)
-# 选项
-option(BUILD_VCPKG "Build use vcpkg" OFF)
-option(BUILD_TEST "Build test executable" OFF)
-option(BUILD_SHARED_LIBS "Build shared libraries" ON)
-option(ENDECODE_ENABLE_INSTALL "Enable installation" ON)
-option(CONSOLE_PRINT "Console print" OFF)
-
-# vcpkg
-if(BUILD_VCPKG)
-    include(${ROOT_DIR}/cmake/module_vcpkg.cmake)
-    add_compile_definitions(ENABLE_GMP)
-endif(BUILD_VCPKG)
 # 控制台打印
 if(CONSOLE_PRINT)
     add_compile_definitions(CONSOLE_PRINT)
 endif()
 
-
 # 三方库
 add_subdirectory(3rdparty)
+VCPKG_LOAD_3RDPARTY()
 
 # 算法库
 include(${ROOT_DIR}/cmake/module.cmake)
