@@ -16,10 +16,13 @@ macro(CreateTarget ProjectName Type Group)
     file(GLOB_RECURSE HEADER_FILES "${CURRENT_PATH}/*.h" "${CURRENT_PATH}/*.hpp")
     file(GLOB_RECURSE SOURCE_FILES "${CURRENT_PATH}/*.c" "${CURRENT_PATH}/*.cpp")
 
-    # 过滤文件
-    if(NOT BUILD_VCPKG)
-        list(FILTER HEADER_FILES EXCLUDE REGEX ".*(rsa|ecc).*")
-        list(FILTER SOURCE_FILES EXCLUDE REGEX ".*(rsa|ecc).*")
+    # 过滤目录
+    if(NOT ENABLE_GMP)
+        set(EXCLUDE_DIRS "rsa" "ecc" "sm2")
+        foreach(dir ${EXCLUDE_DIRS})
+            list(FILTER HEADER_FILES EXCLUDE REGEX ".*[/\\\\]${dir}[/\\\\].*")
+            list(FILTER SOURCE_FILES EXCLUDE REGEX ".*[/\\\\]${dir}[/\\\\].*")
+        endforeach()
     endif()
 
     # 文件分类

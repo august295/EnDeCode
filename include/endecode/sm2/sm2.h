@@ -5,9 +5,10 @@
 
 #include <gmp.h>
 
-#include "endecode/sm2/sm2_define.hpp"
+#include "endecode/ecc/ecc.h"
+#include "endecode/sm2/sm2_define.h"
 
-#include "endecode/common/endecode_export.hpp"
+#include "endecode/common/endecode_export.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -35,6 +36,20 @@ ENDECODE_API int sm2_verify(
     ecc_key_st*    st,
     mpz_t          r,
     mpz_t          s);
+
+ENDECODE_API int sm2_encrypt(
+    const uint8_t* msg,
+    size_t         msg_len,
+    ecc_key_st*    st,
+    uint8_t*       out,
+    size_t*        out_len);
+
+ENDECODE_API int sm2_decrypt(
+    uint8_t*    cipher,
+    size_t      cipher_len,
+    ecc_key_st* st,
+    uint8_t*    out,
+    size_t*     out_len);
 
 #ifdef __cplusplus
 }

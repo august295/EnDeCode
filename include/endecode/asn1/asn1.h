@@ -106,7 +106,7 @@ typedef struct easy_asn1_tree_st
     struct easy_asn1_tree_st*  next_sibling;
 } easy_asn1_tree_st;
 
-#include "endecode/common/endecode_export.hpp"
+#include "endecode/common/endecode_export.h"
 #ifdef __cplusplus
 extern "C" {
 #endif

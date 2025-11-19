@@ -103,7 +103,7 @@ uint8_t  reverse8(uint8_t data);
 uint16_t reverse16(uint16_t data);
 uint32_t reverse32(uint32_t data);
 
-#include "endecode/common/endecode_export.hpp"
+#include "endecode/common/endecode_export.h"
 #ifdef __cplusplus
 extern "C"
 {

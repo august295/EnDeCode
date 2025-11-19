@@ -15,7 +15,7 @@ typedef struct OID_MAPPING
     char*               oid_name;   // OID 名称
 } OID_MAPPING;
 
-#include "endecode/common/endecode_export.hpp"
+#include "endecode/common/endecode_export.h"
 #ifdef __cplusplus
 extern "C" {
 #endif

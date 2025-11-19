@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#include "endecode/ecc/ecc.h"
+#include "endecode/ecc/ecc_define.h"
 
 // clang-format off
 /**

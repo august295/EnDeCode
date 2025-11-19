@@ -14,7 +14,7 @@ typedef struct
     uint8_t  buffer[SHA2_256_BLOCK_SIZE];
 } SHA256_CTX;
 
-#include "endecode/common/endecode_export.hpp"
+#include "endecode/common/endecode_export.h"
 #ifdef __cplusplus
 extern "C"
 {

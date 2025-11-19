@@ -64,24 +64,25 @@ rsa_st* rsa_key_gen(uint32_t bits, uint32_t e)
 void rsa_key_free(rsa_st* ctx)
 {
     mpz_clears(ctx->n, ctx->e, ctx->d, ctx->p, ctx->q, ctx->p1, ctx->q1, ctx->phi, NULL);
+    free(ctx);
 }
 
 int rsa_public_encrypt(const uint8_t* input, uint32_t input_len, uint8_t* output, const rsa_st* ctx, _func_pad func_pad)
 {
     int      ret        = -1;
-    uint32_t block_size = ctx->bits / 8;
-    char*    pad        = NULL;
+    size_t   block_size = ctx->bits / 8;
+    uint8_t* pad        = NULL;
     mpz_t    in, out;
     mpz_inits(in, out, NULL);
     if (func_pad)
     {
-        char* pad = (char*)malloc(block_size);
+        pad = (uint8_t*)malloc(block_size);
         func_pad(pad, block_size, input, input_len);
         mpz_import(in, block_size, 1, 1, 0, 0, pad);
     }
     else
     {
-        char* pad = (char*)malloc(input_len);
+        pad = (uint8_t*)malloc(input_len);
         memcpy(pad, input, input_len);
         mpz_import(in, input_len, 1, 1, 0, 0, pad);
     }

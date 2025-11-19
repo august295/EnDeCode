@@ -7,7 +7,7 @@
 #include "endecode/asn1/cert_sm2.h"
 #include "endecode/asn1/gm_type.h"
 
-#include "endecode/common/endecode_export.hpp"
+#include "endecode/common/endecode_export.h"
 #ifdef __cplusplus
 extern "C" {
 #endif

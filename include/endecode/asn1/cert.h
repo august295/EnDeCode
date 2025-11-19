@@ -6,7 +6,7 @@
 #define PEM_CERT_BEGIN "-----BEGIN CERTIFICATE-----"
 #define PEM_CERT_END   "-----END CERTIFICATE-----"
 
-#include "endecode/common/endecode_export.hpp"
+#include "endecode/common/endecode_export.h"
 #ifdef __cplusplus
 extern "C" {
 #endif

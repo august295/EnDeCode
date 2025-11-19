@@ -43,6 +43,11 @@ git clone --recursive https://github.com/august295/EnDeCode.git
 
 在 `Windows` 上使用 `vcpkg + cmake` 导入 `gmp`。
 
+```cmd
+vcpkg install pkgconf:x64-windows-static
+vcpkg install gmp:x64-windows-static
+```
+
 #### 2.2.1. Visual Studio 2022
 
 ```cmd
@@ -51,6 +56,14 @@ cmake --build .\build\ --config Release
 cmake --build .\build\ --config Debug
 ```
 
+### Linux
+
+在 `Linux` 上使用 `vcpkg + cmake` 导入 `gmp`。
+
+```shell
+sudo apt-get install autoconf automake libtool m4 pkg-config
+vcpkg install gmp
+```
 
 
 ## 3. 分类
@@ -71,8 +84,7 @@ cmake --build .\build\ --config Debug
 
 - [x] RSA
 - [x] ECC
-- [ ] SM2
-- [ ] SM9
+- [x] SM2
 
 #### 3.1.3. 摘要算法（Digest Algorithm）
 
@@ -90,5 +102,4 @@ cmake --build .\build\ --config Debug
 ### 3.2. ASN1
 
 - [x] ASN1
-- [ ] X509
 

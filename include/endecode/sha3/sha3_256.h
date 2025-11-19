@@ -15,7 +15,7 @@ typedef struct
     size_t   buffer_size;
 } sha3_256_ctx;
 
-#include "endecode/common/endecode_export.hpp"
+#include "endecode/common/endecode_export.h"
 #ifdef __cplusplus
 extern "C"
 {

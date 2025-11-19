@@ -15,6 +15,7 @@ if(BUILD_VCPKG)
     # CMAKE_TOOLCHAIN_FILE 设置需要在 project() 之前
     include(cmake/module_vcpkg.cmake)
     add_compile_definitions(ENABLE_GMP)
+    set(ENABLE_GMP TRUE)
 endif(BUILD_VCPKG)
 
 # 项目名称
@@ -70,7 +71,9 @@ endif()
 
 # 三方库
 add_subdirectory(3rdparty)
-VCPKG_LOAD_3RDPARTY()
+if(BUILD_VCPKG)
+    VCPKG_LOAD_3RDPARTY()
+endif()
 
 # 算法库
 include(${ROOT_DIR}/cmake/module.cmake)

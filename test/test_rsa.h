@@ -18,6 +18,9 @@ TEST(test_rsa, test1)
     result[result_len]   = '\0';
     EXPECT_STREQ(plaintext, result);
 
+    // 释放资源
+    free(ciphertext);
+    free(result);
     rsa_key_free(ctx);
 }
 
@@ -35,6 +38,9 @@ TEST(test_rsa, test2)
     result[result_len]   = '\0';
     EXPECT_STREQ(plaintext, result);
 
+    // 释放资源
+    free(ciphertext);
+    free(result);
     rsa_key_free(ctx);
 }
 
@@ -52,5 +58,8 @@ TEST(test_rsa, test_pkcs1)
     result[result_len]   = '\0';
     EXPECT_STREQ(plaintext, result);
 
+    // 释放资源
+    free(ciphertext);
+    free(result);
     rsa_key_free(ctx);
 }

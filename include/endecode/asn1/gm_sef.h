@@ -58,7 +58,7 @@ typedef struct SEF_SEALINFO
     int            imageWidth;               // 印章图像宽度，单位毫米
 } SEALINFO, *PSEALINFO;
 
-#include "endecode/common/endecode_export.hpp"
+#include "endecode/common/endecode_export.h"
 #ifdef __cplusplus
 extern "C" {
 #endif

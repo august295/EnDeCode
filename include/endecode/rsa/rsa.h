@@ -20,7 +20,7 @@ typedef struct rsa_st
     mpz_t    phi;
 } rsa_st;
 
-#include "endecode/common/endecode_export.hpp"
+#include "endecode/common/endecode_export.h"
 #ifdef __cplusplus
 extern "C"
 {

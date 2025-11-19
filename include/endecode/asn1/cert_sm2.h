@@ -111,7 +111,7 @@ typedef struct SM2Certificate
     easy_asn1_string_st signatureValue;     // 签名值域
 } SM2Certificate;
 
-#include "endecode/common/endecode_export.hpp"
+#include "endecode/common/endecode_export.h"
 #ifdef __cplusplus
 extern "C" {
 #endif

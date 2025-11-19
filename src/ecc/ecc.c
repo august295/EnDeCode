@@ -249,6 +249,18 @@ done:
     mpz_clear(kk);
 }
 
+// 生成随机数
+void ecc_generate_random(mpz_t r, const mpz_t n)
+{
+    gmp_randstate_t state;
+    gmp_randinit_default(state);
+    gmp_randseed_ui(state, time(NULL));
+
+    mpz_urandomm(r, state, n);
+
+    gmp_randclear(state);
+}
+
 // 生成密钥对
 void ecc_generate_keypair(ecc_key_st* st, int nid)
 {
@@ -256,14 +268,8 @@ void ecc_generate_keypair(ecc_key_st* st, int nid)
     ecc_point_init(&st->public_key);
     mpz_init(st->private_key);
 
-    gmp_randstate_t state;
-    gmp_randinit_default(state);
-    gmp_randseed_ui(state, time(NULL));
-
-    mpz_urandomm(st->private_key, state, st->curve.p);                    // 生成私钥
+    ecc_generate_random(st->private_key, st->curve.p);                    // 生成私钥
     ecc_scalar_mul(&st->public_key, &st->G, st->private_key, &st->curve); // 生成公钥
-
-    gmp_randclear(state);
 }
 
 void ecc_key_st_clear(ecc_key_st* st)
@@ -272,6 +278,44 @@ void ecc_key_st_clear(ecc_key_st* st)
     ecc_point_clear(&st->G);
     ecc_point_clear(&st->public_key);
     mpz_clear(st->private_key);
+}
+
+bool ecc_point_on_curve(const mpz_t x, const mpz_t y, const mpz_t a, const mpz_t b, const mpz_t p)
+{
+    // 1. 检查范围
+    if (mpz_sgn(x) < 0 || mpz_cmp(x, p) >= 0)
+        return false;
+    if (mpz_sgn(y) < 0 || mpz_cmp(y, p) >= 0)
+        return false;
+
+    mpz_t left, right, t;
+    mpz_inits(left, right, t, NULL);
+
+    // left = y^2 mod p
+    mpz_mul(left, y, y);
+    mpz_mod(left, left, p);
+
+    // right = x^3 + a*x + b mod p
+    mpz_mul(right, x, x);     // x^2
+    mpz_mul(right, right, x); // x^3
+    mpz_mod(right, right, p);
+
+    // t = a*x mod p
+    mpz_mul(t, a, x);
+    mpz_mod(t, t, p);
+    mpz_add(right, right, t);
+    mpz_mod(right, right, p);
+
+    // right = right + b mod p
+    mpz_add(right, right, b);
+    mpz_mod(right, right, p);
+
+    // compare
+    bool ok = (mpz_cmp(left, right) == 0);
+
+    mpz_clears(left, right, t, NULL);
+
+    return ok;
 }
 
 /**
@@ -296,10 +340,7 @@ int ecc_public_encrypt(ECPoint* C1, ECPoint* C2, const uint8_t* input, uint32_t 
     mpz_t k;
     mpz_init(k);
 
-    gmp_randstate_t state;
-    gmp_randinit_default(state);
-    gmp_randseed_ui(state, time(NULL));
-    mpz_urandomm(k, state, st->curve.p);       // 生成随机数 k
+    ecc_generate_random(k, st->curve.p);       // 生成随机数 k
     ecc_scalar_mul(C1, &st->G, k, &st->curve); // C1 = kG
 
     ECPoint temp;
@@ -307,9 +348,11 @@ int ecc_public_encrypt(ECPoint* C1, ECPoint* C2, const uint8_t* input, uint32_t 
     ecc_scalar_mul(&temp, &st->public_key, k, &st->curve);  // temp = k * PublicKey
     ecc_point_add(C2, &plaintext_point, &temp, &st->curve); // C2 = P + temp
 
+    // 释放资源
+    mpz_clear(message_as_int);
+    ecc_point_clear(&plaintext_point);
     ecc_point_clear(&temp);
     mpz_clear(k);
-    gmp_randclear(state);
     return 0;
 }
 
@@ -327,12 +370,15 @@ int ecc_private_decrypt(uint8_t* output, ECPoint* C1, ECPoint* C2, ecc_key_st* s
     mpz_neg(temp.y, temp.y);                                // 求负 temp.y = -temp.y
     mpz_mod(temp.y, temp.y, st->curve.p);
     ecc_point_add(&decrypted_point, C2, &temp, &st->curve); // M = C2 + (-temp)
-    ecc_point_clear(&temp);
 
     // 将解密后的点转换回字符串
-    char   decrypted_str[256];
     size_t count = 0;
     mpz_export(output, &count, 1, 1, 0, 0, decrypted_point.x);
     output[count] = '\0';
+
+    // 释放资源
+    ecc_point_clear(&temp);
+    ecc_point_clear(&decrypted_point);
+
     return count;
 }

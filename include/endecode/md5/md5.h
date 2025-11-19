@@ -14,7 +14,7 @@ typedef struct md5_context
     unsigned char buffer[MD5_BLOCK_SIZE];
 } md5_context;
 
-#include "endecode/common/endecode_export.hpp"
+#include "endecode/common/endecode_export.h"
 #ifdef __cplusplus
 extern "C"
 {

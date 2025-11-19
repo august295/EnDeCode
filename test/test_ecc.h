@@ -22,6 +22,9 @@ TEST(test_ecc, test1)
     ecc_private_decrypt((uint8_t*)decrypted_str, &C1, &C2, &st);
     EXPECT_STREQ(decrypted_str, plaintext_str);
 
+    // 释放资源
+    ecc_point_clear(&C1);
+    ecc_point_clear(&C2);
     ecc_key_st_clear(&st);
 }
 
@@ -43,5 +46,8 @@ TEST(test_ecc, test2)
     ecc_private_decrypt((uint8_t*)decrypted_str, &C1, &C2, &st);
     EXPECT_STREQ(decrypted_str, plaintext_str);
 
+    // 释放资源
+    ecc_point_clear(&C1);
+    ecc_point_clear(&C2);
     ecc_key_st_clear(&st);
 }

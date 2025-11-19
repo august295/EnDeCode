@@ -1,5 +1,5 @@
 #include "endecode/sm3/sm3.h"
-#include "endecode/sm2/sm2_define.hpp"
+#include "endecode/sm2/sm2_define.h"
 
 #define ROTL(x, n)   (((x) << (n)) | ((x) >> (32 - (n))))
 #define P0(x)        ((x) ^ ROTL((x), 9) ^ ROTL((x), 17))
