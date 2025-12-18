@@ -56,7 +56,7 @@ static const uint8_t s[256] =
 #define ROL32(a, n) (((a) << (n)) | ((a) >> (32 - (n))))
 
 // Nonlinear transformation tau
-#define TAU(a) ((uint32_t)s[(a) & 0xFF] |                 \
+#define TAU(a)      ((uint32_t)s[(a) & 0xFF] |            \
                 ((uint32_t)s[((a) >> 8) & 0xFF] << 8) |   \
                 ((uint32_t)s[((a) >> 16) & 0xFF] << 16) | \
                 ((uint32_t)s[((a) >> 24) & 0xFF] << 24))
@@ -185,4 +185,61 @@ void sm4DecryptBlock(Sm4Context* context, const uint8_t* input, uint8_t* output)
     STORE32BE(x2, output + 4);
     STORE32BE(x1, output + 8);
     STORE32BE(x0, output + 12);
+}
+
+ENDECODE_API void sm4_encrypt_ecb(const uint8_t* input, size_t input_len, uint8_t* output, size_t* output_len, _func_pad func_pad)
+{
+    int        len     = 16;
+    uint8_t    key[16] = {0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38};
+    Sm4Context ctx;
+    sm4Init(&ctx, key, len);
+
+    int64_t remaining = input_len;
+    size_t  offset    = 0;
+    while (remaining > 0)
+    {
+        size_t block = remaining > 16 ? 16 : remaining;
+        if (block < 16)
+        {
+            uint8_t pad[16] = {0};
+            func_pad(pad, 16, input + offset, block);
+            sm4EncryptBlock(&ctx, pad, output + offset);
+        }
+        else
+        {
+            sm4EncryptBlock(&ctx, input + offset, output + offset);
+        }
+        offset += block;
+        remaining -= block;
+    }
+    *output_len = offset;
+}
+
+ENDECODE_API void sm4_decrypt_ecb(const uint8_t* input, size_t input_len, uint8_t* output, size_t* output_len, _func_unpad func_unpad)
+{
+    int        len     = 16;
+    uint8_t    key[16] = {0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38};
+    Sm4Context ctx;
+    sm4Init(&ctx, key, len);
+
+    int64_t remaining = input_len;
+    size_t  offset    = 0;
+    while (remaining > 0)
+    {
+        size_t block = 16;
+        sm4DecryptBlock(&ctx, input + offset, output + offset);
+        remaining -= block;
+        if (remaining > 0)
+        {
+            offset += block;
+        }
+        else
+        {
+            uint8_t unpad[16] = {0};
+            size_t  unpad_len = 0;
+            func_unpad(unpad, &unpad_len, output + offset, 16);
+            offset += unpad_len;
+        }
+    }
+    *output_len = offset;
 }

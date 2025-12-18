@@ -4,6 +4,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "endecode/pad/pad.h"
+
 #include "endecode/common/endecode_export.h"
 #ifdef __cplusplus
 extern "C"
@@ -40,6 +42,26 @@ ENDECODE_API void sm4EncryptBlock(Sm4Context* context, const uint8_t* input, uin
  * @param[in]     output         8bit 明文
  */
 ENDECODE_API void sm4DecryptBlock(Sm4Context* context, const uint8_t* input, uint8_t* output);
+
+/**
+ * @brief   ECB模式加密
+ * @param   input                   [IN]        密文
+ * @param   input_len               [IN]        密文长度
+ * @param   output                  [IN]        明文
+ * @param   output_len              [IN]        明文长度
+ * @param   func_pad                [IN]        填充函数
+ */
+ENDECODE_API void sm4_encrypt_ecb(const uint8_t* input, size_t input_len, uint8_t* output, size_t* output_len, _func_pad func_pad);
+
+/**
+ * @brief   ECB模式解密
+ * @param   input                   [IN]        密文
+ * @param   input_len               [IN]        密文长度
+ * @param   output                  [IN]        明文
+ * @param   output_len              [IN]        明文长度
+ * @param   func_pad                [IN]        填充函数
+ */
+ENDECODE_API void sm4_decrypt_ecb(const uint8_t* input, size_t input_len, uint8_t* output, size_t* output_len, _func_unpad func_unpad);
 
 #ifdef __cplusplus
 }
