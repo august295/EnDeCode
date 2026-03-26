@@ -5,7 +5,6 @@
 #endif
 
 #include <gtest/gtest.h>
-#include <benchmark/benchmark.h>
 
 #include "test_a5_1.h"
 #include "test_aes.h"
@@ -42,13 +41,6 @@ int main(int argc, char** argv)
     // Google Test
     ::testing::InitGoogleTest(&argc, argv);
     int gtest_result = RUN_ALL_TESTS();
-    if (gtest_result != 0)
-    {
-        return gtest_result;
-    }
 
-    // Google Benchmark
-    ::benchmark::Initialize(&argc, argv);
-    ::benchmark::RunSpecifiedBenchmarks();
-    return 0;
+    return gtest_result;
 }
