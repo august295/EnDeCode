@@ -31,6 +31,26 @@ void sm2_key_st_clear(ecc_key_st* st)
     mpz_clear(st->private_key);
 }
 
+void mpz_to_bytes(const mpz_t x, uint8_t* buf, size_t buf_len)
+{
+    memset(buf, 0, buf_len);
+
+    // 椭圆曲线坐标最大 32 字节
+    char   tmp[64] = {0};
+    size_t count   = 0;
+    mpz_export(tmp, &count, 1, 1, 1, 0, x);
+    if (count <= buf_len)
+    {
+        // 正常情况：前面补零
+        memcpy(buf + (buf_len - count), tmp, count);
+    }
+    else
+    {
+        // 数据大于缓冲区：取低 buf_len 字节
+        memcpy(buf, tmp + (count - buf_len), buf_len);
+    }
+}
+
 void sm2_sign(
     const uint8_t* msg,
     size_t         msg_len,
@@ -44,8 +64,8 @@ void sm2_sign(
     // Step 2: e = SM3(M')
     uint8_t digest[32];
     uint8_t pubkey[64];
-    mpz_export(pubkey, NULL, 1, 1, 1, 0, st->public_key.x);
-    mpz_export(pubkey + 32, NULL, 1, 1, 1, 0, st->public_key.y);
+    mpz_to_bytes(st->public_key.x, pubkey, 32);
+    mpz_to_bytes(st->public_key.y, pubkey + 32, 32);
 
     sm3_z(id, id_len, pubkey, 64, msg, msg_len, digest);
 
@@ -162,8 +182,8 @@ int sm2_verify(
     // Step 3+4: e = sm3_z(id, pubkey, msg)
     uint8_t digest[32];
     uint8_t pubkey[64];
-    mpz_export(pubkey, NULL, 1, 1, 1, 0, st->public_key.x);
-    mpz_export(pubkey + 32, NULL, 1, 1, 1, 0, st->public_key.y);
+    mpz_to_bytes(st->public_key.x, pubkey, 32);
+    mpz_to_bytes(st->public_key.y, pubkey + 32, 32);
     sm3_z(id, id_len, pubkey, 64, msg, msg_len, digest);
 
     mpz_t e;
@@ -302,27 +322,6 @@ int sm2_kdf(const uint8_t* Z, size_t Zlen, size_t klen_bytes, uint8_t* out)
     return 0;
 }
 
-void mpz_to_bytes(const mpz_t x, uint8_t* buf, size_t buf_len)
-{
-    memset(buf, 0, buf_len);
-
-    // 临时存储 mpz_export 导出的字节
-    size_t   count = 0;
-    uint8_t* tmp   = (uint8_t*)calloc(1, buf_len);
-    mpz_export(tmp, &count, 1, 1, 1, 0, x);
-
-    if (count > buf_len)
-    {
-        memcpy(buf, tmp + (count - buf_len), buf_len);
-    }
-    else
-    {
-        memcpy(buf + (buf_len - count), tmp, count);
-    }
-
-    free(tmp);
-}
-
 int sm2_encrypt(
     const uint8_t* msg,
     size_t         msg_len,
@@ -371,8 +370,8 @@ int sm2_encrypt(
 
         // Step 5: t = KDF(x2 || y2, klen)
         uint8_t Sxy[64];
-        mpz_export(Sxy, NULL, 1, 1, 1, 0, Temp.x);
-        mpz_export(Sxy + 32, NULL, 1, 1, 1, 0, Temp.y);
+        mpz_to_bytes(Temp.x, Sxy, 32);
+        mpz_to_bytes(Temp.y, Sxy + 32, 32);
         size_t klen_bytes = msg_len * 8;
 
         uint8_t* t = (uint8_t*)malloc(klen_bytes);
@@ -398,9 +397,9 @@ int sm2_encrypt(
 
         // Step 7: C3 = Hash(x2 || M || y2)
         uint8_t* C3_input = (uint8_t*)malloc(32 + msg_len + 32);
-        mpz_export(C3_input, NULL, 1, 1, 1, 0, Temp.x);
+        mpz_to_bytes(Temp.x, C3_input, 32);
         memcpy(C3_input + 32, msg, msg_len);
-        mpz_export(C3_input + 32 + msg_len, NULL, 1, 1, 1, 0, Temp.y);
+        mpz_to_bytes(Temp.y, C3_input + 32 + msg_len, 32);
         sm3(C3_input, 32 + msg_len + 32, C3);
         free(C3_input);
 #ifdef CONSOLE_PRINT
@@ -483,8 +482,8 @@ int sm2_decrypt(
 
     // Step 4: t = KDF(x2 || y2, klen)
     uint8_t C11xy[64];
-    mpz_export(C11xy, NULL, 1, 1, 1, 0, C11.x);
-    mpz_export(C11xy + 32, NULL, 1, 1, 1, 0, C11.y);
+    mpz_to_bytes(C11.x, C11xy, 32);
+    mpz_to_bytes(C11.y, C11xy + 32, 32);
     size_t   klen_bytes = cipher_len * 8;
     uint8_t* t          = (uint8_t*)malloc(klen_bytes);
     if (sm2_kdf(C11xy, 64, klen_bytes, t) != 0)

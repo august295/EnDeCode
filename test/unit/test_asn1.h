@@ -8,6 +8,7 @@
 #include "endecode/asn1/asn1_helper.h"
 #include "endecode/asn1/cert_sm2.h"
 #include "endecode/asn1/gm_sef.h"
+#include "endecode/asn1/gm_sof.h"
 
 #include "test_util.h"
 
@@ -327,9 +328,7 @@ TEST(test_asn1, sm2_test2)
     std::string str = ReadCertFile("./cer/sm2-x509.cer");
     EXPECT_TRUE(!str.empty());
 
-#ifdef CONSOLE_PRINT
     BSTR info = NULL;
-    printf("Cert info:\n");
     info = SOF_GetCertInfo((BSTR)str.c_str(), SGD_CERT_VERSION);
     printf("SGD_CERT_VERSION: %s\n", info);
     free(info);
@@ -354,5 +353,4 @@ TEST(test_asn1, sm2_test2)
     info = SOF_GetCertInfo((BSTR)str.c_str(), SGD_CERT_DER_EXTENSIONS);
     printf("SGD_CERT_DER_EXTENSIONS: %s\n", info);
     free(info);
-#endif
 }
