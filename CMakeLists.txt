@@ -26,7 +26,7 @@ project(${UseProjectName}
 )
 
 # C++标准
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 11)
 
 # 条件编译
 if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
