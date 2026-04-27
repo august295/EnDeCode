@@ -41,19 +41,30 @@ git clone --recursive https://github.com/august295/EnDeCode.git
 
 ### 2.2. Windows
 
+#### 2.2.1. Visual Studio 2022
+
 在 `Windows` 上使用 `vcpkg + cmake` 导入 `gmp`。
 
 ```cmd
-vcpkg install pkgconf:x64-windows-static
-vcpkg install gmp:x64-windows-static
+vcpkg install pkgconf:x64-windows
+vcpkg install gmp:x64-windows
 ```
-
-#### 2.2.1. Visual Studio 2022
 
 ```cmd
 cmake -B"build" -G"Visual Studio 17 2022" -D"BUILD_TEST=ON" -D"BUILD_VCPKG=ON" -D"CONSOLE_PRINT=ON"
 cmake --build .\build\ --config Release
-cmake --build .\build\ --config Debug
+```
+
+#### 32 位
+
+```cmd
+vcpkg install pkgconf:x86-windows
+vcpkg install gmp:x86-windows
+```
+
+```cmd
+cmake -B"build_win32" -G"Visual Studio 17 2022" -A"Win32" -D"BUILD_TEST=ON" -D"BUILD_VCPKG=ON" -D"CONSOLE_PRINT=ON"
+cmake --build .\build_win32\ --config Release
 ```
 
 ### Linux
