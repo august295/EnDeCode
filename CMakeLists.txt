@@ -78,6 +78,7 @@ endif()
 # 算法库
 include(${ROOT_DIR}/cmake/module.cmake)
 add_subdirectory(src)
+add_subdirectory(tool)
 
 # 测试程序
 if(BUILD_TEST)

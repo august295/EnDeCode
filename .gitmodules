@@ -4,3 +4,12 @@
 [submodule "3rdparty/benchmark"]
 	path = 3rdparty/benchmark
 	url = git@github.com:google/benchmark.git
+[submodule "3rdparty/CLI11"]
+	path = 3rdparty/CLI11
+	url = git@github.com:CLIUtils/CLI11.git
+[submodule "3rdparty/filesystem"]
+	path = 3rdparty/filesystem
+	url = git@github.com:gulrak/filesystem.git
+[submodule "3rdparty/spdlog"]
+	path = 3rdparty/spdlog
+	url = git@github.com:gabime/spdlog.git
