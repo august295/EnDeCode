@@ -4,6 +4,10 @@
 
 #include <CLI/CLI.hpp>
 
+#include "cli_md5.h"
+#include "cli_sha.h"
+#include "cli_sm3.h"
+
 #include "cli_asn1.h"
 #include "cli_base64.h"
 
@@ -24,6 +28,18 @@ int main(int argc, char** argv)
     CLI::App* parse = app.add_subcommand("parse", "parsers");
     Asn1Algo  asn1Algo;
     asn1Algo.register_cli(parse);
+
+    CLI::App* hash = app.add_subcommand("hash", "digest algorithms");
+    AlgoMD5   algoMD5;
+    algoMD5.register_cli(hash);
+    AlgoSHA1 algoSHA1;
+    algoSHA1.register_cli(hash);
+    AlgoSHA256 algoSha256;
+    algoSha256.register_cli(hash);
+    AlgoSHA3_256 algoSha3_256;
+    algoSha3_256.register_cli(hash);
+    AlgoSM3 algoSM3;
+    algoSM3.register_cli(hash);
 
     try
     {
