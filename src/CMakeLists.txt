@@ -7,6 +7,4 @@ else()
     target_compile_definitions(${ProjectName} PUBLIC -DENDECODE_STATIC)
 endif()
 
-if(BUILD_VCPKG)
-    target_link_libraries(${ProjectName} PkgConfig::gmp)
-endif()
+target_link_libraries(${ProjectName} PkgConfig::gmp)
