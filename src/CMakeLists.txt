@@ -9,9 +9,12 @@ endif()
 
 target_link_libraries(${ProjectName} vcpkg-export::gmp)
 
-add_custom_command(TARGET ${ProjectName} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+if(CMAKE_HOST_SYSTEM_NAME MATCHES "Windows")
+    add_custom_command(TARGET ${ProjectName} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "${GMP_ROOT}/bin/gmp-10.dll"
         "$<TARGET_FILE_DIR:${ProjectName}>"
-    COMMENT "Copying gmp to output directory"
-)
+        COMMENT "Copying gmp to output directory"
+    )
+elseif(CMAKE_HOST_SYSTEM_NAME MATCHES "Linux")
+endif()

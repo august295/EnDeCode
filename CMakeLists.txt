@@ -14,6 +14,7 @@ option(CONSOLE_PRINT "Console print" OFF)
 if(BUILD_VCPKG)
     # CMAKE_TOOLCHAIN_FILE 设置需要在 project() 之前
     include(cmake/module_vcpkg.cmake)
+    VCPKG_BEFORE()
     add_compile_definitions(ENABLE_GMP)
     set(ENABLE_GMP TRUE)
 endif(BUILD_VCPKG)
@@ -24,6 +25,10 @@ project(${UseProjectName}
     VERSION 0.0.0.1
     LANGUAGES CXX
 )
+
+if(BUILD_VCPKG)
+    VCPKG_AFTER()
+endif()
 
 # C++标准
 set(CMAKE_CXX_STANDARD 11)
