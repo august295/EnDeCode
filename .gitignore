@@ -10,5 +10,4 @@ CMakeLists.txt.user
 # vs + wsl
 .vs
 out
-CMakePresets.json
 CMakeSettings.json

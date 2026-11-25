@@ -1,0 +1,49 @@
+{
+    "version": 3,
+    "configurePresets": [
+        {
+            "name": "x64-ninja",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build_clangd",
+            "architecture": {
+                "value": "x64",
+                "strategy": "external"
+            },
+            "toolset": {
+                "value": "host=x64",
+                "strategy": "external"
+            },
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "BUILD_VCPKG": "ON",
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+            }
+        },
+        {
+            "name": "x86-vs2022",
+            "displayName": "x86 Visual Studio 2022",
+            "generator": "Visual Studio 17 2022",
+            "binaryDir": "${sourceDir}/build_win32",
+            "architecture": {
+                "value": "Win32",
+                "strategy": "set"
+            },
+            "cacheVariables": {
+                "BUILD_VCPKG": "ON"
+            }
+        },
+        {
+            "name": "x64-vs2022",
+            "displayName": "x64 Visual Studio 2022",
+            "generator": "Visual Studio 17 2022",
+            "binaryDir": "${sourceDir}/build",
+            "architecture": {
+                "value": "x64",
+                "strategy": "set"
+            },
+            "cacheVariables": {
+                "BUILD_VCPKG": "ON"
+            }
+        }
+    ]
+}
